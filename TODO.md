@@ -1,0 +1,8 @@
+- GdalSmoke ins Repo 
+- proj-data -> proj-data-swiss als Option und zur Laufzeit erstellen lassen via Script
+- Fixen auf Java 25
+- Versionierung via Gradle-Skript (?)
+- Pro OS und Arch ein native-jar
+- Deployment
+- Pipeline.
+- Packagename (Und Groupname)
