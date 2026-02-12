@@ -1,0 +1,18 @@
+plugins {
+    base
+}
+
+allprojects {
+    group = providers.gradleProperty("group").get()
+    version = providers.gradleProperty("version").get()
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
+}

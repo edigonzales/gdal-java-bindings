@@ -1,0 +1,10 @@
+{
+  "bundleVersion": "3.11.1",
+  "entryLibrary": "lib/libgdal.37.dylib",
+  "preloadLibraries": [
+    "lib/libproj.25.dylib"
+  ],
+  "gdalDataPath": "share/gdal",
+  "projDataPath": "share/proj",
+  "driverPath": "lib/gdalplugins"
+}
