@@ -1,5 +1,5 @@
-- GdalSmoke ins Repo 
-- proj-data -> proj-data-swiss als Option und zur Laufzeit erstellen lassen via Script
+- ~~GdalSmoke ins Repo ~~
+- ~~proj-data -> proj-data-swiss als Option und zur Laufzeit erstellen lassen via Script~~
 - Fixen auf Java 25
 - Versionierung via Gradle-Skript (?)
 - Pro OS und Arch ein native-jar
@@ -7,3 +7,4 @@
 - Pipeline.
 - Packagename (Und Groupname)
 - weitere Utilites
+- Würde man versuchen die natives nicht immer herzustellen? Geht das? Sondern eher bei GDAL-updates? 

@@ -1,3 +1,3 @@
-module io.github.stefan.gdal.ffm {
-    exports io.github.stefan.gdal.ffm;
+module ch.so.agi.gdal.ffm {
+    exports ch.so.agi.gdal.ffm;
 }

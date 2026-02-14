@@ -22,7 +22,6 @@ sourceSets {
 
     create("integrationTest") {
         java.srcDir("src/integrationTest/java")
-        resources.srcDir("src/integrationTest/resources")
         compileClasspath += sourceSets["main"].output + configurations["testRuntimeClasspath"]
         runtimeClasspath += output + compileClasspath
     }
@@ -61,6 +60,36 @@ val integrationTest = tasks.register<Test>("integrationTest") {
         System.getenv("GDAL_FFM_RUN_INTEGRATION") == "true"
     }
     jvmArgs("--enable-native-access=ALL-UNNAMED")
+}
+
+tasks.register<JavaExec>("smokeTest") {
+    description = "Runs a GDAL translate smoke test using repository test data."
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    dependsOn("integrationTestClasses")
+
+    val inputFile = layout.projectDirectory.file("src/integrationTest/resources/smoke/reclass.tif").asFile
+    val outputFile = layout.buildDirectory.file("smoke-test-output/reclass-smoke.tif").get().asFile
+    val nativesResources = project(":gdal-ffm-natives")
+        .layout.projectDirectory
+        .dir("src/main/resources")
+
+    classpath = sourceSets["integrationTest"].runtimeClasspath + files(nativesResources)
+    mainClass.set("ch.so.agi.gdal.ffm.GdalSmoke")
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    inputs.file(inputFile)
+    outputs.file(outputFile)
+    outputs.upToDateWhen { false }
+
+    doFirst {
+        if (!inputFile.isFile) {
+            throw GradleException(
+                "Smoke test input is missing: ${inputFile.absolutePath}. " +
+                    "Expected gdal-ffm-core/src/integrationTest/resources/smoke/reclass.tif."
+            )
+        }
+        outputFile.parentFile.mkdirs()
+        setArgs(listOf(outputFile.absolutePath, inputFile.absolutePath))
+    }
 }
 
 tasks.check {

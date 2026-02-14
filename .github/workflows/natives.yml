@@ -60,8 +60,14 @@ jobs:
         shell: bash
         run: ./gradlew :gdal-ffm-natives:assemble
 
-      - name: Upload classifier artifact
+      - name: Upload classifier artifact (standard)
         uses: actions/upload-artifact@v4
         with:
           name: gdal-ffm-natives-${{ matrix.classifier }}
-          path: gdal-ffm-natives/build/libs/*natives-${{ matrix.classifier }}.jar
+          path: gdal-ffm-natives/build/libs/gdal-ffm-natives-*-natives-${{ matrix.classifier }}.jar
+
+      - name: Upload classifier artifact (swiss)
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdal-ffm-natives-swiss-${{ matrix.classifier }}
+          path: gdal-ffm-natives/build/libs/gdal-ffm-natives-swiss-*-natives-${{ matrix.classifier }}.jar

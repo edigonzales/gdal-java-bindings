@@ -6,20 +6,26 @@ Java FFM bindings for GDAL/OGR utilities (`ogr2ogr`, `gdalwarp`, `gdal_translate
 
 - `gdal-ffm-core`: public Java API (`Gdal.vectorTranslate`, `Gdal.warp`, `Gdal.translate`), native loader, error/progress bridge.
 - `gdal-ffm-natives`: classifier JARs that package native GDAL libs + `share/gdal` + `share/proj`.
+- `gdal-ffm-natives-swiss`: optional classifier JARs with the same native libs, but a Swiss-focused `share/proj` subset.
 
 ## Requirements
 
 - JDK 23+
 - Native access enabled at runtime:
   - Classpath: `--enable-native-access=ALL-UNNAMED`
-  - JPMS: `--enable-native-access=io.github.stefan.gdal.ffm`
+  - JPMS: `--enable-native-access=ch.so.agi.gdal.ffm`
 
 ## Dependency setup
 
 ```kotlin
 dependencies {
-    implementation("io.github.stefan:gdal-ffm-core:<version>")
-    runtimeOnly("io.github.stefan:gdal-ffm-natives:<version>:natives-linux-x86_64")
+    implementation("ch.so.agi:gdal-ffm-core:<version>")
+
+    // Standard PROJ data bundle:
+    runtimeOnly("ch.so.agi:gdal-ffm-natives:<version>:natives-linux-x86_64")
+
+    // OR Swiss-focused PROJ data subset:
+    // runtimeOnly("ch.so.agi:gdal-ffm-natives-swiss:<version>:natives-linux-x86_64")
 }
 ```
 
@@ -30,6 +36,15 @@ Available classifiers:
 - `natives-osx-x86_64`
 - `natives-osx-aarch64`
 - `natives-windows-x86_64`
+
+Important: include exactly one runtime native artifact line per classifier (either `gdal-ffm-natives` or `gdal-ffm-natives-swiss`, not both), otherwise the native loader aborts due to ambiguous manifests.
+
+Swiss `share/proj` subset keeps:
+
+- `proj.db`
+- `CHENyx06a.gsb` or `ch_swisstopo_CHENyx06a.tif`
+- `CHENyx06_ETRS.gsb` or `ch_swisstopo_CHENyx06_ETRS.tif`
+- `egm96_15.gtx` or `us_nga_egm96_15.tif`
 
 ## Usage
 
@@ -139,10 +154,16 @@ tools/natives/fetch-and-stage.sh linux-x86_64
 tools/natives/audit-runtime-deps.sh linux-x86_64
 ```
 
-7. Build native classifier jars:
+7. Build native classifier jars (standard + swiss by default):
 
 ```bash
 ./gradlew :gdal-ffm-natives:assemble
+```
+
+Disable Swiss jar creation/publication when needed:
+
+```bash
+./gradlew :gdal-ffm-natives:assemble -PgdalSwissNativesEnabled=false
 ```
 
 ## Developing / Smoke tests
@@ -168,6 +189,12 @@ Use this flow when iterating on native bundles and validating that the Java API 
 ./gradlew :gdal-ffm-core:jar :gdal-ffm-natives:nativesJarOsxAarch64
 ```
 
+Swiss variant for the same classifier:
+
+```bash
+./gradlew :gdal-ffm-core:jar :gdal-ffm-natives:nativesSwissJarOsxAarch64
+```
+
 4. Clear extracted native cache for the exact GDAL/platform tuple:
 
 ```bash
@@ -176,13 +203,17 @@ rm -rf "$TMPDIR/gdal-ffm/3.11.1/osx-aarch64"
 
 Why: `NativeLoader` extracts once into `java.io.tmpdir`. If you do not clear this folder, updated native jars may not be re-extracted.
 
-5. Run a smoke test with native access enabled (source-file mode example):
+5. Run the dedicated smoke test task:
 
 ```bash
-java --enable-native-access=ALL-UNNAMED \
-  -cp "/Users/stefan/sources/gdal-java-bindings/gdal-ffm-core/build/libs/gdal-ffm-core-0.1.0-SNAPSHOT+gdal3.11.1.jar:/Users/stefan/sources/gdal-java-bindings/gdal-ffm-natives/build/libs/gdal-ffm-natives-0.1.0-SNAPSHOT+gdal3.11.1-natives-osx-aarch64.jar" \
-  /Users/stefan/tmp/GdalSmoke.java /Users/stefan/tmp/reclass.tif /Users/stefan/tmpsmoke-out.tif
+./gradlew :gdal-ffm-core:smokeTest
 ```
+
+The task:
+
+- uses input file `gdal-ffm-core/src/integrationTest/resources/smoke/reclass.tif`
+- writes output to `gdal-ffm-core/build/smoke-test-output/reclass-smoke.tif`
+- requires staged natives for your current classifier under `gdal-ffm-natives/src/main/resources/META-INF/gdal-native/<classifier>`
 
 Expected result:
 

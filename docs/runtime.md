@@ -7,7 +7,7 @@ FFM calls require native access for the module that performs the call.
 - Classpath use:
   - `--enable-native-access=ALL-UNNAMED`
 - JPMS use:
-  - `--enable-native-access=io.github.stefan.gdal.ffm`
+  - `--enable-native-access=ch.so.agi.gdal.ffm`
 
 If native access is missing, startup fails early with an explicit message.
 
