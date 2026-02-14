@@ -10,15 +10,15 @@ jobs:
       matrix:
         include:
           - classifier: linux-x86_64
-            os: ubuntu-latest
+            os: ubuntu-24.04
           - classifier: linux-aarch64
-            os: ubuntu-latest
+            os: ubuntu-24.04-arm
           - classifier: osx-x86_64
-            os: macos-latest
+            os: macos-15-intel
           - classifier: osx-aarch64
-            os: macos-latest
+            os: macos-15
           - classifier: windows-x86_64
-            os: windows-latest
+            os: windows-2025
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout

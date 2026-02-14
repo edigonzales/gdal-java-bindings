@@ -10,7 +10,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - label: linux-x86_64
+            os: ubuntu-24.04
+          - label: linux-aarch64
+            os: ubuntu-24.04-arm
+          - label: osx-x86_64
+            os: macos-15-intel
+          - label: osx-aarch64
+            os: macos-15
+          - label: windows-x86_64
+            os: windows-2025
+    name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
