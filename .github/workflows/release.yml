@@ -98,7 +98,7 @@ jobs:
             printf '%s\n' "${matches[@]}" >&2 || true
             exit 1
           fi
-          jar_path="${matches[0]}"
+          jar_path="$(pwd)/${matches[0]}"
           ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
             -PgdalFfmSmokeNativeJar="$jar_path" \
             -PgdalFfmSmokeLabel="${{ matrix.classifier }}-standard"
@@ -108,14 +108,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          matches=(gdal-ffm-natives/build/libs/gdal-ffm-natives-swiss-*-natives-${{ matrix.classifier }}.jar)
+          matches=()
+          while IFS= read -r path; do
+            [[ -n "$path" ]] && matches+=("$path")
+          done < <(
+            find gdal-ffm-natives/build/libs -maxdepth 1 -type f \
+              -name "gdal-ffm-natives-swiss-*-natives-${{ matrix.classifier }}.jar" \
+              | sort
+          )
           if [[ ${#matches[@]} -ne 1 ]]; then
             echo "Expected exactly one swiss native jar for classifier ${{ matrix.classifier }}, found ${#matches[@]}" >&2
             printf '%s\n' "${matches[@]}" >&2 || true
             exit 1
           fi
-          jar_path="${matches[0]}"
+          jar_path="$(pwd)/${matches[0]}"
           ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
             -PgdalFfmSmokeNativeJar="$jar_path" \
             -PgdalFfmSmokeLabel="${{ matrix.classifier }}-swiss"

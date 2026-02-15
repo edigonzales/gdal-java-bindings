@@ -1,3 +1,5 @@
+import java.io.File
+
 plugins {
     `java-library`
     `maven-publish`
@@ -124,7 +126,12 @@ tasks.register<JavaExec>("smokeTestPackagedNative") {
                 "Missing required property -PgdalFfmSmokeNativeJar=<path-to-native-jar> for smokeTestPackagedNative."
             )
         }
-        val nativeJar = file(nativeJarPath)
+        val nativeJarPathFile = File(nativeJarPath)
+        val nativeJar = if (nativeJarPathFile.isAbsolute) {
+            nativeJarPathFile
+        } else {
+            rootProject.file(nativeJarPath)
+        }
         if (!nativeJar.isFile) {
             throw GradleException("Packaged smoke native JAR does not exist: ${nativeJar.absolutePath}")
         }

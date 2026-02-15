@@ -195,6 +195,53 @@ copy_sections() {
   return 0
 }
 
+normalize_windows_runtime_bins() {
+  local required_runtime_paths="$1"
+
+  mkdir -p "$TARGET_DIR/bin"
+
+  if [[ -d "$TARGET_DIR/lib" ]]; then
+    while IFS= read -r dll_path; do
+      local dll_name
+      dll_name="$(basename "$dll_path")"
+      local target_path="$TARGET_DIR/bin/$dll_name"
+      if [[ ! -f "$target_path" && ! -L "$target_path" ]]; then
+        cp "$dll_path" "$target_path"
+      fi
+    done < <(find "$TARGET_DIR/lib" -type f -iname '*.dll' -print)
+  fi
+
+  if [[ -z "$required_runtime_paths" ]]; then
+    return
+  fi
+
+  IFS=',' read -r -a required_items <<< "$required_runtime_paths"
+  for required in "${required_items[@]}"; do
+    required="$(echo "$required" | sed 's/^ *//;s/ *$//')"
+    if [[ -z "$required" ]]; then
+      continue
+    fi
+
+    local expected_path="$TARGET_DIR/$required"
+    if [[ -f "$expected_path" || -L "$expected_path" ]]; then
+      continue
+    fi
+
+    local expected_name
+    expected_name="$(basename "$required")"
+    local candidate
+    candidate="$(find "$TARGET_DIR" -type f -iname "$expected_name" -print | head -n 1 || true)"
+    if [[ -z "$candidate" ]]; then
+      continue
+    fi
+
+    mkdir -p "$(dirname "$expected_path")"
+    if [[ "$candidate" != "$expected_path" ]]; then
+      cp "$candidate" "$expected_path"
+    fi
+  done
+}
+
 prune_runtime_payload() {
   local os_family="$1"
 
@@ -416,6 +463,10 @@ while true; do
 
   extra_index=$((extra_index + 1))
 done
+
+if [[ "$OS_FAMILY" == "windows" ]]; then
+  normalize_windows_runtime_bins "$ENTRY_LIBRARY,$PRELOAD_LIBRARIES"
+fi
 
 prune_runtime_payload "$OS_FAMILY"
 "$ROOT_DIR/tools/natives/relocate-runtime-deps.sh" "$CLASSIFIER" "$TARGET_DIR"
