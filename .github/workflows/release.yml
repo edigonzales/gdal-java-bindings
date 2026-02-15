@@ -55,6 +55,13 @@ jobs:
         shell: bash
         run: tools/natives/refresh-lock-closure.sh --check
 
+      - name: Install patchelf (Linux only)
+        if: startsWith(matrix.classifier, 'linux-')
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf
+
       - name: Stage native payload
         shell: bash
         run: tools/natives/fetch-and-stage.sh ${{ matrix.classifier }}

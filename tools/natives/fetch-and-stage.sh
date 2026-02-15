@@ -363,6 +363,7 @@ while true; do
 done
 
 prune_runtime_payload "$OS_FAMILY"
+"$ROOT_DIR/tools/natives/relocate-runtime-deps.sh" "$CLASSIFIER" "$TARGET_DIR"
 
 mkdir -p "$TARGET_DIR/share/gdal" "$TARGET_DIR/share/proj"
 

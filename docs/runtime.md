@@ -76,6 +76,16 @@ The staged classifier payload intentionally excludes CLI binaries.
 
 Build/dev artifacts (`cmake`, `pkgconfig`, docs, man pages, completions, headers) are stripped during staging.
 
+## Conda relocation and placeholder handling
+
+`tools/natives/fetch-and-stage.sh` calls `tools/natives/relocate-runtime-deps.sh` for every classifier.
+
+- Linux: rewrites absolute conda placeholder `DT_NEEDED` entries to bundled sonames (`patchelf --replace-needed`)
+- macOS: rewrites absolute non-system install names to `@rpath/<basename>`, sets dylib ids, and ensures required `LC_RPATH`
+- Windows: performs strict placeholder-marker scan on staged runtime DLLs
+
+Linux CI runners install `patchelf` before staging (`Build Natives` / `Release` workflows).
+
 ## Runtime dependency audit
 
 Use `tools/natives/audit-runtime-deps.sh <classifier>` after staging.
@@ -84,7 +94,8 @@ Use `tools/natives/audit-runtime-deps.sh <classifier>` after staging.
 - Linux: `readelf -d` (fallback `objdump -p`)
 - Windows: `dumpbin /DEPENDENTS` (fallback `llvm-objdump -p`)
 
-The audit fails fast with missing soname/dll hints mapped to the requiring binary.
+The audit fails fast with missing soname/dll hints mapped to the requiring binary and treats
+absolute non-relocatable linkage as an error (`absolute DT_NEEDED dependency` / `non-relocatable install name`).
 
 ## Packaged runtime smoke
 

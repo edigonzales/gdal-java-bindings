@@ -142,11 +142,19 @@ tools/natives/refresh-lock-closure.sh --max-backtracks 5000 --debug-resolver
 python -m pip install --user conda-package-handling
 ```
 
+Linux only: ensure `patchelf` is available (required for ELF relocation of conda placeholder paths).
+
 5. Stage one classifier:
 
 ```bash
 tools/natives/fetch-and-stage.sh linux-x86_64
 ```
+
+The staging step runs relocation/sanitization automatically via `tools/natives/relocate-runtime-deps.sh`:
+
+- Linux: rewrites absolute `DT_NEEDED` placeholder paths to bundled sonames using `patchelf`
+- macOS: rewrites absolute install names to `@rpath/*` and ensures required `LC_RPATH` entries
+- Windows: fails fast if placeholder markers are detected in runtime DLLs
 
 6. Audit runtime link closure for that classifier:
 
@@ -174,6 +182,7 @@ Disable Swiss jar creation/publication when needed:
   - swiss (`gdal-ffm-natives-swiss`)
 - Each smoke run uses a dedicated label and isolated temp dir (`build/tmp/smoke/<label>`) to avoid cache carry-over between variants.
 - Resolver drift check (`tools/natives/refresh-lock-closure.sh --check`) is available as optional workflow input `verify-lock-closure` and is disabled by default.
+- Linux runners install `patchelf` before staging natives.
 - Windows currently keeps lock/audit validation, but no packaged smoke task.
 
 ## Developing / Smoke tests

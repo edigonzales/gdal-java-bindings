@@ -79,6 +79,18 @@ is_allowed_system_linux() {
   esac
 }
 
+is_allowed_system_linux_absolute() {
+  local dep="$1"
+  case "$dep" in
+    /lib/*|/lib64/*|/usr/lib/*|/usr/lib64/*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 is_allowed_system_osx() {
   local dep="$1"
   [[ "$dep" == /usr/lib/* || "$dep" == /System/Library/* ]]
@@ -115,12 +127,17 @@ audit_macos() {
       dep="${dep#${dep%%[![:space:]]*}}"
       [[ -z "$dep" ]] && continue
 
+      if is_allowed_system_osx "$dep"; then
+        continue
+      fi
+      if [[ "$dep" == /* ]]; then
+        record_missing "$binary" "non-relocatable install name: $dep"
+        continue
+      fi
+
       local dep_base
       dep_base="$(basename "$dep")"
       if is_provided "$dep_base"; then
-        continue
-      fi
-      if is_allowed_system_osx "$dep"; then
         continue
       fi
       if [[ "$dep" == @rpath/* || "$dep" == @loader_path/* || "$dep" == @executable_path/* ]]; then
@@ -139,6 +156,13 @@ audit_linux() {
     while IFS= read -r binary; do
       while IFS= read -r dep; do
         local dep_name="$dep"
+        if [[ "$dep_name" == */* ]]; then
+          if is_allowed_system_linux_absolute "$dep_name"; then
+            continue
+          fi
+          record_missing "$binary" "absolute DT_NEEDED dependency: $dep_name"
+          continue
+        fi
         if is_provided "$dep_name"; then
           continue
         fi
