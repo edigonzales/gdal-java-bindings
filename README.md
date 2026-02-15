@@ -173,6 +173,7 @@ Disable Swiss jar creation/publication when needed:
   - standard (`gdal-ffm-natives`)
   - swiss (`gdal-ffm-natives-swiss`)
 - Each smoke run uses a dedicated label and isolated temp dir (`build/tmp/smoke/<label>`) to avoid cache carry-over between variants.
+- Resolver drift check (`tools/natives/refresh-lock-closure.sh --check`) is available as optional workflow input `verify-lock-closure` and is disabled by default.
 - Windows currently keeps lock/audit validation, but no packaged smoke task.
 
 ## Developing / Smoke tests

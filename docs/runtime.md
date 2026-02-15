@@ -64,6 +64,9 @@ Tooling env vars:
 - `GDAL_FFM_VERIFY_RESOLVER=true`: `verify-lock.sh` additionally runs `refresh-lock-closure.sh --check`
 - `JEXTRACT_BIN=/path/to/jextract`: overrides the `jextract` executable used by `tools/jextract/regenerate.sh`
 
+GitHub `Build Natives` / `Release` run `verify-lock.sh` by default. The resolver drift check
+(`refresh-lock-closure.sh --check`) is optional via workflow input `verify-lock-closure`.
+
 ## Runtime-only bundle content
 
 The staged classifier payload intentionally excludes CLI binaries.

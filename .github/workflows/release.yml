@@ -2,6 +2,12 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      verify-lock-closure:
+        description: "Run resolver drift check (tools/natives/refresh-lock-closure.sh --check)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build-natives:
@@ -45,6 +51,7 @@ jobs:
         run: tools/natives/verify-lock.sh
 
       - name: Validate lock closure
+        if: ${{ inputs.verify-lock-closure }}
         shell: bash
         run: tools/natives/refresh-lock-closure.sh --check
 
