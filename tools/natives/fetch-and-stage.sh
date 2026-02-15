@@ -79,6 +79,42 @@ classifier_os() {
   esac
 }
 
+sha256_file() {
+  local file="$1"
+
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$file" | awk '{print $1}'
+    return
+  fi
+
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file" | awk '{print $1}'
+    return
+  fi
+
+  if command -v openssl >/dev/null 2>&1; then
+    openssl dgst -sha256 "$file" | awk '{print $NF}'
+    return
+  fi
+
+  if command -v python >/dev/null 2>&1; then
+    python - "$file" <<'PY'
+import hashlib
+import sys
+
+h = hashlib.sha256()
+with open(sys.argv[1], "rb") as f:
+    for chunk in iter(lambda: f.read(1024 * 1024), b""):
+        h.update(chunk)
+print(h.hexdigest())
+PY
+    return
+  fi
+
+  echo "No SHA-256 tool available (expected shasum, sha256sum, openssl, or python)." >&2
+  exit 1
+}
+
 extract_archive() {
   local archive_file="$1"
   local archive_type="$2"
@@ -95,11 +131,30 @@ extract_archive() {
       unzip -q "$archive_file" -d "$extract_dir"
       ;;
     conda)
-      if ! command -v cph >/dev/null 2>&1; then
-        echo "Missing required tool: cph (conda-package-handling CLI)" >&2
+      if command -v cph >/dev/null 2>&1; then
+        cph extract --dest "$extract_dir" "$archive_file" >/dev/null
+      elif command -v python >/dev/null 2>&1; then
+        python - "$archive_file" "$extract_dir" <<'PY'
+import sys
+
+archive = sys.argv[1]
+dest = sys.argv[2]
+
+try:
+    import conda_package_handling.api as cph_api
+except Exception as exc:
+    raise SystemExit(f"Missing required tool: cph and Python module 'conda_package_handling' unavailable ({exc})")
+
+try:
+    cph_api.extract(archive, dest_dir=dest)
+except TypeError:
+    # Backward compatibility for older conda-package-handling signatures.
+    cph_api.extract(archive, dest)
+PY
+      else
+        echo "Missing required tool: cph (conda-package-handling CLI) and python fallback unavailable." >&2
         exit 1
       fi
-      cph extract --dest "$extract_dir" "$archive_file" >/dev/null
       ;;
     *)
       echo "Unsupported archive type: $archive_type" >&2
@@ -286,7 +341,7 @@ stage_package() {
   local actual_sha
   local need_download=true
   if [[ -f "$archive_file" ]]; then
-    actual_sha="$(shasum -a 256 "$archive_file" | awk '{print $1}')"
+    actual_sha="$(sha256_file "$archive_file")"
     if [[ "$actual_sha" == "$sha256" ]]; then
       echo "Using cached archive $archive_file"
       need_download=false
@@ -301,7 +356,7 @@ stage_package() {
     curl --retry 5 --retry-delay 2 -fL "$normalized_url" -o "$archive_file"
   fi
 
-  actual_sha="$(shasum -a 256 "$archive_file" | awk '{print $1}')"
+  actual_sha="$(sha256_file "$archive_file")"
   if [[ "$actual_sha" != "$sha256" ]]; then
     echo "SHA256 mismatch for $CLASSIFIER ($name)" >&2
     echo "expected: $sha256" >&2
