@@ -3,7 +3,10 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOCK_FILE="$ROOT_DIR/tools/natives/binaries.lock"
+TMP_DIR="$ROOT_DIR/tmp"
 CLASSIFIERS="linux-x86_64 linux-aarch64 osx-x86_64 osx-aarch64 windows-x86_64"
+
+mkdir -p "$TMP_DIR"
 
 if grep -q 'REPLACE_WITH_SHA256' "$LOCK_FILE"; then
   echo "binaries.lock still contains REPLACE_WITH_SHA256 placeholders" >&2
@@ -11,7 +14,7 @@ if grep -q 'REPLACE_WITH_SHA256' "$LOCK_FILE"; then
 fi
 
 for classifier in $CLASSIFIERS; do
-  indices_file="$(mktemp "$ROOT_DIR/tmp/lock-verify-${classifier}.XXXXXX")"
+  indices_file="$(mktemp "$TMP_DIR/lock-verify-${classifier}.XXXXXX")"
 
   awk -F= -v prefix="platform.${classifier}.extra_" '
     index($1, prefix) == 1 {
