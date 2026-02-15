@@ -1,8 +1,8 @@
 {
   "bundleVersion": "3.11.1",
-  "entryLibrary": "bin/gdal311.dll",
+  "entryLibrary": "bin/gdal.dll",
   "preloadLibraries": [
-    "bin/proj_9_6.dll",
+    "bin/proj_9.dll",
     "bin/geos_c.dll",
     "bin/sqlite3.dll"
   ],

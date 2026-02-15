@@ -196,8 +196,6 @@ copy_sections() {
 }
 
 normalize_windows_runtime_bins() {
-  local required_runtime_paths="$1"
-
   mkdir -p "$TARGET_DIR/bin"
 
   if [[ -d "$TARGET_DIR/lib" ]]; then
@@ -210,36 +208,6 @@ normalize_windows_runtime_bins() {
       fi
     done < <(find "$TARGET_DIR/lib" -type f -iname '*.dll' -print)
   fi
-
-  if [[ -z "$required_runtime_paths" ]]; then
-    return
-  fi
-
-  IFS=',' read -r -a required_items <<< "$required_runtime_paths"
-  for required in "${required_items[@]}"; do
-    required="$(echo "$required" | sed 's/^ *//;s/ *$//')"
-    if [[ -z "$required" ]]; then
-      continue
-    fi
-
-    local expected_path="$TARGET_DIR/$required"
-    if [[ -f "$expected_path" || -L "$expected_path" ]]; then
-      continue
-    fi
-
-    local expected_name
-    expected_name="$(basename "$required")"
-    local candidate
-    candidate="$(find "$TARGET_DIR" -type f -iname "$expected_name" -print | head -n 1 || true)"
-    if [[ -z "$candidate" ]]; then
-      continue
-    fi
-
-    mkdir -p "$(dirname "$expected_path")"
-    if [[ "$candidate" != "$expected_path" ]]; then
-      cp "$candidate" "$expected_path"
-    fi
-  done
 }
 
 prune_runtime_payload() {
@@ -309,8 +277,32 @@ validate_staged_payload() {
   local entry_library="$2"
   local preload_libraries="$3"
 
+  print_windows_dll_diagnostics() {
+    local missing_kind="$1"
+    local expected_path="$2"
+
+    echo "Expected runtime path from binaries.lock ($missing_kind): $expected_path" >&2
+    if [[ -d "$TARGET_DIR/bin" ]]; then
+      echo "Available staged DLLs under $TARGET_DIR/bin:" >&2
+      find "$TARGET_DIR/bin" -maxdepth 2 -type f -iname '*.dll' -print \
+        | sed "s#^$TARGET_DIR/##" \
+        | sort >&2
+    else
+      echo "Staged runtime directory missing: $TARGET_DIR/bin" >&2
+    fi
+
+    if [[ "$missing_kind" == "entry_library" ]]; then
+      echo "If names drifted upstream, update platform.windows-x86_64.entry_library in tools/natives/binaries.lock." >&2
+    else
+      echo "If names drifted upstream, update platform.windows-x86_64.preload_libraries in tools/natives/binaries.lock." >&2
+    fi
+  }
+
   local entry_path="$TARGET_DIR/$entry_library"
   if [[ ! -f "$entry_path" && ! -L "$entry_path" ]]; then
+    if [[ "$os_family" == "windows" ]]; then
+      print_windows_dll_diagnostics "entry_library" "$entry_library"
+    fi
     echo "Missing entry library after staging: $entry_library" >&2
     exit 1
   fi
@@ -324,6 +316,9 @@ validate_staged_payload() {
       fi
       local preload_path="$TARGET_DIR/$preload"
       if [[ ! -f "$preload_path" && ! -L "$preload_path" ]]; then
+        if [[ "$os_family" == "windows" ]]; then
+          print_windows_dll_diagnostics "preload_libraries" "$preload"
+        fi
         echo "Missing preload library after staging: $preload" >&2
         exit 1
       fi
@@ -465,7 +460,7 @@ while true; do
 done
 
 if [[ "$OS_FAMILY" == "windows" ]]; then
-  normalize_windows_runtime_bins "$ENTRY_LIBRARY,$PRELOAD_LIBRARIES"
+  normalize_windows_runtime_bins
 fi
 
 prune_runtime_payload "$OS_FAMILY"
