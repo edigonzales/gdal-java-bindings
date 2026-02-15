@@ -92,6 +92,63 @@ tasks.register<JavaExec>("smokeTest") {
     }
 }
 
+tasks.register<JavaExec>("smokeTestPackagedNative") {
+    description = "Runs a GDAL translate smoke test against a packaged native classifier JAR."
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    dependsOn("integrationTestClasses")
+
+    val inputFile = layout.projectDirectory.file("src/integrationTest/resources/smoke/reclass.tif").asFile
+    val smokeNativeJar = providers.gradleProperty("gdalFfmSmokeNativeJar")
+    val smokeLabel = providers.gradleProperty("gdalFfmSmokeLabel")
+        .map { label -> label.trim().ifEmpty { "packaged" } }
+        .orElse("packaged")
+    val outputFile = smokeLabel.flatMap { label ->
+        layout.buildDirectory.file("smoke-test-output/${label}-reclass-smoke.tif")
+    }
+    val tmpDir = smokeLabel.flatMap { label ->
+        layout.buildDirectory.dir("tmp/smoke/$label")
+    }
+
+    classpath = sourceSets["integrationTest"].runtimeClasspath
+    mainClass.set("ch.so.agi.gdal.ffm.GdalSmoke")
+    inputs.file(inputFile)
+    inputs.property("gdalFfmSmokeNativeJar", smokeNativeJar.orNull ?: "")
+    inputs.property("gdalFfmSmokeLabel", smokeLabel)
+    outputs.file(outputFile)
+    outputs.upToDateWhen { false }
+
+    doFirst {
+        val nativeJarPath = smokeNativeJar.orNull?.trim()
+        if (nativeJarPath.isNullOrEmpty()) {
+            throw GradleException(
+                "Missing required property -PgdalFfmSmokeNativeJar=<path-to-native-jar> for smokeTestPackagedNative."
+            )
+        }
+        val nativeJar = file(nativeJarPath)
+        if (!nativeJar.isFile) {
+            throw GradleException("Packaged smoke native JAR does not exist: ${nativeJar.absolutePath}")
+        }
+        if (!inputFile.isFile) {
+            throw GradleException(
+                "Smoke test input is missing: ${inputFile.absolutePath}. " +
+                    "Expected gdal-ffm-core/src/integrationTest/resources/smoke/reclass.tif."
+            )
+        }
+
+        val smokeOutputFile = outputFile.get().asFile
+        val smokeTmpDir = tmpDir.get().asFile
+        smokeOutputFile.parentFile.mkdirs()
+        smokeTmpDir.mkdirs()
+
+        classpath = sourceSets["integrationTest"].runtimeClasspath + files(nativeJar)
+        jvmArgs(
+            "--enable-native-access=ALL-UNNAMED",
+            "-Djava.io.tmpdir=${smokeTmpDir.absolutePath}"
+        )
+        setArgs(listOf(smokeOutputFile.absolutePath, inputFile.absolutePath))
+    }
+}
+
 tasks.check {
     dependsOn(integrationTest)
 }

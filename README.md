@@ -166,6 +166,15 @@ Disable Swiss jar creation/publication when needed:
 ./gradlew :gdal-ffm-natives:assemble -PgdalSwissNativesEnabled=false
 ```
 
+## CI runtime smoke coverage
+
+- `Build Natives` and `Release` run packaged runtime smoke tests for `linux-*` and `osx-*` classifiers.
+- Both variants are validated per classifier:
+  - standard (`gdal-ffm-natives`)
+  - swiss (`gdal-ffm-natives-swiss`)
+- Each smoke run uses a dedicated label and isolated temp dir (`build/tmp/smoke/<label>`) to avoid cache carry-over between variants.
+- Windows currently keeps lock/audit validation, but no packaged smoke task.
+
 ## Developing / Smoke tests
 
 Use this flow when iterating on native bundles and validating that the Java API can load GDAL end-to-end.
@@ -219,6 +228,22 @@ Expected result:
 
 - process exits with code `0`
 - output file is created
+
+6. Run packaged-native smoke against assembled classifier JARs:
+
+```bash
+./gradlew :gdal-ffm-core:smokeTestPackagedNative \
+  -PgdalFfmSmokeNativeJar=gdal-ffm-natives/build/libs/gdal-ffm-natives-<version>-natives-osx-aarch64.jar \
+  -PgdalFfmSmokeLabel=osx-aarch64-standard
+
+./gradlew :gdal-ffm-core:smokeTestPackagedNative \
+  -PgdalFfmSmokeNativeJar=gdal-ffm-natives/build/libs/gdal-ffm-natives-swiss-<version>-natives-osx-aarch64.jar \
+  -PgdalFfmSmokeLabel=osx-aarch64-swiss
+```
+
+Packaged smoke output is written to:
+
+- `gdal-ffm-core/build/smoke-test-output/<label>-reclass-smoke.tif`
 
 If you get `UnsatisfiedLinkError` (`Library not loaded`), run:
 

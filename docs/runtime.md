@@ -83,6 +83,27 @@ Use `tools/natives/audit-runtime-deps.sh <classifier>` after staging.
 
 The audit fails fast with missing soname/dll hints mapped to the requiring binary.
 
+## Packaged runtime smoke
+
+GitHub Actions runs packaged runtime smokes in both `Build Natives` and `Release`:
+
+- only for `linux-*` and `osx-*` classifiers
+- for both bundle variants (`gdal-ffm-natives` and `gdal-ffm-natives-swiss`)
+- with per-run isolation via `-Djava.io.tmpdir=.../build/tmp/smoke/<label>` to avoid cache carry-over
+
+Local equivalent:
+
+```bash
+./gradlew :gdal-ffm-core:smokeTestPackagedNative \
+  -PgdalFfmSmokeNativeJar=gdal-ffm-natives/build/libs/gdal-ffm-natives-<version>-natives-linux-x86_64.jar \
+  -PgdalFfmSmokeLabel=linux-x86_64-standard
+```
+
+Required properties:
+
+- `gdalFfmSmokeNativeJar`: path to exactly one native classifier JAR
+- `gdalFfmSmokeLabel`: label used for isolated output and temp directories
+
 ## Troubleshooting
 
 1. `Native access is not enabled`

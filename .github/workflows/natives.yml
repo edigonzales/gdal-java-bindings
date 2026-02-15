@@ -60,6 +60,40 @@ jobs:
         shell: bash
         run: ./gradlew :gdal-ffm-natives:assemble
 
+      - name: Run packaged smoke (standard)
+        if: startsWith(matrix.classifier, 'linux-') || startsWith(matrix.classifier, 'osx-')
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          matches=(gdal-ffm-natives/build/libs/gdal-ffm-natives-*-natives-${{ matrix.classifier }}.jar)
+          if [[ ${#matches[@]} -ne 1 ]]; then
+            echo "Expected exactly one standard native jar for classifier ${{ matrix.classifier }}, found ${#matches[@]}" >&2
+            printf '%s\n' "${matches[@]}" >&2 || true
+            exit 1
+          fi
+          jar_path="${matches[0]}"
+          ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
+            -PgdalFfmSmokeNativeJar="$jar_path" \
+            -PgdalFfmSmokeLabel="${{ matrix.classifier }}-standard"
+
+      - name: Run packaged smoke (swiss)
+        if: startsWith(matrix.classifier, 'linux-') || startsWith(matrix.classifier, 'osx-')
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          matches=(gdal-ffm-natives/build/libs/gdal-ffm-natives-swiss-*-natives-${{ matrix.classifier }}.jar)
+          if [[ ${#matches[@]} -ne 1 ]]; then
+            echo "Expected exactly one swiss native jar for classifier ${{ matrix.classifier }}, found ${#matches[@]}" >&2
+            printf '%s\n' "${matches[@]}" >&2 || true
+            exit 1
+          fi
+          jar_path="${matches[0]}"
+          ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
+            -PgdalFfmSmokeNativeJar="$jar_path" \
+            -PgdalFfmSmokeLabel="${{ matrix.classifier }}-swiss"
+
       - name: Upload classifier artifact (standard)
         uses: actions/upload-artifact@v4
         with:
