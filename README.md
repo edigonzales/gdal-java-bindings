@@ -11,6 +11,12 @@ Java FFM bindings for GDAL/OGR utilities (`ogr2ogr`, `gdalwarp`, `gdal_translate
 ## Requirements
 
 - JDK 23+
+
+If only JDK 25 is installed locally, you can run Gradle with:
+
+```bash
+./gradlew <task> -PgdalFfmJavaToolchainVersion=25
+```
 - Native access enabled at runtime:
   - Classpath: `--enable-native-access=ALL-UNNAMED`
   - JPMS: `--enable-native-access=ch.so.agi.gdal.ffm`
@@ -84,6 +90,22 @@ Gdal.translate(
     "-of", "COG"
 );
 ```
+
+
+## OGR streaming API (preview)
+
+`gdal-ffm-core` now exposes a neutral vector streaming surface intended for integrations like Apache Hop plugins:
+
+- `Ogr.open(Path, Map<String,String>)`
+- `OgrDataSource` / `OgrLayerReader` / `OgrLayerWriter`
+- `OgrFeature`
+- `OgrGeometry`
+
+Geometry transport is neutral and uses EWKB-compatible payloads with optional SRID support.
+Use `OgrGeometry.fromWkb(wkb, srid)` when the SRID must be embedded directly in the binary payload.
+
+> Note: the public API contracts are available now; native OGR runtime wiring is prepared via
+> `tools/jextract/regenerate.sh` and `src/main/native/gdal_ffi.h` updates.
 
 ## Regenerating low-level bindings
 

@@ -64,6 +64,8 @@ Tooling env vars:
 - `GDAL_FFM_VERIFY_RESOLVER=true`: `verify-lock.sh` additionally runs `refresh-lock-closure.sh --check`
 - `JEXTRACT_BIN=/path/to/jextract`: overrides the `jextract` executable used by `tools/jextract/regenerate.sh`
 
+For OGR streaming API regeneration, `GDAL_INCLUDE_DIR` must also contain `ogr_api.h` and `ogr_srs_api.h` in addition to the GDAL/CPL headers.
+
 GitHub `Build Natives` / `Release` run `verify-lock.sh` by default. The resolver drift check
 (`refresh-lock-closure.sh --check`) is optional via workflow input `verify-lock-closure`.
 

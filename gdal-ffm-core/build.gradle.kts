@@ -5,9 +5,14 @@ plugins {
     `maven-publish`
 }
 
+
+val javaToolchainVersion = providers.gradleProperty("gdalFfmJavaToolchainVersion")
+    .map(String::toInt)
+    .orElse(23)
+
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(23))
+        languageVersion.set(JavaLanguageVersion.of(javaToolchainVersion.get()))
     }
     withSourcesJar()
     withJavadocJar()

@@ -10,7 +10,7 @@ CLASS_NAME="GdalGenerated"
 JEXTRACT_BIN="${JEXTRACT_BIN:-jextract}"
 
 if [[ -z "${GDAL_INCLUDE_DIR:-}" ]]; then
-  echo "GDAL_INCLUDE_DIR is required (path containing gdal.h, gdal_utils.h, cpl_error.h, cpl_conv.h)" >&2
+  echo "GDAL_INCLUDE_DIR is required (path containing gdal.h, gdal_utils.h, ogr_api.h, ogr_srs_api.h, cpl_error.h, cpl_conv.h)" >&2
   exit 1
 fi
 
@@ -29,6 +29,31 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "GDALOpenEx" \
   --include-function "GDALClose" \
   --include-function "GDALReleaseDataset" \
+  --include-function "GDALDatasetGetLayerByName" \
+  --include-function "GDALDatasetGetLayer" \
+  --include-function "GDALDatasetGetLayerCount" \
+  --include-function "OGR_L_GetLayerDefn" \
+  --include-function "OGR_L_GetNextFeature" \
+  --include-function "OGR_L_ResetReading" \
+  --include-function "OGR_L_CreateFeature" \
+  --include-function "OGR_F_Create" \
+  --include-function "OGR_F_Destroy" \
+  --include-function "OGR_F_GetFID" \
+  --include-function "OGR_F_GetGeometryRef" \
+  --include-function "OGR_F_SetGeometry" \
+  --include-function "OGR_F_GetFieldIndex" \
+  --include-function "OGR_F_GetFieldAsString" \
+  --include-function "OGR_F_GetFieldAsInteger64" \
+  --include-function "OGR_F_GetFieldAsDouble" \
+  --include-function "OGR_F_SetFieldString" \
+  --include-function "OGR_F_SetFieldInteger64" \
+  --include-function "OGR_F_SetFieldDouble" \
+  --include-function "OGR_F_SetFieldNull" \
+  --include-function "OGR_G_ExportToWkb" \
+  --include-function "OGR_G_CreateFromWkb" \
+  --include-function "OGR_G_DestroyGeometry" \
+  --include-function "OGR_G_GetSpatialReference" \
+  --include-function "OSRGetAuthorityCode" \
   --include-function "GDALVectorTranslateOptionsNew" \
   --include-function "GDALVectorTranslateOptionsFree" \
   --include-function "GDALVectorTranslateOptionsSetProgress" \
