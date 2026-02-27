@@ -61,7 +61,10 @@ val integrationTest = tasks.register<Test>("integrationTest") {
     description = "Runs integration tests that require bundled GDAL libraries."
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     testClassesDirs = sourceSets["integrationTest"].output.classesDirs
-    classpath = sourceSets["integrationTest"].runtimeClasspath
+    val nativesResources = project(":gdal-ffm-natives")
+        .layout.projectDirectory
+        .dir("src/main/resources")
+    classpath = sourceSets["integrationTest"].runtimeClasspath + files(nativesResources)
     shouldRunAfter(tasks.test)
     onlyIf {
         System.getenv("GDAL_FFM_RUN_INTEGRATION") == "true"

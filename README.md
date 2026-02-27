@@ -92,20 +92,36 @@ Gdal.translate(
 ```
 
 
-## OGR streaming API (preview)
+## OGR streaming API
 
-`gdal-ffm-core` now exposes a neutral vector streaming surface intended for integrations like Apache Hop plugins:
+`gdal-ffm-core` exposes a neutral vector streaming surface intended for integrations like Apache Hop plugins:
 
 - `Ogr.open(Path, Map<String,String>)`
 - `OgrDataSource` / `OgrLayerReader` / `OgrLayerWriter`
 - `OgrFeature`
 - `OgrGeometry`
+- `OgrLayerDefinition` / `OgrFieldDefinition` / `OgrFieldType`
 
 Geometry transport is neutral and uses EWKB-compatible payloads with optional SRID support.
 Use `OgrGeometry.fromWkb(wkb, srid)` when the SRID must be embedded directly in the binary payload.
 
-> Note: the public API contracts are available now; native OGR runtime wiring is prepared via
-> `tools/jextract/regenerate.sh` and `src/main/native/gdal_ffi.h` updates.
+Example:
+
+```java
+try (OgrDataSource dataSource = Ogr.open(Path.of("input.geojson"), Map.of())) {
+    OgrLayerDefinition layer = dataSource.listLayers().getFirst();
+    try (OgrLayerReader reader = dataSource.openReader(layer.name(), Map.of(
+            OgrReaderOptions.ATTRIBUTE_FILTER, "value >= 10",
+            OgrReaderOptions.BBOX, "2600000,1200000,2700000,1300000",
+            OgrReaderOptions.SELECTED_FIELDS, "id,name",
+            OgrReaderOptions.LIMIT, "1000"
+    ))) {
+        for (OgrFeature feature : reader) {
+            // stream rows
+        }
+    }
+}
+```
 
 ## Regenerating low-level bindings
 

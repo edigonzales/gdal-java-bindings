@@ -314,6 +314,2066 @@ public class GdalGenerated extends GdalGenerated$shared {
         }
     }
 
+    private static class OGR_G_CreateFromWkb {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_G_CreateFromWkb");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRErr OGR_G_CreateFromWkb(const void *, OGRSpatialReferenceH, OGRGeometryH *, int)
+     * }
+     */
+    public static FunctionDescriptor OGR_G_CreateFromWkb$descriptor() {
+        return OGR_G_CreateFromWkb.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRErr OGR_G_CreateFromWkb(const void *, OGRSpatialReferenceH, OGRGeometryH *, int)
+     * }
+     */
+    public static MethodHandle OGR_G_CreateFromWkb$handle() {
+        return OGR_G_CreateFromWkb.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRErr OGR_G_CreateFromWkb(const void *, OGRSpatialReferenceH, OGRGeometryH *, int)
+     * }
+     */
+    public static MemorySegment OGR_G_CreateFromWkb$address() {
+        return OGR_G_CreateFromWkb.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRErr OGR_G_CreateFromWkb(const void *, OGRSpatialReferenceH, OGRGeometryH *, int)
+     * }
+     */
+    public static int OGR_G_CreateFromWkb(MemorySegment x0, MemorySegment x1, MemorySegment x2, int x3) {
+        var mh$ = OGR_G_CreateFromWkb.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_G_CreateFromWkb", x0, x1, x2, x3);
+            }
+            return (int)mh$.invokeExact(x0, x1, x2, x3);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_G_CreateFromWkt {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_G_CreateFromWkt");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRErr OGR_G_CreateFromWkt(char **, OGRSpatialReferenceH, OGRGeometryH *)
+     * }
+     */
+    public static FunctionDescriptor OGR_G_CreateFromWkt$descriptor() {
+        return OGR_G_CreateFromWkt.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRErr OGR_G_CreateFromWkt(char **, OGRSpatialReferenceH, OGRGeometryH *)
+     * }
+     */
+    public static MethodHandle OGR_G_CreateFromWkt$handle() {
+        return OGR_G_CreateFromWkt.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRErr OGR_G_CreateFromWkt(char **, OGRSpatialReferenceH, OGRGeometryH *)
+     * }
+     */
+    public static MemorySegment OGR_G_CreateFromWkt$address() {
+        return OGR_G_CreateFromWkt.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRErr OGR_G_CreateFromWkt(char **, OGRSpatialReferenceH, OGRGeometryH *)
+     * }
+     */
+    public static int OGR_G_CreateFromWkt(MemorySegment x0, MemorySegment x1, MemorySegment x2) {
+        var mh$ = OGR_G_CreateFromWkt.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_G_CreateFromWkt", x0, x1, x2);
+            }
+            return (int)mh$.invokeExact(x0, x1, x2);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_G_DestroyGeometry {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_G_DestroyGeometry");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void OGR_G_DestroyGeometry(OGRGeometryH)
+     * }
+     */
+    public static FunctionDescriptor OGR_G_DestroyGeometry$descriptor() {
+        return OGR_G_DestroyGeometry.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void OGR_G_DestroyGeometry(OGRGeometryH)
+     * }
+     */
+    public static MethodHandle OGR_G_DestroyGeometry$handle() {
+        return OGR_G_DestroyGeometry.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void OGR_G_DestroyGeometry(OGRGeometryH)
+     * }
+     */
+    public static MemorySegment OGR_G_DestroyGeometry$address() {
+        return OGR_G_DestroyGeometry.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void OGR_G_DestroyGeometry(OGRGeometryH)
+     * }
+     */
+    public static void OGR_G_DestroyGeometry(MemorySegment x0) {
+        var mh$ = OGR_G_DestroyGeometry.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_G_DestroyGeometry", x0);
+            }
+            mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_G_ExportToWkb {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_G_ExportToWkb");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRErr OGR_G_ExportToWkb(OGRGeometryH, OGRwkbByteOrder, unsigned char *)
+     * }
+     */
+    public static FunctionDescriptor OGR_G_ExportToWkb$descriptor() {
+        return OGR_G_ExportToWkb.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRErr OGR_G_ExportToWkb(OGRGeometryH, OGRwkbByteOrder, unsigned char *)
+     * }
+     */
+    public static MethodHandle OGR_G_ExportToWkb$handle() {
+        return OGR_G_ExportToWkb.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRErr OGR_G_ExportToWkb(OGRGeometryH, OGRwkbByteOrder, unsigned char *)
+     * }
+     */
+    public static MemorySegment OGR_G_ExportToWkb$address() {
+        return OGR_G_ExportToWkb.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRErr OGR_G_ExportToWkb(OGRGeometryH, OGRwkbByteOrder, unsigned char *)
+     * }
+     */
+    public static int OGR_G_ExportToWkb(MemorySegment x0, int x1, MemorySegment x2) {
+        var mh$ = OGR_G_ExportToWkb.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_G_ExportToWkb", x0, x1, x2);
+            }
+            return (int)mh$.invokeExact(x0, x1, x2);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_G_WkbSize {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_G_WkbSize");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * int OGR_G_WkbSize(OGRGeometryH hGeom)
+     * }
+     */
+    public static FunctionDescriptor OGR_G_WkbSize$descriptor() {
+        return OGR_G_WkbSize.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * int OGR_G_WkbSize(OGRGeometryH hGeom)
+     * }
+     */
+    public static MethodHandle OGR_G_WkbSize$handle() {
+        return OGR_G_WkbSize.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * int OGR_G_WkbSize(OGRGeometryH hGeom)
+     * }
+     */
+    public static MemorySegment OGR_G_WkbSize$address() {
+        return OGR_G_WkbSize.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * int OGR_G_WkbSize(OGRGeometryH hGeom)
+     * }
+     */
+    public static int OGR_G_WkbSize(MemorySegment hGeom) {
+        var mh$ = OGR_G_WkbSize.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_G_WkbSize", hGeom);
+            }
+            return (int)mh$.invokeExact(hGeom);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_G_GetSpatialReference {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_G_GetSpatialReference");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRSpatialReferenceH OGR_G_GetSpatialReference(OGRGeometryH)
+     * }
+     */
+    public static FunctionDescriptor OGR_G_GetSpatialReference$descriptor() {
+        return OGR_G_GetSpatialReference.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRSpatialReferenceH OGR_G_GetSpatialReference(OGRGeometryH)
+     * }
+     */
+    public static MethodHandle OGR_G_GetSpatialReference$handle() {
+        return OGR_G_GetSpatialReference.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRSpatialReferenceH OGR_G_GetSpatialReference(OGRGeometryH)
+     * }
+     */
+    public static MemorySegment OGR_G_GetSpatialReference$address() {
+        return OGR_G_GetSpatialReference.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRSpatialReferenceH OGR_G_GetSpatialReference(OGRGeometryH)
+     * }
+     */
+    public static MemorySegment OGR_G_GetSpatialReference(MemorySegment x0) {
+        var mh$ = OGR_G_GetSpatialReference.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_G_GetSpatialReference", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_Fld_GetNameRef {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_Fld_GetNameRef");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * const char *OGR_Fld_GetNameRef(OGRFieldDefnH)
+     * }
+     */
+    public static FunctionDescriptor OGR_Fld_GetNameRef$descriptor() {
+        return OGR_Fld_GetNameRef.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * const char *OGR_Fld_GetNameRef(OGRFieldDefnH)
+     * }
+     */
+    public static MethodHandle OGR_Fld_GetNameRef$handle() {
+        return OGR_Fld_GetNameRef.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * const char *OGR_Fld_GetNameRef(OGRFieldDefnH)
+     * }
+     */
+    public static MemorySegment OGR_Fld_GetNameRef$address() {
+        return OGR_Fld_GetNameRef.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * const char *OGR_Fld_GetNameRef(OGRFieldDefnH)
+     * }
+     */
+    public static MemorySegment OGR_Fld_GetNameRef(MemorySegment x0) {
+        var mh$ = OGR_Fld_GetNameRef.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_Fld_GetNameRef", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_Fld_GetType {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_Fld_GetType");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRFieldType OGR_Fld_GetType(OGRFieldDefnH)
+     * }
+     */
+    public static FunctionDescriptor OGR_Fld_GetType$descriptor() {
+        return OGR_Fld_GetType.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRFieldType OGR_Fld_GetType(OGRFieldDefnH)
+     * }
+     */
+    public static MethodHandle OGR_Fld_GetType$handle() {
+        return OGR_Fld_GetType.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRFieldType OGR_Fld_GetType(OGRFieldDefnH)
+     * }
+     */
+    public static MemorySegment OGR_Fld_GetType$address() {
+        return OGR_Fld_GetType.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRFieldType OGR_Fld_GetType(OGRFieldDefnH)
+     * }
+     */
+    public static int OGR_Fld_GetType(MemorySegment x0) {
+        var mh$ = OGR_Fld_GetType.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_Fld_GetType", x0);
+            }
+            return (int)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_FD_GetFieldCount {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_FD_GetFieldCount");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * int OGR_FD_GetFieldCount(OGRFeatureDefnH)
+     * }
+     */
+    public static FunctionDescriptor OGR_FD_GetFieldCount$descriptor() {
+        return OGR_FD_GetFieldCount.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * int OGR_FD_GetFieldCount(OGRFeatureDefnH)
+     * }
+     */
+    public static MethodHandle OGR_FD_GetFieldCount$handle() {
+        return OGR_FD_GetFieldCount.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * int OGR_FD_GetFieldCount(OGRFeatureDefnH)
+     * }
+     */
+    public static MemorySegment OGR_FD_GetFieldCount$address() {
+        return OGR_FD_GetFieldCount.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * int OGR_FD_GetFieldCount(OGRFeatureDefnH)
+     * }
+     */
+    public static int OGR_FD_GetFieldCount(MemorySegment x0) {
+        var mh$ = OGR_FD_GetFieldCount.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_FD_GetFieldCount", x0);
+            }
+            return (int)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_FD_GetFieldDefn {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_FD_GetFieldDefn");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRFieldDefnH OGR_FD_GetFieldDefn(OGRFeatureDefnH, int)
+     * }
+     */
+    public static FunctionDescriptor OGR_FD_GetFieldDefn$descriptor() {
+        return OGR_FD_GetFieldDefn.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRFieldDefnH OGR_FD_GetFieldDefn(OGRFeatureDefnH, int)
+     * }
+     */
+    public static MethodHandle OGR_FD_GetFieldDefn$handle() {
+        return OGR_FD_GetFieldDefn.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRFieldDefnH OGR_FD_GetFieldDefn(OGRFeatureDefnH, int)
+     * }
+     */
+    public static MemorySegment OGR_FD_GetFieldDefn$address() {
+        return OGR_FD_GetFieldDefn.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRFieldDefnH OGR_FD_GetFieldDefn(OGRFeatureDefnH, int)
+     * }
+     */
+    public static MemorySegment OGR_FD_GetFieldDefn(MemorySegment x0, int x1) {
+        var mh$ = OGR_FD_GetFieldDefn.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_FD_GetFieldDefn", x0, x1);
+            }
+            return (MemorySegment)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_Create {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_Create");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRFeatureH OGR_F_Create(OGRFeatureDefnH)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_Create$descriptor() {
+        return OGR_F_Create.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRFeatureH OGR_F_Create(OGRFeatureDefnH)
+     * }
+     */
+    public static MethodHandle OGR_F_Create$handle() {
+        return OGR_F_Create.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRFeatureH OGR_F_Create(OGRFeatureDefnH)
+     * }
+     */
+    public static MemorySegment OGR_F_Create$address() {
+        return OGR_F_Create.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRFeatureH OGR_F_Create(OGRFeatureDefnH)
+     * }
+     */
+    public static MemorySegment OGR_F_Create(MemorySegment x0) {
+        var mh$ = OGR_F_Create.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_Create", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_Destroy {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_Destroy");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void OGR_F_Destroy(OGRFeatureH)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_Destroy$descriptor() {
+        return OGR_F_Destroy.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void OGR_F_Destroy(OGRFeatureH)
+     * }
+     */
+    public static MethodHandle OGR_F_Destroy$handle() {
+        return OGR_F_Destroy.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void OGR_F_Destroy(OGRFeatureH)
+     * }
+     */
+    public static MemorySegment OGR_F_Destroy$address() {
+        return OGR_F_Destroy.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void OGR_F_Destroy(OGRFeatureH)
+     * }
+     */
+    public static void OGR_F_Destroy(MemorySegment x0) {
+        var mh$ = OGR_F_Destroy.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_Destroy", x0);
+            }
+            mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_SetGeometry {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_SetGeometry");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRErr OGR_F_SetGeometry(OGRFeatureH, OGRGeometryH)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_SetGeometry$descriptor() {
+        return OGR_F_SetGeometry.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRErr OGR_F_SetGeometry(OGRFeatureH, OGRGeometryH)
+     * }
+     */
+    public static MethodHandle OGR_F_SetGeometry$handle() {
+        return OGR_F_SetGeometry.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRErr OGR_F_SetGeometry(OGRFeatureH, OGRGeometryH)
+     * }
+     */
+    public static MemorySegment OGR_F_SetGeometry$address() {
+        return OGR_F_SetGeometry.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRErr OGR_F_SetGeometry(OGRFeatureH, OGRGeometryH)
+     * }
+     */
+    public static int OGR_F_SetGeometry(MemorySegment x0, MemorySegment x1) {
+        var mh$ = OGR_F_SetGeometry.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_SetGeometry", x0, x1);
+            }
+            return (int)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_GetGeometryRef {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_GetGeometryRef");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRGeometryH OGR_F_GetGeometryRef(OGRFeatureH)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_GetGeometryRef$descriptor() {
+        return OGR_F_GetGeometryRef.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRGeometryH OGR_F_GetGeometryRef(OGRFeatureH)
+     * }
+     */
+    public static MethodHandle OGR_F_GetGeometryRef$handle() {
+        return OGR_F_GetGeometryRef.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRGeometryH OGR_F_GetGeometryRef(OGRFeatureH)
+     * }
+     */
+    public static MemorySegment OGR_F_GetGeometryRef$address() {
+        return OGR_F_GetGeometryRef.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRGeometryH OGR_F_GetGeometryRef(OGRFeatureH)
+     * }
+     */
+    public static MemorySegment OGR_F_GetGeometryRef(MemorySegment x0) {
+        var mh$ = OGR_F_GetGeometryRef.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_GetGeometryRef", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_GetFieldIndex {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_GetFieldIndex");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * int OGR_F_GetFieldIndex(OGRFeatureH, const char *)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_GetFieldIndex$descriptor() {
+        return OGR_F_GetFieldIndex.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * int OGR_F_GetFieldIndex(OGRFeatureH, const char *)
+     * }
+     */
+    public static MethodHandle OGR_F_GetFieldIndex$handle() {
+        return OGR_F_GetFieldIndex.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * int OGR_F_GetFieldIndex(OGRFeatureH, const char *)
+     * }
+     */
+    public static MemorySegment OGR_F_GetFieldIndex$address() {
+        return OGR_F_GetFieldIndex.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * int OGR_F_GetFieldIndex(OGRFeatureH, const char *)
+     * }
+     */
+    public static int OGR_F_GetFieldIndex(MemorySegment x0, MemorySegment x1) {
+        var mh$ = OGR_F_GetFieldIndex.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_GetFieldIndex", x0, x1);
+            }
+            return (int)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_IsFieldSetAndNotNull {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_IsFieldSetAndNotNull");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * int OGR_F_IsFieldSetAndNotNull(OGRFeatureH, int)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_IsFieldSetAndNotNull$descriptor() {
+        return OGR_F_IsFieldSetAndNotNull.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * int OGR_F_IsFieldSetAndNotNull(OGRFeatureH, int)
+     * }
+     */
+    public static MethodHandle OGR_F_IsFieldSetAndNotNull$handle() {
+        return OGR_F_IsFieldSetAndNotNull.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * int OGR_F_IsFieldSetAndNotNull(OGRFeatureH, int)
+     * }
+     */
+    public static MemorySegment OGR_F_IsFieldSetAndNotNull$address() {
+        return OGR_F_IsFieldSetAndNotNull.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * int OGR_F_IsFieldSetAndNotNull(OGRFeatureH, int)
+     * }
+     */
+    public static int OGR_F_IsFieldSetAndNotNull(MemorySegment x0, int x1) {
+        var mh$ = OGR_F_IsFieldSetAndNotNull.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_IsFieldSetAndNotNull", x0, x1);
+            }
+            return (int)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_SetFieldNull {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_SetFieldNull");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldNull(OGRFeatureH, int)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_SetFieldNull$descriptor() {
+        return OGR_F_SetFieldNull.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldNull(OGRFeatureH, int)
+     * }
+     */
+    public static MethodHandle OGR_F_SetFieldNull$handle() {
+        return OGR_F_SetFieldNull.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldNull(OGRFeatureH, int)
+     * }
+     */
+    public static MemorySegment OGR_F_SetFieldNull$address() {
+        return OGR_F_SetFieldNull.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldNull(OGRFeatureH, int)
+     * }
+     */
+    public static void OGR_F_SetFieldNull(MemorySegment x0, int x1) {
+        var mh$ = OGR_F_SetFieldNull.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_SetFieldNull", x0, x1);
+            }
+            mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_GetFieldAsInteger64 {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_LONG_LONG,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_GetFieldAsInteger64");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * GIntBig OGR_F_GetFieldAsInteger64(OGRFeatureH, int)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_GetFieldAsInteger64$descriptor() {
+        return OGR_F_GetFieldAsInteger64.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * GIntBig OGR_F_GetFieldAsInteger64(OGRFeatureH, int)
+     * }
+     */
+    public static MethodHandle OGR_F_GetFieldAsInteger64$handle() {
+        return OGR_F_GetFieldAsInteger64.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * GIntBig OGR_F_GetFieldAsInteger64(OGRFeatureH, int)
+     * }
+     */
+    public static MemorySegment OGR_F_GetFieldAsInteger64$address() {
+        return OGR_F_GetFieldAsInteger64.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * GIntBig OGR_F_GetFieldAsInteger64(OGRFeatureH, int)
+     * }
+     */
+    public static long OGR_F_GetFieldAsInteger64(MemorySegment x0, int x1) {
+        var mh$ = OGR_F_GetFieldAsInteger64.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_GetFieldAsInteger64", x0, x1);
+            }
+            return (long)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_GetFieldAsDouble {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_DOUBLE,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_GetFieldAsDouble");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * double OGR_F_GetFieldAsDouble(OGRFeatureH, int)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_GetFieldAsDouble$descriptor() {
+        return OGR_F_GetFieldAsDouble.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * double OGR_F_GetFieldAsDouble(OGRFeatureH, int)
+     * }
+     */
+    public static MethodHandle OGR_F_GetFieldAsDouble$handle() {
+        return OGR_F_GetFieldAsDouble.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * double OGR_F_GetFieldAsDouble(OGRFeatureH, int)
+     * }
+     */
+    public static MemorySegment OGR_F_GetFieldAsDouble$address() {
+        return OGR_F_GetFieldAsDouble.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * double OGR_F_GetFieldAsDouble(OGRFeatureH, int)
+     * }
+     */
+    public static double OGR_F_GetFieldAsDouble(MemorySegment x0, int x1) {
+        var mh$ = OGR_F_GetFieldAsDouble.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_GetFieldAsDouble", x0, x1);
+            }
+            return (double)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_GetFieldAsString {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_GetFieldAsString");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * const char *OGR_F_GetFieldAsString(OGRFeatureH, int)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_GetFieldAsString$descriptor() {
+        return OGR_F_GetFieldAsString.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * const char *OGR_F_GetFieldAsString(OGRFeatureH, int)
+     * }
+     */
+    public static MethodHandle OGR_F_GetFieldAsString$handle() {
+        return OGR_F_GetFieldAsString.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * const char *OGR_F_GetFieldAsString(OGRFeatureH, int)
+     * }
+     */
+    public static MemorySegment OGR_F_GetFieldAsString$address() {
+        return OGR_F_GetFieldAsString.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * const char *OGR_F_GetFieldAsString(OGRFeatureH, int)
+     * }
+     */
+    public static MemorySegment OGR_F_GetFieldAsString(MemorySegment x0, int x1) {
+        var mh$ = OGR_F_GetFieldAsString.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_GetFieldAsString", x0, x1);
+            }
+            return (MemorySegment)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_SetFieldInteger64 {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT,
+            GdalGenerated.C_LONG_LONG
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_SetFieldInteger64");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldInteger64(OGRFeatureH, int, GIntBig)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_SetFieldInteger64$descriptor() {
+        return OGR_F_SetFieldInteger64.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldInteger64(OGRFeatureH, int, GIntBig)
+     * }
+     */
+    public static MethodHandle OGR_F_SetFieldInteger64$handle() {
+        return OGR_F_SetFieldInteger64.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldInteger64(OGRFeatureH, int, GIntBig)
+     * }
+     */
+    public static MemorySegment OGR_F_SetFieldInteger64$address() {
+        return OGR_F_SetFieldInteger64.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldInteger64(OGRFeatureH, int, GIntBig)
+     * }
+     */
+    public static void OGR_F_SetFieldInteger64(MemorySegment x0, int x1, long x2) {
+        var mh$ = OGR_F_SetFieldInteger64.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_SetFieldInteger64", x0, x1, x2);
+            }
+            mh$.invokeExact(x0, x1, x2);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_SetFieldDouble {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT,
+            GdalGenerated.C_DOUBLE
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_SetFieldDouble");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldDouble(OGRFeatureH, int, double)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_SetFieldDouble$descriptor() {
+        return OGR_F_SetFieldDouble.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldDouble(OGRFeatureH, int, double)
+     * }
+     */
+    public static MethodHandle OGR_F_SetFieldDouble$handle() {
+        return OGR_F_SetFieldDouble.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldDouble(OGRFeatureH, int, double)
+     * }
+     */
+    public static MemorySegment OGR_F_SetFieldDouble$address() {
+        return OGR_F_SetFieldDouble.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldDouble(OGRFeatureH, int, double)
+     * }
+     */
+    public static void OGR_F_SetFieldDouble(MemorySegment x0, int x1, double x2) {
+        var mh$ = OGR_F_SetFieldDouble.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_SetFieldDouble", x0, x1, x2);
+            }
+            mh$.invokeExact(x0, x1, x2);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_SetFieldString {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_SetFieldString");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldString(OGRFeatureH, int, const char *)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_SetFieldString$descriptor() {
+        return OGR_F_SetFieldString.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldString(OGRFeatureH, int, const char *)
+     * }
+     */
+    public static MethodHandle OGR_F_SetFieldString$handle() {
+        return OGR_F_SetFieldString.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldString(OGRFeatureH, int, const char *)
+     * }
+     */
+    public static MemorySegment OGR_F_SetFieldString$address() {
+        return OGR_F_SetFieldString.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void OGR_F_SetFieldString(OGRFeatureH, int, const char *)
+     * }
+     */
+    public static void OGR_F_SetFieldString(MemorySegment x0, int x1, MemorySegment x2) {
+        var mh$ = OGR_F_SetFieldString.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_SetFieldString", x0, x1, x2);
+            }
+            mh$.invokeExact(x0, x1, x2);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_F_GetFID {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_LONG_LONG,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_F_GetFID");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * GIntBig OGR_F_GetFID(OGRFeatureH)
+     * }
+     */
+    public static FunctionDescriptor OGR_F_GetFID$descriptor() {
+        return OGR_F_GetFID.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * GIntBig OGR_F_GetFID(OGRFeatureH)
+     * }
+     */
+    public static MethodHandle OGR_F_GetFID$handle() {
+        return OGR_F_GetFID.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * GIntBig OGR_F_GetFID(OGRFeatureH)
+     * }
+     */
+    public static MemorySegment OGR_F_GetFID$address() {
+        return OGR_F_GetFID.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * GIntBig OGR_F_GetFID(OGRFeatureH)
+     * }
+     */
+    public static long OGR_F_GetFID(MemorySegment x0) {
+        var mh$ = OGR_F_GetFID.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_F_GetFID", x0);
+            }
+            return (long)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_GetName {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_GetName");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * const char *OGR_L_GetName(OGRLayerH)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_GetName$descriptor() {
+        return OGR_L_GetName.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * const char *OGR_L_GetName(OGRLayerH)
+     * }
+     */
+    public static MethodHandle OGR_L_GetName$handle() {
+        return OGR_L_GetName.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * const char *OGR_L_GetName(OGRLayerH)
+     * }
+     */
+    public static MemorySegment OGR_L_GetName$address() {
+        return OGR_L_GetName.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * const char *OGR_L_GetName(OGRLayerH)
+     * }
+     */
+    public static MemorySegment OGR_L_GetName(MemorySegment x0) {
+        var mh$ = OGR_L_GetName.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_GetName", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_GetGeomType {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_GetGeomType");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRwkbGeometryType OGR_L_GetGeomType(OGRLayerH)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_GetGeomType$descriptor() {
+        return OGR_L_GetGeomType.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRwkbGeometryType OGR_L_GetGeomType(OGRLayerH)
+     * }
+     */
+    public static MethodHandle OGR_L_GetGeomType$handle() {
+        return OGR_L_GetGeomType.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRwkbGeometryType OGR_L_GetGeomType(OGRLayerH)
+     * }
+     */
+    public static MemorySegment OGR_L_GetGeomType$address() {
+        return OGR_L_GetGeomType.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRwkbGeometryType OGR_L_GetGeomType(OGRLayerH)
+     * }
+     */
+    public static int OGR_L_GetGeomType(MemorySegment x0) {
+        var mh$ = OGR_L_GetGeomType.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_GetGeomType", x0);
+            }
+            return (int)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_SetSpatialFilter {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_SetSpatialFilter");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void OGR_L_SetSpatialFilter(OGRLayerH, OGRGeometryH)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_SetSpatialFilter$descriptor() {
+        return OGR_L_SetSpatialFilter.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void OGR_L_SetSpatialFilter(OGRLayerH, OGRGeometryH)
+     * }
+     */
+    public static MethodHandle OGR_L_SetSpatialFilter$handle() {
+        return OGR_L_SetSpatialFilter.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void OGR_L_SetSpatialFilter(OGRLayerH, OGRGeometryH)
+     * }
+     */
+    public static MemorySegment OGR_L_SetSpatialFilter$address() {
+        return OGR_L_SetSpatialFilter.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void OGR_L_SetSpatialFilter(OGRLayerH, OGRGeometryH)
+     * }
+     */
+    public static void OGR_L_SetSpatialFilter(MemorySegment x0, MemorySegment x1) {
+        var mh$ = OGR_L_SetSpatialFilter.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_SetSpatialFilter", x0, x1);
+            }
+            mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_SetSpatialFilterRect {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_DOUBLE,
+            GdalGenerated.C_DOUBLE,
+            GdalGenerated.C_DOUBLE,
+            GdalGenerated.C_DOUBLE
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_SetSpatialFilterRect");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void OGR_L_SetSpatialFilterRect(OGRLayerH, double, double, double, double)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_SetSpatialFilterRect$descriptor() {
+        return OGR_L_SetSpatialFilterRect.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void OGR_L_SetSpatialFilterRect(OGRLayerH, double, double, double, double)
+     * }
+     */
+    public static MethodHandle OGR_L_SetSpatialFilterRect$handle() {
+        return OGR_L_SetSpatialFilterRect.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void OGR_L_SetSpatialFilterRect(OGRLayerH, double, double, double, double)
+     * }
+     */
+    public static MemorySegment OGR_L_SetSpatialFilterRect$address() {
+        return OGR_L_SetSpatialFilterRect.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void OGR_L_SetSpatialFilterRect(OGRLayerH, double, double, double, double)
+     * }
+     */
+    public static void OGR_L_SetSpatialFilterRect(MemorySegment x0, double x1, double x2, double x3, double x4) {
+        var mh$ = OGR_L_SetSpatialFilterRect.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_SetSpatialFilterRect", x0, x1, x2, x3, x4);
+            }
+            mh$.invokeExact(x0, x1, x2, x3, x4);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_SetAttributeFilter {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_SetAttributeFilter");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRErr OGR_L_SetAttributeFilter(OGRLayerH, const char *)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_SetAttributeFilter$descriptor() {
+        return OGR_L_SetAttributeFilter.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRErr OGR_L_SetAttributeFilter(OGRLayerH, const char *)
+     * }
+     */
+    public static MethodHandle OGR_L_SetAttributeFilter$handle() {
+        return OGR_L_SetAttributeFilter.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRErr OGR_L_SetAttributeFilter(OGRLayerH, const char *)
+     * }
+     */
+    public static MemorySegment OGR_L_SetAttributeFilter$address() {
+        return OGR_L_SetAttributeFilter.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRErr OGR_L_SetAttributeFilter(OGRLayerH, const char *)
+     * }
+     */
+    public static int OGR_L_SetAttributeFilter(MemorySegment x0, MemorySegment x1) {
+        var mh$ = OGR_L_SetAttributeFilter.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_SetAttributeFilter", x0, x1);
+            }
+            return (int)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_ResetReading {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_ResetReading");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void OGR_L_ResetReading(OGRLayerH)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_ResetReading$descriptor() {
+        return OGR_L_ResetReading.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void OGR_L_ResetReading(OGRLayerH)
+     * }
+     */
+    public static MethodHandle OGR_L_ResetReading$handle() {
+        return OGR_L_ResetReading.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void OGR_L_ResetReading(OGRLayerH)
+     * }
+     */
+    public static MemorySegment OGR_L_ResetReading$address() {
+        return OGR_L_ResetReading.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void OGR_L_ResetReading(OGRLayerH)
+     * }
+     */
+    public static void OGR_L_ResetReading(MemorySegment x0) {
+        var mh$ = OGR_L_ResetReading.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_ResetReading", x0);
+            }
+            mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_GetNextFeature {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_GetNextFeature");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRFeatureH OGR_L_GetNextFeature(OGRLayerH)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_GetNextFeature$descriptor() {
+        return OGR_L_GetNextFeature.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRFeatureH OGR_L_GetNextFeature(OGRLayerH)
+     * }
+     */
+    public static MethodHandle OGR_L_GetNextFeature$handle() {
+        return OGR_L_GetNextFeature.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRFeatureH OGR_L_GetNextFeature(OGRLayerH)
+     * }
+     */
+    public static MemorySegment OGR_L_GetNextFeature$address() {
+        return OGR_L_GetNextFeature.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRFeatureH OGR_L_GetNextFeature(OGRLayerH)
+     * }
+     */
+    public static MemorySegment OGR_L_GetNextFeature(MemorySegment x0) {
+        var mh$ = OGR_L_GetNextFeature.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_GetNextFeature", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_CreateFeature {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_CreateFeature");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRErr OGR_L_CreateFeature(OGRLayerH, OGRFeatureH)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_CreateFeature$descriptor() {
+        return OGR_L_CreateFeature.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRErr OGR_L_CreateFeature(OGRLayerH, OGRFeatureH)
+     * }
+     */
+    public static MethodHandle OGR_L_CreateFeature$handle() {
+        return OGR_L_CreateFeature.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRErr OGR_L_CreateFeature(OGRLayerH, OGRFeatureH)
+     * }
+     */
+    public static MemorySegment OGR_L_CreateFeature$address() {
+        return OGR_L_CreateFeature.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRErr OGR_L_CreateFeature(OGRLayerH, OGRFeatureH)
+     * }
+     */
+    public static int OGR_L_CreateFeature(MemorySegment x0, MemorySegment x1) {
+        var mh$ = OGR_L_CreateFeature.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_CreateFeature", x0, x1);
+            }
+            return (int)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_GetLayerDefn {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_GetLayerDefn");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRFeatureDefnH OGR_L_GetLayerDefn(OGRLayerH)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_GetLayerDefn$descriptor() {
+        return OGR_L_GetLayerDefn.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRFeatureDefnH OGR_L_GetLayerDefn(OGRLayerH)
+     * }
+     */
+    public static MethodHandle OGR_L_GetLayerDefn$handle() {
+        return OGR_L_GetLayerDefn.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRFeatureDefnH OGR_L_GetLayerDefn(OGRLayerH)
+     * }
+     */
+    public static MemorySegment OGR_L_GetLayerDefn$address() {
+        return OGR_L_GetLayerDefn.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRFeatureDefnH OGR_L_GetLayerDefn(OGRLayerH)
+     * }
+     */
+    public static MemorySegment OGR_L_GetLayerDefn(MemorySegment x0) {
+        var mh$ = OGR_L_GetLayerDefn.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_GetLayerDefn", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OGR_L_SetIgnoredFields {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OGR_L_SetIgnoredFields");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRErr OGR_L_SetIgnoredFields(OGRLayerH, const char **)
+     * }
+     */
+    public static FunctionDescriptor OGR_L_SetIgnoredFields$descriptor() {
+        return OGR_L_SetIgnoredFields.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRErr OGR_L_SetIgnoredFields(OGRLayerH, const char **)
+     * }
+     */
+    public static MethodHandle OGR_L_SetIgnoredFields$handle() {
+        return OGR_L_SetIgnoredFields.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRErr OGR_L_SetIgnoredFields(OGRLayerH, const char **)
+     * }
+     */
+    public static MemorySegment OGR_L_SetIgnoredFields$address() {
+        return OGR_L_SetIgnoredFields.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRErr OGR_L_SetIgnoredFields(OGRLayerH, const char **)
+     * }
+     */
+    public static int OGR_L_SetIgnoredFields(MemorySegment x0, MemorySegment x1) {
+        var mh$ = OGR_L_SetIgnoredFields.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OGR_L_SetIgnoredFields", x0, x1);
+            }
+            return (int)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
     private static class GDALAllRegister {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(    );
 
@@ -548,6 +2608,188 @@ public class GdalGenerated extends GdalGenerated$shared {
                 traceDowncall("GDALReleaseDataset", x0);
             }
             return (int)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALDatasetGetLayerCount {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALDatasetGetLayerCount");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * int GDALDatasetGetLayerCount(GDALDatasetH)
+     * }
+     */
+    public static FunctionDescriptor GDALDatasetGetLayerCount$descriptor() {
+        return GDALDatasetGetLayerCount.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * int GDALDatasetGetLayerCount(GDALDatasetH)
+     * }
+     */
+    public static MethodHandle GDALDatasetGetLayerCount$handle() {
+        return GDALDatasetGetLayerCount.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * int GDALDatasetGetLayerCount(GDALDatasetH)
+     * }
+     */
+    public static MemorySegment GDALDatasetGetLayerCount$address() {
+        return GDALDatasetGetLayerCount.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * int GDALDatasetGetLayerCount(GDALDatasetH)
+     * }
+     */
+    public static int GDALDatasetGetLayerCount(MemorySegment x0) {
+        var mh$ = GDALDatasetGetLayerCount.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALDatasetGetLayerCount", x0);
+            }
+            return (int)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALDatasetGetLayer {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_INT
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALDatasetGetLayer");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRLayerH GDALDatasetGetLayer(GDALDatasetH, int)
+     * }
+     */
+    public static FunctionDescriptor GDALDatasetGetLayer$descriptor() {
+        return GDALDatasetGetLayer.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRLayerH GDALDatasetGetLayer(GDALDatasetH, int)
+     * }
+     */
+    public static MethodHandle GDALDatasetGetLayer$handle() {
+        return GDALDatasetGetLayer.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRLayerH GDALDatasetGetLayer(GDALDatasetH, int)
+     * }
+     */
+    public static MemorySegment GDALDatasetGetLayer$address() {
+        return GDALDatasetGetLayer.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRLayerH GDALDatasetGetLayer(GDALDatasetH, int)
+     * }
+     */
+    public static MemorySegment GDALDatasetGetLayer(MemorySegment x0, int x1) {
+        var mh$ = GDALDatasetGetLayer.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALDatasetGetLayer", x0, x1);
+            }
+            return (MemorySegment)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALDatasetGetLayerByName {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALDatasetGetLayerByName");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * OGRLayerH GDALDatasetGetLayerByName(GDALDatasetH, const char *)
+     * }
+     */
+    public static FunctionDescriptor GDALDatasetGetLayerByName$descriptor() {
+        return GDALDatasetGetLayerByName.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * OGRLayerH GDALDatasetGetLayerByName(GDALDatasetH, const char *)
+     * }
+     */
+    public static MethodHandle GDALDatasetGetLayerByName$handle() {
+        return GDALDatasetGetLayerByName.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * OGRLayerH GDALDatasetGetLayerByName(GDALDatasetH, const char *)
+     * }
+     */
+    public static MemorySegment GDALDatasetGetLayerByName$address() {
+        return GDALDatasetGetLayerByName.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * OGRLayerH GDALDatasetGetLayerByName(GDALDatasetH, const char *)
+     * }
+     */
+    public static MemorySegment GDALDatasetGetLayerByName(MemorySegment x0, MemorySegment x1) {
+        var mh$ = GDALDatasetGetLayerByName.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALDatasetGetLayerByName", x0, x1);
+            }
+            return (MemorySegment)mh$.invokeExact(x0, x1);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {
@@ -1284,6 +3526,67 @@ public class GdalGenerated extends GdalGenerated$shared {
                 traceDowncall("GDALVectorTranslate", pszDest, hDstDS, nSrcCount, pahSrcDS, psOptions, pbUsageError);
             }
             return (MemorySegment)mh$.invokeExact(pszDest, hDstDS, nSrcCount, pahSrcDS, psOptions, pbUsageError);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class OSRGetAuthorityCode {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("OSRGetAuthorityCode");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * const char *OSRGetAuthorityCode(OGRSpatialReferenceH hSRS, const char *pszTargetKey)
+     * }
+     */
+    public static FunctionDescriptor OSRGetAuthorityCode$descriptor() {
+        return OSRGetAuthorityCode.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * const char *OSRGetAuthorityCode(OGRSpatialReferenceH hSRS, const char *pszTargetKey)
+     * }
+     */
+    public static MethodHandle OSRGetAuthorityCode$handle() {
+        return OSRGetAuthorityCode.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * const char *OSRGetAuthorityCode(OGRSpatialReferenceH hSRS, const char *pszTargetKey)
+     * }
+     */
+    public static MemorySegment OSRGetAuthorityCode$address() {
+        return OSRGetAuthorityCode.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * const char *OSRGetAuthorityCode(OGRSpatialReferenceH hSRS, const char *pszTargetKey)
+     * }
+     */
+    public static MemorySegment OSRGetAuthorityCode(MemorySegment hSRS, MemorySegment pszTargetKey) {
+        var mh$ = OSRGetAuthorityCode.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("OSRGetAuthorityCode", hSRS, pszTargetKey);
+            }
+            return (MemorySegment)mh$.invokeExact(hSRS, pszTargetKey);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {

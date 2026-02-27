@@ -32,9 +32,15 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "GDALDatasetGetLayerByName" \
   --include-function "GDALDatasetGetLayer" \
   --include-function "GDALDatasetGetLayerCount" \
+  --include-function "OGR_L_GetName" \
+  --include-function "OGR_L_GetGeomType" \
   --include-function "OGR_L_GetLayerDefn" \
   --include-function "OGR_L_GetNextFeature" \
   --include-function "OGR_L_ResetReading" \
+  --include-function "OGR_L_SetSpatialFilter" \
+  --include-function "OGR_L_SetSpatialFilterRect" \
+  --include-function "OGR_L_SetAttributeFilter" \
+  --include-function "OGR_L_SetIgnoredFields" \
   --include-function "OGR_L_CreateFeature" \
   --include-function "OGR_F_Create" \
   --include-function "OGR_F_Destroy" \
@@ -42,6 +48,11 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "OGR_F_GetGeometryRef" \
   --include-function "OGR_F_SetGeometry" \
   --include-function "OGR_F_GetFieldIndex" \
+  --include-function "OGR_F_IsFieldSetAndNotNull" \
+  --include-function "OGR_FD_GetFieldCount" \
+  --include-function "OGR_FD_GetFieldDefn" \
+  --include-function "OGR_Fld_GetNameRef" \
+  --include-function "OGR_Fld_GetType" \
   --include-function "OGR_F_GetFieldAsString" \
   --include-function "OGR_F_GetFieldAsInteger64" \
   --include-function "OGR_F_GetFieldAsDouble" \
@@ -49,7 +60,9 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "OGR_F_SetFieldInteger64" \
   --include-function "OGR_F_SetFieldDouble" \
   --include-function "OGR_F_SetFieldNull" \
+  --include-function "OGR_G_CreateFromWkt" \
   --include-function "OGR_G_ExportToWkb" \
+  --include-function "OGR_G_WkbSize" \
   --include-function "OGR_G_CreateFromWkb" \
   --include-function "OGR_G_DestroyGeometry" \
   --include-function "OGR_G_GetSpatialReference" \
