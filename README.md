@@ -97,10 +97,13 @@ Gdal.translate(
 `gdal-ffm-core` exposes a neutral vector streaming surface intended for integrations like Apache Hop plugins:
 
 - `Ogr.open(Path, Map<String,String>)`
+- `Ogr.create(Path, driverShortName, writeMode, datasetCreationOptions)`
+- `Ogr.listWritableVectorDrivers()`
 - `OgrDataSource` / `OgrLayerReader` / `OgrLayerWriter`
 - `OgrFeature`
 - `OgrGeometry`
 - `OgrLayerDefinition` / `OgrFieldDefinition` / `OgrFieldType`
+- `OgrLayerWriteSpec` / `OgrWriteMode` / `OgrDriverInfo`
 
 Geometry transport is neutral and uses EWKB-compatible payloads with optional SRID support.
 Use `OgrGeometry.fromWkb(wkb, srid)` when the SRID must be embedded directly in the binary payload.
@@ -119,6 +122,29 @@ try (OgrDataSource dataSource = Ogr.open(Path.of("input.geojson"), Map.of())) {
         for (OgrFeature feature : reader) {
             // stream rows
         }
+    }
+}
+
+try (OgrDataSource dataSource = Ogr.create(
+        Path.of("output.gpkg"),
+        "GPKG",
+        OgrWriteMode.OVERWRITE,
+        Map.of("SPATIAL_INDEX", "YES"))) {
+    OgrLayerWriteSpec spec = new OgrLayerWriteSpec(
+            "features",
+            1, // POINT
+            List.of(
+                    new OgrFieldDefinition("id", OgrFieldType.INTEGER64),
+                    new OgrFieldDefinition("name", OgrFieldType.STRING)
+            )
+    ).withWriteMode(OgrWriteMode.OVERWRITE);
+
+    try (OgrLayerWriter writer = dataSource.openWriter(spec)) {
+        writer.write(new OgrFeature(
+                -1,
+                Map.of("id", 1L, "name", "A"),
+                OgrGeometry.fromWkb(new byte[] { /* WKB */ })
+        ));
     }
 }
 ```

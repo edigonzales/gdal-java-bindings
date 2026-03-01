@@ -28,10 +28,25 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "GDALAllRegister" \
   --include-function "GDALOpenEx" \
   --include-function "GDALClose" \
+  --include-function "GDALGetDriverCount" \
+  --include-function "GDALGetDriver" \
+  --include-function "GDALGetDriverByName" \
+  --include-function "GDALGetDriverShortName" \
+  --include-function "GDALGetDriverLongName" \
+  --include-function "GDALGetMetadataItem" \
   --include-function "GDALReleaseDataset" \
   --include-function "GDALDatasetGetLayerByName" \
   --include-function "GDALDatasetGetLayer" \
   --include-function "GDALDatasetGetLayerCount" \
+  --include-function "OGRGetDriverCount" \
+  --include-function "OGRGetDriver" \
+  --include-function "OGRGetDriverByName" \
+  --include-function "OGR_Dr_GetName" \
+  --include-function "OGR_Dr_TestCapability" \
+  --include-function "OGR_Dr_CreateDataSource" \
+  --include-function "OGR_Dr_DeleteDataSource" \
+  --include-function "OGR_DS_CreateLayer" \
+  --include-function "OGR_DS_DeleteLayer" \
   --include-function "OGR_L_GetName" \
   --include-function "OGR_L_GetGeomType" \
   --include-function "OGR_L_GetLayerDefn" \
@@ -42,6 +57,7 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "OGR_L_SetAttributeFilter" \
   --include-function "OGR_L_SetIgnoredFields" \
   --include-function "OGR_L_CreateFeature" \
+  --include-function "OGR_L_CreateField" \
   --include-function "OGR_F_Create" \
   --include-function "OGR_F_Destroy" \
   --include-function "OGR_F_GetFID" \
@@ -51,6 +67,9 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "OGR_F_IsFieldSetAndNotNull" \
   --include-function "OGR_FD_GetFieldCount" \
   --include-function "OGR_FD_GetFieldDefn" \
+  --include-function "OGR_FD_GetGeomFieldIndex" \
+  --include-function "OGR_Fld_Create" \
+  --include-function "OGR_Fld_Destroy" \
   --include-function "OGR_Fld_GetNameRef" \
   --include-function "OGR_Fld_GetType" \
   --include-function "OGR_F_GetFieldAsString" \
@@ -60,6 +79,8 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "OGR_F_SetFieldInteger64" \
   --include-function "OGR_F_SetFieldDouble" \
   --include-function "OGR_F_SetFieldNull" \
+  --include-function "OGR_F_SetFID" \
+  --include-function "OGR_F_SetGeomField" \
   --include-function "OGR_G_CreateFromWkt" \
   --include-function "OGR_G_ExportToWkb" \
   --include-function "OGR_G_WkbSize" \
