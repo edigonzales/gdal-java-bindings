@@ -214,7 +214,23 @@ final class NativeLoader {
                     "Native library listed in " + sourceField + " is missing: " + relativePath
             );
         }
-        System.load(libPath.toString());
+        try {
+            System.load(libPath.toString());
+        } catch (UnsatisfiedLinkError e) {
+            if (isAlreadyLoadedByAnotherClassLoader(e, libPath)) {
+                return;
+            }
+            throw e;
+        }
+    }
+
+    private static boolean isAlreadyLoadedByAnotherClassLoader(UnsatisfiedLinkError error, Path libPath) {
+        String message = error.getMessage();
+        if (message == null) {
+            return false;
+        }
+        return message.contains("already loaded in another classloader")
+                && (message.contains(libPath.toString()) || message.contains(libPath.getFileName().toString()));
     }
 
     private static Path resolveOptional(Path extractionRoot, String relativePath) {

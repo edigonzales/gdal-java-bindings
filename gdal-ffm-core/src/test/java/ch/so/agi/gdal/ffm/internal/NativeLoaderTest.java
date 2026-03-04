@@ -1,6 +1,7 @@
 package ch.so.agi.gdal.ffm.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,6 +44,23 @@ class NativeLoaderTest {
         }
     }
 
+    @Test
+    void recognizesLibraryAlreadyLoadedInAnotherClassLoaderMessage() throws Exception {
+        Path libPath = Path.of("/tmp/gdal-ffm/3.11.1/osx-aarch64/lib/libproj.25.dylib");
+
+        boolean recognized = invokeAlreadyLoadedByOtherClassLoader(
+                new UnsatisfiedLinkError("Native Library " + libPath + " already loaded in another classloader"),
+                libPath
+        );
+        assertTrue(recognized);
+
+        boolean unrelated = invokeAlreadyLoadedByOtherClassLoader(
+                new UnsatisfiedLinkError("Unable to load library"),
+                libPath
+        );
+        assertFalse(unrelated);
+    }
+
     private static URL invokeFindManifest(URLClassLoader classLoader) {
         Thread current = Thread.currentThread();
         ClassLoader previous = current.getContextClassLoader();
@@ -61,6 +79,26 @@ class NativeLoaderTest {
             throw new RuntimeException(e);
         } finally {
             current.setContextClassLoader(previous);
+        }
+    }
+
+    private static boolean invokeAlreadyLoadedByOtherClassLoader(UnsatisfiedLinkError error, Path libPath) {
+        try {
+            Method method = NativeLoader.class.getDeclaredMethod(
+                    "isAlreadyLoadedByAnotherClassLoader",
+                    UnsatisfiedLinkError.class,
+                    Path.class
+            );
+            method.setAccessible(true);
+            return (boolean) method.invoke(null, error, libPath);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new RuntimeException(cause);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
         }
     }
 

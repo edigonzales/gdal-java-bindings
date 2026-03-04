@@ -45,6 +45,12 @@ Available classifiers:
 
 Important: include exactly one runtime native artifact line per classifier (either `gdal-ffm-natives` or `gdal-ffm-natives-swiss`, not both), otherwise the native loader aborts due to ambiguous manifests.
 
+For plugin-based hosts (for example Apache Hop plugin folders with isolated classloaders), prefer a shared runtime layout:
+- keep all transforms using `gdal-ffm-core` in one plugin folder/classloader
+- keep native/runtime jars (`gdal-ffm-core`, `gdal-ffm-natives:*`) only once in that shared `lib/`
+
+This avoids duplicated multi-hundred-MB payloads and classloader-native edge cases.
+
 Swiss `share/proj` subset keeps:
 
 - `proj.db`
