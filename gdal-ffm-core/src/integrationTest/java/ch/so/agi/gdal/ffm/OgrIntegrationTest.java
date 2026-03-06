@@ -2,6 +2,7 @@ package ch.so.agi.gdal.ffm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class OgrIntegrationTest {
     private static final String DRIVER_GPKG = "GPKG";
+    private static final String DRIVER_SHAPEFILE = "ESRI Shapefile";
     private static final int GEOMETRY_TYPE_POINT = 1;
 
     @Test
@@ -193,6 +195,148 @@ class OgrIntegrationTest {
         }
     }
 
+    @Test
+    void writesAndReadsRoundTripWithShapefileLongFieldName() throws Exception {
+        assumeShapefileDriver();
+
+        Path output = createTempOutputPath("shp");
+        List<OgrFieldDefinition> schema = List.of(new OgrFieldDefinition("flaechenmass", OgrFieldType.INTEGER64));
+
+        try {
+            try (OgrDataSource dataSource = Ogr.create(output, DRIVER_SHAPEFILE, OgrWriteMode.FAIL_IF_EXISTS);
+                 OgrLayerWriter writer =
+                         dataSource.openWriter(new OgrLayerWriteSpec("features", GEOMETRY_TYPE_POINT, schema))) {
+                writer.write(feature(1L, Map.of("flaechenmass", 1250L), 5, 5));
+            }
+
+            try (OgrDataSource readDataSource = Ogr.open(output)) {
+                OgrLayerDefinition layer = readDataSource.listLayers().getFirst();
+                assertEquals(1, layer.fields().size());
+                String persistedFieldName = layer.fields().getFirst().name();
+                assertEquals("flaechenma", persistedFieldName);
+
+                try (OgrLayerReader reader = readDataSource.openReader(layer.name(), Map.of())) {
+                    OgrFeature feature = collect(reader).getFirst();
+                    assertEquals(1250L, ((Number) feature.attributes().get(persistedFieldName)).longValue());
+                }
+            }
+        } finally {
+            deleteShapefileDataset(output);
+        }
+    }
+
+    @Test
+    void writesAndReadsRoundTripWithCollidingShapefileFieldNames() throws Exception {
+        assumeShapefileDriver();
+
+        Path output = createTempOutputPath("shp");
+        List<OgrFieldDefinition> schema = List.of(
+                new OgrFieldDefinition("abcdefghijk", OgrFieldType.STRING),
+                new OgrFieldDefinition("abcdefghijl", OgrFieldType.STRING)
+        );
+
+        try {
+            try (OgrDataSource dataSource = Ogr.create(output, DRIVER_SHAPEFILE, OgrWriteMode.FAIL_IF_EXISTS);
+                 OgrLayerWriter writer =
+                         dataSource.openWriter(new OgrLayerWriteSpec("features", GEOMETRY_TYPE_POINT, schema))) {
+                writer.write(feature(1L, Map.of("abcdefghijk", "A", "abcdefghijl", "B"), 5, 5));
+            }
+
+            try (OgrDataSource readDataSource = Ogr.open(output)) {
+                OgrLayerDefinition layer = readDataSource.listLayers().getFirst();
+                assertEquals(2, layer.fields().size());
+                String firstPersistedFieldName = layer.fields().get(0).name();
+                String secondPersistedFieldName = layer.fields().get(1).name();
+                assertEquals(10, firstPersistedFieldName.length());
+                assertTrue(secondPersistedFieldName.length() <= 10);
+                assertNotEquals(firstPersistedFieldName, secondPersistedFieldName);
+
+                try (OgrLayerReader reader = readDataSource.openReader(layer.name(), Map.of())) {
+                    OgrFeature feature = collect(reader).getFirst();
+                    assertEquals("A", feature.attributes().get(firstPersistedFieldName));
+                    assertEquals("B", feature.attributes().get(secondPersistedFieldName));
+                }
+            }
+        } finally {
+            deleteShapefileDataset(output);
+        }
+    }
+
+    @Test
+    void overwritesExistingShapefileWithLongFieldNames() throws Exception {
+        assumeShapefileDriver();
+
+        Path output = createTempOutputPath("shp");
+        List<OgrFieldDefinition> schema = List.of(new OgrFieldDefinition("flaechenmass", OgrFieldType.INTEGER64));
+
+        try {
+            try (OgrDataSource dataSource = Ogr.create(output, DRIVER_SHAPEFILE, OgrWriteMode.FAIL_IF_EXISTS);
+                 OgrLayerWriter writer =
+                         dataSource.openWriter(new OgrLayerWriteSpec("features", GEOMETRY_TYPE_POINT, schema))) {
+                writer.write(feature(1L, Map.of("flaechenmass", 1L), 5, 5));
+            }
+
+            try (OgrDataSource dataSource = Ogr.create(output, DRIVER_SHAPEFILE, OgrWriteMode.OVERWRITE);
+                 OgrLayerWriter writer =
+                         dataSource.openWriter(new OgrLayerWriteSpec("features", GEOMETRY_TYPE_POINT, schema))) {
+                writer.write(feature(2L, Map.of("flaechenmass", 2L), 15, 15));
+            }
+
+            try (OgrDataSource readDataSource = Ogr.open(output)) {
+                OgrLayerDefinition layer = readDataSource.listLayers().getFirst();
+                String persistedFieldName = layer.fields().getFirst().name();
+                try (OgrLayerReader reader = readDataSource.openReader(layer.name(), Map.of())) {
+                    List<OgrFeature> features = collect(reader);
+                    assertEquals(1, features.size());
+                    assertEquals(2L, ((Number) features.getFirst().attributes().get(persistedFieldName)).longValue());
+                }
+            }
+        } finally {
+            deleteShapefileDataset(output);
+        }
+    }
+
+    @Test
+    void appendToShapefileWithOriginalLongFieldNameFailsWithSchemaGuidance() throws Exception {
+        assumeShapefileDriver();
+
+        Path output = createTempOutputPath("shp");
+        List<OgrFieldDefinition> schema = List.of(new OgrFieldDefinition("flaechenmass", OgrFieldType.INTEGER64));
+
+        try {
+            try (OgrDataSource dataSource = Ogr.create(output, DRIVER_SHAPEFILE, OgrWriteMode.FAIL_IF_EXISTS);
+                 OgrLayerWriter writer =
+                         dataSource.openWriter(new OgrLayerWriteSpec("features", GEOMETRY_TYPE_POINT, schema))) {
+                writer.write(feature(1L, Map.of("flaechenmass", 1L), 5, 5));
+            }
+
+            OgrLayerWriteSpec appendSpec = new OgrLayerWriteSpec(
+                    shapefileLayerName(output),
+                    null,
+                    schema,
+                    OgrWriteMode.APPEND,
+                    Map.of(),
+                    Map.of(),
+                    null,
+                    null
+            );
+
+            IllegalArgumentException error = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> {
+                        try (OgrDataSource dataSource = Ogr.create(output, DRIVER_SHAPEFILE, OgrWriteMode.APPEND)) {
+                            dataSource.openWriter(appendSpec);
+                        }
+                    }
+            );
+            assertTrue(error.getMessage().contains("flaechenmass"));
+            assertTrue(error.getMessage().contains("flaechenma"));
+            assertTrue(error.getMessage().contains("APPEND expects the actual persisted target field names"));
+        } finally {
+            deleteShapefileDataset(output);
+        }
+    }
+
     private static void assumeGpkgDriver() {
         boolean gpkgPresent = Ogr.listWritableVectorDrivers().stream()
                 .map(OgrDriverInfo::shortName)
@@ -200,13 +344,21 @@ class OgrIntegrationTest {
         assumeTrue(gpkgPresent, "GPKG writable driver is required for writer integration tests");
     }
 
+    private static void assumeShapefileDriver() {
+        boolean shapefilePresent = Ogr.listWritableVectorDrivers().stream()
+                .map(OgrDriverInfo::shortName)
+                .anyMatch(DRIVER_SHAPEFILE::equals);
+        assumeTrue(shapefilePresent, "ESRI Shapefile writable driver is required for writer integration tests");
+    }
+
     private static OgrFeature feature(long fid, String name, long id, double x, double y) {
+        return feature(fid, Map.of("id", id, "name", name), x, y);
+    }
+
+    private static OgrFeature feature(long fid, Map<String, Object> attributes, double x, double y) {
         return new OgrFeature(
                 fid,
-                Map.of(
-                        "id", id,
-                        "name", name
-                ),
+                attributes,
                 OgrGeometry.fromWkb(pointWkb(x, y), 2056)
         );
     }
@@ -239,6 +391,20 @@ class OgrIntegrationTest {
         Path temp = Files.createTempFile("ogr-integration-write-", "." + extension);
         Files.deleteIfExists(temp);
         return temp;
+    }
+
+    private static void deleteShapefileDataset(Path shapefilePath) throws Exception {
+        String fileName = shapefilePath.getFileName().toString();
+        String basename = fileName.endsWith(".shp") ? fileName.substring(0, fileName.length() - 4) : fileName;
+        Path directory = shapefilePath.getParent();
+        for (String suffix : List.of(".shp", ".dbf", ".shx", ".prj", ".cpg", ".qix", ".sbn", ".sbx", ".shp.xml")) {
+            Files.deleteIfExists(directory.resolve(basename + suffix));
+        }
+    }
+
+    private static String shapefileLayerName(Path shapefilePath) {
+        String fileName = shapefilePath.getFileName().toString();
+        return fileName.endsWith(".shp") ? fileName.substring(0, fileName.length() - 4) : fileName;
     }
 
     private static Path createTempGeoJson() throws Exception {

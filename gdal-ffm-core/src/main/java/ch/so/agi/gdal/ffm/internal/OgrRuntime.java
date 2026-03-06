@@ -395,15 +395,26 @@ public final class OgrRuntime {
                 default -> throw new IllegalStateException("Unhandled write mode: " + spec.writeMode());
             }
 
+            Map<String, Integer> boundFieldIndexesByRequestedName = null;
             if (CStrings.isNull(layer)) {
                 layer = createLayer(spec.layerName(), spec.geometryTypeCode(), effectiveLayerCreationOptions, spec.fields());
-            } else {
-                validateExistingLayerSchema(layer, spec.fields());
+                OgrLayerDefinition layerDefinition = describeLayer(layer);
+                boundFieldIndexesByRequestedName =
+                        bindCreatedLayerFields(spec.layerName(), spec.fields(), layerDefinition);
+                int geometryFieldIndex = resolveGeometryFieldIndex(layer, spec.geometryFieldName());
+                return new NativeOgrLayerWriter(
+                        this,
+                        layer,
+                        layerDefinition,
+                        geometryFieldIndex,
+                        boundFieldIndexesByRequestedName
+                );
             }
 
+            validateExistingLayerSchema(layer, spec.fields());
             OgrLayerDefinition layerDefinition = describeLayer(layer);
             int geometryFieldIndex = resolveGeometryFieldIndex(layer, spec.geometryFieldName());
-            return new NativeOgrLayerWriter(this, layer, layerDefinition, geometryFieldIndex);
+            return new NativeOgrLayerWriter(this, layer, layerDefinition, geometryFieldIndex, null);
         }
 
         @Override
@@ -554,13 +565,16 @@ public final class OgrRuntime {
             for (OgrFieldDefinition existingField : existing.fields()) {
                 byLowercaseName.put(existingField.name().toLowerCase(Locale.ROOT), existingField.type());
             }
+            String existingFieldNames = formatFieldNames(existing.fields());
 
             for (OgrFieldDefinition requestedField : requestedFields) {
                 String lower = requestedField.name().toLowerCase(Locale.ROOT);
                 OgrFieldType existingType = byLowercaseName.get(lower);
                 if (existingType == null) {
                     throw new IllegalArgumentException(
-                            "Append target layer is missing field '" + requestedField.name() + "'"
+                            "Append target layer is missing field '" + requestedField.name()
+                                    + "'. Existing target field names: " + existingFieldNames
+                                    + ". APPEND expects the actual persisted target field names."
                     );
                 }
                 if (requestedField.type() != OgrFieldType.UNKNOWN && existingType != requestedField.type()) {
@@ -570,6 +584,40 @@ public final class OgrRuntime {
                     );
                 }
             }
+        }
+
+        private Map<String, Integer> bindCreatedLayerFields(
+                String requestedLayerName,
+                List<OgrFieldDefinition> requestedFields,
+                OgrLayerDefinition createdLayerDefinition
+        ) {
+            if (requestedFields == null || requestedFields.isEmpty()) {
+                return Map.of();
+            }
+
+            List<OgrFieldDefinition> actualFields = createdLayerDefinition.fields();
+            if (requestedFields.size() != actualFields.size()) {
+                throw new IllegalStateException(
+                        "Created target layer schema differs from requested schema for layer '"
+                                + requestedLayerName + "'"
+                                + " (actual layer name: '" + createdLayerDefinition.name() + "'). Requested fields ("
+                                + requestedFields.size() + "): " + formatFieldNames(requestedFields)
+                                + ". Actual fields (" + actualFields.size() + "): " + formatFieldNames(actualFields)
+                );
+            }
+
+            Map<String, Integer> bindings = new LinkedHashMap<>();
+            for (int i = 0; i < requestedFields.size(); i++) {
+                String requestedFieldName = requestedFields.get(i).name();
+                String lower = requestedFieldName.toLowerCase(Locale.ROOT);
+                Integer previous = bindings.put(lower, i);
+                if (previous != null) {
+                    throw new IllegalArgumentException(
+                            "Duplicate requested field name while binding created layer schema: " + requestedFieldName
+                    );
+                }
+            }
+            return Map.copyOf(bindings);
         }
 
         private int resolveGeometryFieldIndex(MemorySegment layer, String geometryFieldName) {
@@ -610,6 +658,14 @@ public final class OgrRuntime {
                 normalized.putIfAbsent("GEOMETRY_NAME", geometryFieldName.trim());
             }
             return Map.copyOf(normalized);
+        }
+
+        private static String formatFieldNames(List<OgrFieldDefinition> fields) {
+            List<String> names = new ArrayList<>(fields.size());
+            for (OgrFieldDefinition field : fields) {
+                names.add(field.name());
+            }
+            return names.toString();
         }
 
         private static void configureLayer(
@@ -806,6 +862,7 @@ public final class OgrRuntime {
         private final MemorySegment layer;
         private final OgrLayerDefinition layerDefinition;
         private final int geometryFieldIndex;
+        private final Map<String, Integer> boundFieldIndexesByRequestedName;
 
         private boolean closed;
 
@@ -813,12 +870,14 @@ public final class OgrRuntime {
                 NativeOgrDataSource dataSource,
                 MemorySegment layer,
                 OgrLayerDefinition layerDefinition,
-                int geometryFieldIndex
+                int geometryFieldIndex,
+                Map<String, Integer> boundFieldIndexesByRequestedName
         ) {
             this.dataSource = dataSource;
             this.layer = layer;
             this.layerDefinition = layerDefinition;
             this.geometryFieldIndex = geometryFieldIndex;
+            this.boundFieldIndexesByRequestedName = boundFieldIndexesByRequestedName;
         }
 
         @Override
@@ -881,13 +940,7 @@ public final class OgrRuntime {
                     continue;
                 }
 
-                MemorySegment fieldNameCString = arena.allocateFrom(fieldName);
-                int fieldIndex = GdalGenerated.OGR_F_GetFieldIndex(nativeFeature, fieldNameCString);
-                if (fieldIndex < 0) {
-                    throw new IllegalArgumentException(
-                            "Field '" + fieldName + "' does not exist in target layer '" + layerDefinition.name() + "'"
-                    );
-                }
+                int fieldIndex = resolveFieldIndex(nativeFeature, fieldName, arena);
 
                 Object value = entry.getValue();
                 if (value == null) {
@@ -918,6 +971,29 @@ public final class OgrRuntime {
                 MemorySegment stringValue = arena.allocateFrom(value.toString());
                 GdalGenerated.OGR_F_SetFieldString(nativeFeature, fieldIndex, stringValue);
             }
+        }
+
+        private int resolveFieldIndex(MemorySegment nativeFeature, String fieldName, Arena arena) {
+            if (boundFieldIndexesByRequestedName != null) {
+                Integer boundFieldIndex = boundFieldIndexesByRequestedName.get(fieldName.toLowerCase(Locale.ROOT));
+                if (boundFieldIndex == null) {
+                    throw new IllegalArgumentException(
+                            "Field '" + fieldName + "' is not part of the bound target schema for layer '"
+                                    + layerDefinition.name() + "'. Available target fields: "
+                                    + layerDefinition.fields().stream().map(OgrFieldDefinition::name).toList()
+                    );
+                }
+                return boundFieldIndex;
+            }
+
+            MemorySegment fieldNameCString = arena.allocateFrom(fieldName);
+            int fieldIndex = GdalGenerated.OGR_F_GetFieldIndex(nativeFeature, fieldNameCString);
+            if (fieldIndex < 0) {
+                throw new IllegalArgumentException(
+                        "Field '" + fieldName + "' does not exist in target layer '" + layerDefinition.name() + "'"
+                );
+            }
+            return fieldIndex;
         }
 
         private void writeGeometry(
