@@ -162,16 +162,55 @@ jobs:
           merge-multiple: true
           path: gdal-ffm-natives/build/libs
 
+      - name: Resolve project version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^version=//p' gradle.properties | head -n1)"
+          if [[ -z "$version" ]]; then
+            echo "Could not resolve project version from gradle.properties" >&2
+            exit 1
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $version"
+
       - name: Verify downloaded native jars
         shell: bash
         run: |
           set -euo pipefail
+          version="${{ steps.version.outputs.value }}"
+          classifiers=(
+            "linux-x86_64"
+            "linux-aarch64"
+            "osx-x86_64"
+            "osx-aarch64"
+            "windows-x86_64"
+          )
+          min_size_bytes=$((100 * 1024 * 1024))
+
           actual="$(find gdal-ffm-natives/build/libs -maxdepth 1 -type f -name '*.jar' | wc -l | tr -d ' ')"
-          if [[ "$actual" -lt 10 ]]; then
-            echo "Expected at least 10 native jars (5 standard + 5 swiss), got $actual" >&2
-            find gdal-ffm-natives/build/libs -maxdepth 1 -type f -name '*.jar' -print >&2 || true
+          if [[ "$actual" -ne 10 ]]; then
+            echo "Expected exactly 10 native jars (5 standard + 5 swiss), got $actual" >&2
+            find gdal-ffm-natives/build/libs -maxdepth 1 -type f -name '*.jar' -print | sort >&2 || true
             exit 1
           fi
+
+          for classifier in "${classifiers[@]}"; do
+            for prefix in "gdal-ffm-natives" "gdal-ffm-natives-swiss"; do
+              jar="gdal-ffm-natives/build/libs/${prefix}-${version}-natives-${classifier}.jar"
+              if [[ ! -f "$jar" ]]; then
+                echo "Missing expected native jar: $jar" >&2
+                exit 1
+              fi
+              size_bytes="$(wc -c < "$jar" | tr -d ' ')"
+              if (( size_bytes < min_size_bytes )); then
+                echo "Native jar too small: $jar (${size_bytes} bytes, expected >= ${min_size_bytes})" >&2
+                exit 1
+              fi
+            done
+          done
+
           find gdal-ffm-natives/build/libs -maxdepth 1 -type f -name '*.jar' -print | sort
 
       - name: Publish artifacts
@@ -197,3 +236,133 @@ jobs:
             -x :gdal-ffm-natives:nativesSwissJarOsxX8664 \
             -x :gdal-ffm-natives:nativesSwissJarOsxAarch64 \
             -x :gdal-ffm-natives:nativesSwissJarWindowsX8664
+
+      - name: Verify published artifacts in Maven repository
+        env:
+          MAVEN_REPOSITORY_URL: ${{ secrets.MAVEN_REPOSITORY_URL }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+          PROJECT_VERSION: ${{ steps.version.outputs.value }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64
+          import hashlib
+          import os
+          import pathlib
+          import sys
+          import urllib.request
+          import xml.etree.ElementTree as ET
+
+          repo_url = (os.environ.get("MAVEN_REPOSITORY_URL") or "").rstrip("/")
+          username = os.environ.get("MAVEN_USERNAME") or ""
+          password = os.environ.get("MAVEN_PASSWORD") or ""
+          version = os.environ["PROJECT_VERSION"]
+
+          if not repo_url:
+            print("MAVEN_REPOSITORY_URL is empty", file=sys.stderr)
+            sys.exit(1)
+
+          base_url = f"{repo_url}/ch/so/agi"
+
+          def auth_headers():
+            if username and password:
+              token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+              return {"Authorization": f"Basic {token}"}
+            return {}
+
+          def http_get(url: str) -> bytes:
+            req = urllib.request.Request(url, headers=auth_headers(), method="GET")
+            with urllib.request.urlopen(req) as resp:
+              if resp.status != 200:
+                raise RuntimeError(f"GET {url} returned HTTP {resp.status}")
+              return resp.read()
+
+          def http_head(url: str):
+            req = urllib.request.Request(url, headers=auth_headers(), method="HEAD")
+            with urllib.request.urlopen(req) as resp:
+              if resp.status != 200:
+                raise RuntimeError(f"HEAD {url} returned HTTP {resp.status}")
+              return resp.headers
+
+          def resolve_snapshot_value(artifact_id, classifier):
+            metadata_url = f"{base_url}/{artifact_id}/{version}/maven-metadata.xml"
+            metadata_bytes = http_get(metadata_url)
+            root = ET.fromstring(metadata_bytes)
+
+            versioning = root.find("versioning")
+            if versioning is None:
+              raise RuntimeError(f"Missing <versioning> in {metadata_url}")
+
+            snapshot_versions = versioning.find("snapshotVersions")
+            if snapshot_versions is not None:
+              for sv in snapshot_versions.findall("snapshotVersion"):
+                ext = (sv.findtext("extension") or "").strip()
+                cls = (sv.findtext("classifier") or "").strip()
+                value = (sv.findtext("value") or "").strip()
+                if ext != "jar":
+                  continue
+                if (classifier or "") != cls:
+                  continue
+                if value:
+                  return value
+
+            snapshot = versioning.find("snapshot")
+            if snapshot is None:
+              raise RuntimeError(f"Missing snapshot info in {metadata_url}")
+            ts = (snapshot.findtext("timestamp") or "").strip()
+            bn = (snapshot.findtext("buildNumber") or "").strip()
+            if not ts or not bn:
+              raise RuntimeError(f"Incomplete snapshot timestamp/buildNumber in {metadata_url}")
+            return version.replace("-SNAPSHOT", f"-{ts}-{bn}")
+
+          def resolve_remote_file(artifact_id, classifier):
+            resolved_version = resolve_snapshot_value(artifact_id, classifier) if version.endswith("-SNAPSHOT") else version
+            suffix = f"-{classifier}" if classifier else ""
+            filename = f"{artifact_id}-{resolved_version}{suffix}.jar"
+            return f"{base_url}/{artifact_id}/{version}/{filename}"
+
+          classifiers = [
+            "linux-x86_64",
+            "linux-aarch64",
+            "osx-x86_64",
+            "osx-aarch64",
+            "windows-x86_64",
+          ]
+          min_size = 100 * 1024 * 1024
+
+          checks = []
+          core_local = pathlib.Path(f"gdal-ffm-core/build/libs/gdal-ffm-core-{version}.jar")
+          checks.append(("gdal-ffm-core", None, core_local))
+          for classifier in classifiers:
+            checks.append(("gdal-ffm-natives", f"natives-{classifier}", pathlib.Path(f"gdal-ffm-natives/build/libs/gdal-ffm-natives-{version}-natives-{classifier}.jar")))
+            checks.append(("gdal-ffm-natives-swiss", f"natives-{classifier}", pathlib.Path(f"gdal-ffm-natives/build/libs/gdal-ffm-natives-swiss-{version}-natives-{classifier}.jar")))
+
+          for artifact_id, classifier, local_path in checks:
+            if not local_path.is_file():
+              raise RuntimeError(f"Local artifact missing: {local_path}")
+            local_bytes = local_path.read_bytes()
+            local_size = len(local_bytes)
+            if artifact_id.startswith("gdal-ffm-natives") and local_size < min_size:
+              raise RuntimeError(f"Local native artifact too small: {local_path} ({local_size} bytes)")
+
+            local_sha = hashlib.sha256(local_bytes).hexdigest()
+            remote_jar_url = resolve_remote_file(artifact_id, classifier)
+            headers = http_head(remote_jar_url)
+            content_length = headers.get("Content-Length")
+            if content_length is None:
+              raise RuntimeError(f"Missing Content-Length for {remote_jar_url}")
+            remote_size = int(content_length)
+            if remote_size != local_size:
+              raise RuntimeError(f"Size mismatch for {remote_jar_url}: remote={remote_size}, local={local_size}")
+
+            remote_sha_url = f"{remote_jar_url}.sha256"
+            remote_sha = http_get(remote_sha_url).decode("utf-8").strip().split()[0]
+            if remote_sha != local_sha:
+              raise RuntimeError(f"SHA mismatch for {remote_jar_url}: remote={remote_sha}, local={local_sha}")
+
+            print(f"Verified {remote_jar_url} ({local_size} bytes)")
+
+          print("Remote publish verification passed.")
+          PY
