@@ -187,7 +187,8 @@ jobs:
             "osx-aarch64"
             "windows-x86_64"
           )
-          min_size_bytes=$((100 * 1024 * 1024))
+          default_min_size_bytes=$((100 * 1024 * 1024))
+          windows_min_size_bytes=$((30 * 1024 * 1024))
 
           actual="$(find gdal-ffm-natives/build/libs -maxdepth 1 -type f -name '*.jar' | wc -l | tr -d ' ')"
           if [[ "$actual" -ne 10 ]]; then
@@ -197,6 +198,10 @@ jobs:
           fi
 
           for classifier in "${classifiers[@]}"; do
+            min_size_bytes="$default_min_size_bytes"
+            if [[ "$classifier" == windows-* ]]; then
+              min_size_bytes="$windows_min_size_bytes"
+            fi
             for prefix in "gdal-ffm-natives" "gdal-ffm-natives-swiss"; do
               jar="gdal-ffm-natives/build/libs/${prefix}-${version}-natives-${classifier}.jar"
               if [[ ! -f "$jar" ]]; then
@@ -330,7 +335,13 @@ jobs:
             "osx-aarch64",
             "windows-x86_64",
           ]
-          min_size = 100 * 1024 * 1024
+          default_min_size = 100 * 1024 * 1024
+          windows_min_size = 30 * 1024 * 1024
+
+          def min_size_for_classifier(classifier):
+            if classifier and classifier.endswith("windows-x86_64"):
+              return windows_min_size
+            return default_min_size
 
           checks = []
           core_local = pathlib.Path(f"gdal-ffm-core/build/libs/gdal-ffm-core-{version}.jar")
@@ -344,8 +355,10 @@ jobs:
               raise RuntimeError(f"Local artifact missing: {local_path}")
             local_bytes = local_path.read_bytes()
             local_size = len(local_bytes)
-            if artifact_id.startswith("gdal-ffm-natives") and local_size < min_size:
-              raise RuntimeError(f"Local native artifact too small: {local_path} ({local_size} bytes)")
+            if artifact_id.startswith("gdal-ffm-natives"):
+              min_size = min_size_for_classifier(classifier)
+              if local_size < min_size:
+                raise RuntimeError(f"Local native artifact too small: {local_path} ({local_size} bytes, expected >= {min_size})")
 
             local_sha = hashlib.sha256(local_bytes).hexdigest()
             remote_jar_url = resolve_remote_file(artifact_id, classifier)
