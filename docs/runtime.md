@@ -38,6 +38,35 @@ After native extraction/loading, the runtime sets:
 
 Values point to extracted bundle directories in `java.io.tmpdir`.
 
+## Scoped GDAL/VSI config
+
+The high-level API now distinguishes explicit runtime config from the global process environment.
+
+- `GdalConfig` is an immutable key/value container
+- `ScopedGdalConfig` applies config for one operation and restores previous thread-local values
+
+This is the basis for row/job-scoped remote access in downstream integrations such as Apache Hop.
+
+Typical remote/auth mappings:
+
+- `GDAL_HTTP_AUTH=BASIC`
+- `GDAL_HTTP_USERPWD=user:password`
+- `GDAL_HTTP_BEARER=<token>`
+- `GDAL_HTTP_HEADERS=Header: value`
+
+## Dataset references
+
+Raster and OGR entrypoints accept either `Path` or `DatasetRef`.
+
+`DatasetRef` distinguishes:
+
+- `LOCAL_PATH`
+- `HTTP_URL`
+- `GDAL_VSI`
+
+`HTTP_URL` becomes a GDAL `/vsicurl/` identifier and is therefore suitable for HTTP/HTTPS COG
+access without an explicit Java-side pre-download.
+
 ## Bundled source packages
 
 `tools/natives/binaries.lock` is split into:

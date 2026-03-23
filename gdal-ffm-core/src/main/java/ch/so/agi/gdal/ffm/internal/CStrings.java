@@ -3,7 +3,7 @@ package ch.so.agi.gdal.ffm.internal;
 import java.lang.foreign.MemorySegment;
 
 final class CStrings {
-    private static final long MAX_C_STRING_BYTES = 64L * 1024L;
+    private static final long MAX_C_STRING_BYTES = 8L * 1024L * 1024L;
 
     private CStrings() {
     }

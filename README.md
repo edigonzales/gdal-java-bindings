@@ -1,10 +1,13 @@
 # gdal-java-bindings
 
-Java FFM bindings for GDAL/OGR utilities (`ogr2ogr`, `gdalwarp`, `gdal_translate`) with bundled native libraries.
+Java 23 FFM bindings for GDAL/OGR utilities and vector streaming with bundled native libraries.
+The public API now covers the raster operations required by the Hop raster suite as well:
+`info`, `translate`, `warp`, `buildVrt`, `rasterize`, structured dataset references and scoped
+GDAL/VSI configuration.
 
 ## Modules
 
-- `gdal-ffm-core`: public Java API (`Gdal.vectorTranslate`, `Gdal.warp`, `Gdal.translate`), native loader, error/progress bridge.
+- `gdal-ffm-core`: public Java API (`Gdal.info`, `Gdal.translate`, `Gdal.warp`, `Gdal.buildVrt`, `Gdal.rasterize`, `Gdal.vectorTranslate`, `Ogr.*`), native loader, error/progress bridge.
 - `gdal-ffm-natives`: classifier JARs that package native GDAL libs + `share/gdal` + `share/proj`.
 - `gdal-ffm-natives-swiss`: optional classifier JARs with the same native libs, but a Swiss-focused `share/proj` subset.
 
@@ -68,12 +71,7 @@ Gdal.vectorTranslate(
     "-overwrite"
 );
 
-Gdal.warp(
-    Path.of("warped.tif"),
-    Path.of("input.tif"),
-    "-t_srs", "EPSG:2056",
-    "-r", "bilinear"
-);
+String infoJson = Gdal.info(Path.of("input.tif"), "-json");
 
 Gdal.translate(
     Path.of("output-cog.tif"),
@@ -81,7 +79,48 @@ Gdal.translate(
     "-of", "COG",
     "-co", "COMPRESS=ZSTD"
 );
+
+Gdal.warp(
+    Path.of("warped.tif"),
+    Path.of("input.tif"),
+    "-t_srs", "EPSG:2056",
+    "-r", "bilinear"
+);
+
+Gdal.buildVrt(
+    Path.of("mosaic.vrt"),
+    List.of(Path.of("a.tif"), Path.of("b.tif"))
+);
+
+Gdal.rasterize(
+    Path.of("out.tif"),
+    Path.of("features.geojson"),
+    "-burn", "1",
+    "-te", "0", "0", "100", "100",
+    "-tr", "1", "1"
+);
 ```
+
+## Dataset references and scoped config
+
+Raster and OGR entrypoints can use either `Path` or explicit `DatasetRef`.
+
+```java
+DatasetRef remoteCog = DatasetRef.httpUrl("https://example.org/cog.tif");
+GdalConfig config = GdalConfig.empty()
+    .withConfigOption("GDAL_HTTP_BEARER", "token");
+
+String json = Gdal.info(remoteCog, config, "-json");
+```
+
+Supported `DatasetRef` types:
+
+- `LOCAL_PATH`
+- `HTTP_URL`
+- `GDAL_VSI`
+
+`HTTP_URL` inputs are translated into GDAL `/vsicurl/` identifiers. Config values are applied per
+operation through `ScopedGdalConfig`, so auth/config does not remain globally active after the call.
 
 Progress callback:
 
@@ -103,7 +142,9 @@ Gdal.translate(
 `gdal-ffm-core` exposes a neutral vector streaming surface intended for integrations like Apache Hop plugins:
 
 - `Ogr.open(Path, Map<String,String>)`
+- `Ogr.open(DatasetRef, Map<String,String>, GdalConfig)`
 - `Ogr.create(Path, driverShortName, writeMode, datasetCreationOptions)`
+- `Ogr.create(DatasetRef, driverShortName, writeMode, datasetCreationOptions, GdalConfig)`
 - `Ogr.listWritableVectorDrivers()`
 - `OgrDataSource` / `OgrLayerReader` / `OgrLayerWriter`
 - `OgrFeature`
@@ -154,6 +195,9 @@ try (OgrDataSource dataSource = Ogr.create(
     }
 }
 ```
+
+`DatasetRef.gdalVsi("/vsimem/example.geojson")` is supported for temporary in-memory datasets,
+which is used by the Hop rasterization path for row-based geometries.
 
 ## Regenerating low-level bindings
 

@@ -1,5 +1,7 @@
 package ch.so.agi.gdal.ffm.internal;
 
+import ch.so.agi.gdal.ffm.DatasetRef;
+import ch.so.agi.gdal.ffm.GdalConfig;
 import ch.so.agi.gdal.ffm.OgrDataSource;
 import ch.so.agi.gdal.ffm.OgrDriverInfo;
 import ch.so.agi.gdal.ffm.OgrFeature;
@@ -60,7 +62,11 @@ public final class OgrRuntime {
     }
 
     public static OgrDataSource open(Path path, Map<String, String> openOptions) {
-        return open(path, openOptions, false);
+        return open(DatasetRef.local(path), openOptions, GdalConfig.empty());
+    }
+
+    public static OgrDataSource open(DatasetRef datasetRef, Map<String, String> openOptions, GdalConfig config) {
+        return open(datasetRef, openOptions, config, false);
     }
 
     public static OgrDataSource create(
@@ -69,10 +75,21 @@ public final class OgrRuntime {
             OgrWriteMode writeMode,
             Map<String, String> datasetCreationOptions
     ) {
-        Objects.requireNonNull(path, "path must not be null");
+        return create(DatasetRef.local(path), driverShortName, writeMode, datasetCreationOptions, GdalConfig.empty());
+    }
+
+    public static OgrDataSource create(
+            DatasetRef datasetRef,
+            String driverShortName,
+            OgrWriteMode writeMode,
+            Map<String, String> datasetCreationOptions,
+            GdalConfig config
+    ) {
+        Objects.requireNonNull(datasetRef, "datasetRef must not be null");
         Objects.requireNonNull(driverShortName, "driverShortName must not be null");
         Objects.requireNonNull(writeMode, "writeMode must not be null");
         Objects.requireNonNull(datasetCreationOptions, "datasetCreationOptions must not be null");
+        Objects.requireNonNull(config, "config must not be null");
         ensureInitialized();
 
         String normalizedDriverShortName = driverShortName.trim();
@@ -80,32 +97,49 @@ public final class OgrRuntime {
             throw new IllegalArgumentException("driverShortName must not be blank");
         }
 
-        Path absolutePath = path.toAbsolutePath();
-        boolean datasetExists = Files.exists(absolutePath);
+        String datasetIdentifier = datasetRef.toGdalIdentifier();
+        Path absolutePath = datasetRef.isLocalPath() ? datasetRef.localPath() : null;
+        boolean datasetExists = absolutePath != null && Files.exists(absolutePath);
 
-        if (datasetExists) {
-            switch (writeMode) {
-                case FAIL_IF_EXISTS -> throw new IllegalArgumentException(
-                        "Target dataset already exists: " + absolutePath
-                );
-                case OVERWRITE -> {
-                    MemorySegment driver = resolveDriverByName(normalizedDriverShortName);
-                    deleteDataSource(driver, absolutePath);
+        try (GdalConfigScope.ScopedConfigHandle ignored = GdalConfigScope.applyScoped(config)) {
+            if (datasetExists) {
+                switch (writeMode) {
+                    case FAIL_IF_EXISTS -> throw new IllegalArgumentException(
+                            "Target dataset already exists: " + absolutePath
+                    );
+                    case OVERWRITE -> {
+                        MemorySegment driver = resolveDriverByName(normalizedDriverShortName);
+                        deleteDataSource(driver, datasetIdentifier);
+                    }
+                    case APPEND -> {
+                        return open(
+                                datasetRef,
+                                Map.of(OgrOpenOptions.ALLOWED_DRIVERS, normalizedDriverShortName),
+                                config,
+                                true
+                        );
+                    }
+                    default -> throw new IllegalStateException("Unhandled write mode: " + writeMode);
                 }
-                case APPEND -> {
+            }
+
+            if (!datasetExists && writeMode == OgrWriteMode.APPEND && !datasetRef.isLocalPath()) {
+                try {
                     return open(
-                            absolutePath,
+                            datasetRef,
                             Map.of(OgrOpenOptions.ALLOWED_DRIVERS, normalizedDriverShortName),
+                            config,
                             true
                     );
+                } catch (RuntimeException ignoredOpenFailure) {
+                    // Fall through to create when remote/non-file append target does not already exist.
                 }
-                default -> throw new IllegalStateException("Unhandled write mode: " + writeMode);
             }
-        }
 
-        MemorySegment driver = resolveDriverByName(normalizedDriverShortName);
-        MemorySegment dataset = createDataSource(driver, absolutePath, datasetCreationOptions);
-        return new NativeOgrDataSource(absolutePath, dataset, true);
+            MemorySegment driver = resolveDriverByName(normalizedDriverShortName);
+            MemorySegment dataset = createDataSource(driver, datasetIdentifier, datasetCreationOptions);
+            return new NativeOgrDataSource(datasetIdentifier, dataset, true);
+        }
     }
 
     public static List<OgrDriverInfo> listWritableVectorDrivers() {
@@ -159,9 +193,15 @@ public final class OgrRuntime {
         return List.copyOf(writableDrivers);
     }
 
-    private static OgrDataSource open(Path path, Map<String, String> openOptions, boolean writable) {
-        Objects.requireNonNull(path, "path must not be null");
+    private static OgrDataSource open(
+            DatasetRef datasetRef,
+            Map<String, String> openOptions,
+            GdalConfig config,
+            boolean writable
+    ) {
+        Objects.requireNonNull(datasetRef, "datasetRef must not be null");
         Objects.requireNonNull(openOptions, "openOptions must not be null");
+        Objects.requireNonNull(config, "config must not be null");
         ensureInitialized();
 
         OgrOptions.OpenOptions parsedOpenOptions = OgrOptions.parseOpenOptions(openOptions);
@@ -177,8 +217,9 @@ public final class OgrRuntime {
 
         GdalGenerated.CPLErrorReset();
         MemorySegment dataset;
-        try (Arena arena = Arena.ofConfined()) {
-            MemorySegment sourcePath = arena.allocateFrom(path.toAbsolutePath().toString());
+        try (GdalConfigScope.ScopedConfigHandle ignored = GdalConfigScope.applyScoped(config);
+             Arena arena = Arena.ofConfined()) {
+            MemorySegment sourcePath = arena.allocateFrom(datasetRef.toGdalIdentifier());
             MemorySegment allowedDriversArgv = allowedDrivers.length == 0
                     ? MemorySegment.NULL
                     : CArgv.toCStringArray(allowedDrivers, arena);
@@ -195,9 +236,9 @@ public final class OgrRuntime {
             );
         }
         if (CStrings.isNull(dataset)) {
-            throw GdalErrors.lastError("Failed to open OGR datasource: " + path);
+            throw GdalErrors.lastError("Failed to open OGR datasource: " + datasetRef.identifier());
         }
-        return new NativeOgrDataSource(path.toAbsolutePath(), dataset, writable);
+        return new NativeOgrDataSource(datasetRef.toGdalIdentifier(), dataset, writable);
     }
 
     private static MemorySegment resolveDriverByName(String driverShortName) {
@@ -218,34 +259,34 @@ public final class OgrRuntime {
 
     private static MemorySegment createDataSource(
             MemorySegment driver,
-            Path path,
+            String datasetIdentifier,
             Map<String, String> datasetCreationOptions
     ) {
         GdalGenerated.CPLErrorReset();
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment pathCString = arena.allocateFrom(path.toString());
+            MemorySegment pathCString = arena.allocateFrom(datasetIdentifier);
             String[] options = toKeyValueArray(datasetCreationOptions);
             MemorySegment optionsArgv = options.length == 0 ? MemorySegment.NULL : CArgv.toCStringArray(options, arena);
 
             MemorySegment dataset = GdalGenerated.OGR_Dr_CreateDataSource(driver, pathCString, optionsArgv);
             if (CStrings.isNull(dataset)) {
-                throw GdalErrors.lastError("Failed to create OGR datasource: " + path);
+                throw GdalErrors.lastError("Failed to create OGR datasource: " + datasetIdentifier);
             }
             return dataset;
         }
     }
 
-    private static void deleteDataSource(MemorySegment driver, Path path) {
+    private static void deleteDataSource(MemorySegment driver, String datasetIdentifier) {
         GdalGenerated.CPLErrorReset();
         try (Arena arena = Arena.ofConfined()) {
-            MemorySegment pathCString = arena.allocateFrom(path.toString());
+            MemorySegment pathCString = arena.allocateFrom(datasetIdentifier);
             if (!testDriverCapability(driver, DRIVER_CAPABILITY_DELETE_DATA_SOURCE)) {
                 throw new IllegalArgumentException(
-                        "Driver does not support overwrite/delete for existing dataset: " + path
+                        "Driver does not support overwrite/delete for existing dataset: " + datasetIdentifier
                 );
             }
             int errorCode = GdalGenerated.OGR_Dr_DeleteDataSource(driver, pathCString);
-            throwIfOgrError(errorCode, "Failed to overwrite existing OGR datasource: " + path);
+            throwIfOgrError(errorCode, "Failed to overwrite existing OGR datasource: " + datasetIdentifier);
         }
     }
 
@@ -302,12 +343,12 @@ public final class OgrRuntime {
     }
 
     private static final class NativeOgrDataSource implements OgrDataSource {
-        private final Path sourcePath;
+        private final String sourcePath;
         private final MemorySegment dataset;
         private final boolean writable;
         private volatile boolean closed;
 
-        private NativeOgrDataSource(Path sourcePath, MemorySegment dataset, boolean writable) {
+        private NativeOgrDataSource(String sourcePath, MemorySegment dataset, boolean writable) {
             this.sourcePath = sourcePath;
             this.dataset = dataset;
             this.writable = writable;
