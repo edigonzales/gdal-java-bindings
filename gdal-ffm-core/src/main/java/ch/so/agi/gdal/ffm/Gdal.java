@@ -151,4 +151,24 @@ public final class Gdal {
         Objects.requireNonNull(config, "config must not be null");
         GdalRuntime.rasterize(dest, src, config, progress, args);
     }
+
+    public static List<RasterDriverInfo> listWritableRasterDrivers() {
+        return GdalRuntime.listWritableRasterDrivers();
+    }
+
+    public static String driverCreationOptionListXml(String driverShortName) {
+        Objects.requireNonNull(driverShortName, "driverShortName must not be null");
+        return GdalRuntime.driverCreationOptionListXml(driverShortName);
+    }
+
+    public static List<String> listCreationOptionEnumValues(String driverShortName, String optionName) {
+        Objects.requireNonNull(driverShortName, "driverShortName must not be null");
+        Objects.requireNonNull(optionName, "optionName must not be null");
+        return GdalRuntime.listCreationOptionEnumValues(driverShortName, optionName);
+    }
+
+    public static List<String> listCompressionOptions(String driverShortName) {
+        Objects.requireNonNull(driverShortName, "driverShortName must not be null");
+        return GdalRuntime.listCompressionOptions(driverShortName);
+    }
 }

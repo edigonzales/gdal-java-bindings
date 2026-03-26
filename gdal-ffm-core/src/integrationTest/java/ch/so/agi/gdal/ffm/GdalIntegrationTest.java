@@ -12,6 +12,20 @@ import org.junit.jupiter.api.Test;
 
 class GdalIntegrationTest {
     @Test
+    void listWritableRasterDriversIncludesGtiff() {
+        List<RasterDriverInfo> drivers = Gdal.listWritableRasterDrivers();
+
+        assertTrue(drivers.stream().anyMatch(driver -> "GTiff".equalsIgnoreCase(driver.shortName())));
+    }
+
+    @Test
+    void listCompressionOptionsForGtiffReturnsValues() {
+        List<String> compressionOptions = Gdal.listCompressionOptions("GTiff");
+
+        assertTrue(compressionOptions.stream().anyMatch(value -> "NONE".equalsIgnoreCase(value)));
+    }
+
+    @Test
     void vectorTranslateGeoJsonToGpkg() {
         Path input = testData("sample.geojson");
         Path output = outputFile("vector-translate.gpkg");
