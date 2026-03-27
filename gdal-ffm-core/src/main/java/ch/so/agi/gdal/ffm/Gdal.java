@@ -186,6 +186,39 @@ public final class Gdal {
         GdalRuntime.rasterMosaic(dest, sources, config, progress, args);
     }
 
+    public static void rasterZonalStats(Path dest, Path src, Path zones, String... args) {
+        rasterZonalStats(DatasetRef.local(dest), DatasetRef.local(src), DatasetRef.local(zones), GdalConfig.empty(), null, args);
+    }
+
+    public static void rasterZonalStats(DatasetRef dest, DatasetRef src, DatasetRef zones, String... args) {
+        rasterZonalStats(dest, src, zones, GdalConfig.empty(), null, args);
+    }
+
+    public static void rasterZonalStats(
+            DatasetRef dest,
+            DatasetRef src,
+            DatasetRef zones,
+            GdalConfig config,
+            String... args
+    ) {
+        rasterZonalStats(dest, src, zones, config, null, args);
+    }
+
+    public static void rasterZonalStats(
+            DatasetRef dest,
+            DatasetRef src,
+            DatasetRef zones,
+            GdalConfig config,
+            ProgressCallback progress,
+            String... args
+    ) {
+        Objects.requireNonNull(dest, "dest must not be null");
+        Objects.requireNonNull(src, "src must not be null");
+        Objects.requireNonNull(zones, "zones must not be null");
+        Objects.requireNonNull(config, "config must not be null");
+        GdalRuntime.rasterZonalStats(dest, src, zones, config, progress, args);
+    }
+
     public static void vectorRasterize(Path dest, Path src, String... args) {
         vectorRasterize(DatasetRef.local(dest), DatasetRef.local(src), GdalConfig.empty(), null, args);
     }

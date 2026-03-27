@@ -3,12 +3,12 @@
 Java 23 FFM bindings for GDAL/OGR utilities and vector streaming with bundled native libraries.
 The public API now covers the raster operations required by the Hop raster suite as well:
 `rasterInfo`, `rasterConvert`, `rasterClip`, `rasterReproject`, `rasterResize`, `rasterMosaic`,
-`vectorRasterize`, structured dataset references and scoped
+`rasterZonalStats`, `vectorRasterize`, structured dataset references and scoped
 GDAL/VSI configuration.
 
 ## Modules
 
-- `gdal-ffm-core`: public Java API (`Gdal.rasterInfo`, `Gdal.rasterConvert`, `Gdal.rasterClip`, `Gdal.rasterReproject`, `Gdal.rasterResize`, `Gdal.rasterMosaic`, `Gdal.vectorRasterize`, `Gdal.vectorTranslate`, `Ogr.*`), native loader, error/progress bridge.
+- `gdal-ffm-core`: public Java API (`Gdal.rasterInfo`, `Gdal.rasterConvert`, `Gdal.rasterClip`, `Gdal.rasterReproject`, `Gdal.rasterResize`, `Gdal.rasterMosaic`, `Gdal.rasterZonalStats`, `Gdal.vectorRasterize`, `Gdal.vectorTranslate`, `Ogr.*`), native loader, error/progress bridge.
 - `gdal-ffm-natives`: classifier JARs that package native GDAL libs + `share/gdal` + `share/proj`.
 - `gdal-ffm-natives-swiss`: optional classifier JARs with the same native libs, but a Swiss-focused `share/proj` subset.
 
@@ -92,6 +92,15 @@ Gdal.rasterMosaic(
     Path.of("mosaic.vrt"),
     List.of(Path.of("a.tif"), Path.of("b.tif")),
     "--output-format", "VRT"
+);
+
+Gdal.rasterZonalStats(
+    Path.of("zones-stats.gpkg"),
+    Path.of("ndom.tif"),
+    Path.of("buildings.gpkg"),
+    "--output-format", "GPKG",
+    "--zones-layer", "buildings",
+    "--stat", "mean"
 );
 
 Gdal.vectorRasterize(

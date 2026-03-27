@@ -179,6 +179,27 @@ public final class GdalRuntime {
         );
     }
 
+    public static void rasterZonalStats(
+            DatasetRef dest,
+            DatasetRef src,
+            DatasetRef zones,
+            GdalConfig config,
+            ProgressCallback progress,
+            String... args
+    ) {
+        Objects.requireNonNull(dest, "dest must not be null");
+        Objects.requireNonNull(src, "src must not be null");
+        Objects.requireNonNull(zones, "zones must not be null");
+        Objects.requireNonNull(config, "config must not be null");
+        initialize();
+        GdalAlgorithmRunner.run(
+                List.of("raster", "zonal-stats"),
+                config,
+                progress,
+                withInputZonesOutputArgs(src, zones, dest, args)
+        );
+    }
+
     public static void vectorRasterize(
             DatasetRef dest,
             DatasetRef src,
@@ -402,6 +423,28 @@ public final class GdalRuntime {
             commandLineArgs.add("-i");
             commandLineArgs.add(input.toGdalIdentifier());
         }
+        commandLineArgs.add("-o");
+        commandLineArgs.add(output.toGdalIdentifier());
+        return commandLineArgs;
+    }
+
+    private static List<String> withInputZonesOutputArgs(
+            DatasetRef input,
+            DatasetRef zones,
+            DatasetRef output,
+            String... args
+    ) {
+        Objects.requireNonNull(input, "input must not be null");
+        Objects.requireNonNull(zones, "zones must not be null");
+        Objects.requireNonNull(output, "output must not be null");
+        ArrayList<String> commandLineArgs = new ArrayList<>();
+        if (args != null) {
+            commandLineArgs.addAll(List.of(args));
+        }
+        commandLineArgs.add("-i");
+        commandLineArgs.add(input.toGdalIdentifier());
+        commandLineArgs.add("--zones");
+        commandLineArgs.add(zones.toGdalIdentifier());
         commandLineArgs.add("-o");
         commandLineArgs.add(output.toGdalIdentifier());
         return commandLineArgs;
