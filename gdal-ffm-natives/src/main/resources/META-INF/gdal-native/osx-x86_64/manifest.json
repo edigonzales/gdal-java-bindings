@@ -1,10 +1,8 @@
 {
-  "bundleVersion": "3.11.1",
-  "entryLibrary": "lib/libgdal.37.dylib",
+  "bundleVersion": "3.12.2",
+  "entryLibrary": "lib/libgdal.38.dylib",
   "preloadLibraries": [
-    "lib/libproj.25.dylib",
-    "lib/libgeos_c.1.dylib",
-    "lib/libsqlite3.0.dylib"
+    "lib/libproj.25.dylib"
   ],
   "gdalDataPath": "share/gdal",
   "projDataPath": "share/proj",

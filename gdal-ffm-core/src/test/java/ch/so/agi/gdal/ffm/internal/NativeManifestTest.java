@@ -9,7 +9,7 @@ class NativeManifestTest {
     void parsesManifestJson() {
         String json = """
                 {
-                  "bundleVersion": "3.11.1",
+                  "bundleVersion": "3.12.2",
                   "entryLibrary": "lib/libgdal.so.37",
                   "preloadLibraries": ["lib/libproj.so.25", "lib/libgeos_c.so.1"],
                   "gdalDataPath": "share/gdal",
@@ -20,7 +20,7 @@ class NativeManifestTest {
 
         NativeManifest manifest = NativeManifest.parse(json);
 
-        assertEquals("3.11.1", manifest.bundleVersion());
+        assertEquals("3.12.2", manifest.bundleVersion());
         assertEquals("lib/libgdal.so.37", manifest.entryLibrary());
         assertEquals(2, manifest.preloadLibraries().size());
         assertEquals("share/gdal", manifest.gdalDataPath());

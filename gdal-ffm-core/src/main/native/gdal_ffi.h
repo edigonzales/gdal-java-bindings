@@ -2,10 +2,12 @@
 #define GDAL_FFM_BINDING_HEADER
 
 #include "gdal.h"
+#include "gdalalgorithm.h"
 #include "gdal_utils.h"
 #include "ogr_api.h"
 #include "ogr_srs_api.h"
 #include "cpl_error.h"
 #include "cpl_conv.h"
+#include "cpl_string.h"
 
 #endif

@@ -52,6 +52,13 @@ contains_placeholder_marker() {
   return 1
 }
 
+is_elf_binary() {
+  local file="$1"
+  local magic
+  magic="$(LC_ALL=C dd if="$file" bs=4 count=1 2>/dev/null | od -An -t x1 | tr -d ' \n')"
+  [[ "$magic" == "7f454c46" ]]
+}
+
 is_allowed_system_linux_absolute() {
   local dep="$1"
   case "$dep" in
@@ -114,6 +121,103 @@ linux_binaries() {
   } | sort -u
 }
 
+linux_relocate_with_lief() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "Missing required tool for linux relocation: readelf/patchelf or python3+lief" >&2
+    exit 1
+  fi
+
+  python3 - "$BUNDLE_DIR" "$LIB_BASENAMES_FILE" <<'PY'
+import pathlib
+import sys
+
+try:
+    import lief
+except Exception as exc:
+    raise SystemExit(
+        "Missing required tool for linux relocation: readelf/patchelf or python3+lief "
+        f"({exc})"
+    )
+
+BUNDLE_DIR = pathlib.Path(sys.argv[1])
+LIB_BASENAMES = {
+    line.strip()
+    for line in pathlib.Path(sys.argv[2]).read_text(encoding="utf-8").splitlines()
+    if line.strip()
+}
+ALLOWED_SYSTEM_PREFIXES = ("/lib/", "/lib64/", "/usr/lib/", "/usr/lib64/")
+PLACEHOLDER_MARKERS = (
+    "_h_env_placehold",
+    "/home/conda/feedstock_root",
+    "/opt/conda",
+    "C:\\b\\",
+)
+
+
+def linux_binaries():
+    patterns = ("*.so", "*.so.*")
+    roots = (BUNDLE_DIR / "lib", BUNDLE_DIR / "lib" / "gdalplugins")
+    seen = set()
+    for root in roots:
+        if not root.is_dir():
+            continue
+        for pattern in patterns:
+            for path in root.rglob(pattern):
+                if path.is_file() and not path.is_symlink():
+                    seen.add(path)
+    return sorted(seen)
+
+
+for binary_path in linux_binaries():
+    if binary_path.read_bytes()[:4] != b"\x7fELF":
+        continue
+    binary = lief.ELF.parse(str(binary_path))
+    if binary is None:
+        raise SystemExit(f"Failed to parse ELF binary: {binary_path}")
+
+    changed = False
+    for dependency in list(binary.libraries):
+        if not dependency:
+            continue
+        if "/" not in dependency:
+            continue
+
+        dependency_base = pathlib.Path(dependency).name
+        if dependency_base in LIB_BASENAMES:
+            print(f"Rewriting DT_NEEDED in {binary_path}: {dependency} -> {dependency_base}")
+            binary.remove_library(dependency)
+            if dependency_base not in binary.libraries:
+                binary.add_library(dependency_base)
+            changed = True
+            continue
+
+        if dependency.startswith(ALLOWED_SYSTEM_PREFIXES):
+            continue
+
+        raise SystemExit(
+            f"Non-relocatable absolute DT_NEEDED dependency '{dependency}' in {binary_path}"
+        )
+
+    if changed:
+        binary.write(str(binary_path))
+
+for binary_path in linux_binaries():
+    if binary_path.read_bytes()[:4] != b"\x7fELF":
+        continue
+    binary = lief.ELF.parse(str(binary_path))
+    if binary is None:
+        raise SystemExit(f"Failed to parse ELF binary after relocation: {binary_path}")
+
+    for dependency in binary.libraries:
+        if not dependency:
+            continue
+        if any(marker in dependency for marker in PLACEHOLDER_MARKERS):
+            raise SystemExit(
+                f"Placeholder dependency remained after relocation: '{dependency}' in {binary_path}"
+            )
+PY
+}
+
 macos_main_binaries() {
   if [[ -d "$BUNDLE_DIR/lib" ]]; then
     find "$BUNDLE_DIR/lib" -maxdepth 1 -type f \( -name '*.dylib' -o -name '*.dylib.*' \) -print | sort -u
@@ -140,17 +244,16 @@ windows_binaries() {
 }
 
 linux_relocate() {
-  if ! command -v readelf >/dev/null 2>&1; then
-    echo "Missing required tool for linux relocation: readelf" >&2
-    exit 1
-  fi
-  if ! command -v patchelf >/dev/null 2>&1; then
-    echo "Missing required tool for linux relocation: patchelf" >&2
-    exit 1
+  if ! command -v readelf >/dev/null 2>&1 || ! command -v patchelf >/dev/null 2>&1; then
+    linux_relocate_with_lief
+    return
   fi
 
   local binary dep dep_base
   while IFS= read -r binary; do
+    if ! is_elf_binary "$binary"; then
+      continue
+    fi
     while IFS= read -r dep; do
       [[ -z "$dep" ]] && continue
 
@@ -173,6 +276,9 @@ linux_relocate() {
   done < <(linux_binaries)
 
   while IFS= read -r binary; do
+    if ! is_elf_binary "$binary"; then
+      continue
+    fi
     while IFS= read -r dep; do
       [[ -z "$dep" ]] && continue
       if contains_placeholder_marker "$dep"; then
@@ -210,6 +316,16 @@ ensure_macos_rpath() {
     echo "Adding LC_RPATH '$rpath' to $binary"
     install_name_tool -add_rpath "$rpath" "$binary"
   fi
+}
+
+codesign_macos_binary() {
+  local binary="$1"
+  if ! command -v codesign >/dev/null 2>&1; then
+    echo "Missing required tool for macOS relocation: codesign" >&2
+    exit 1
+  fi
+  echo "Ad-hoc signing $binary"
+  codesign --force --sign - "$binary" >/dev/null
 }
 
 macos_relocate() {
@@ -270,6 +386,10 @@ macos_relocate() {
     ensure_macos_rpath "$binary" "@loader_path"
     ensure_macos_rpath "$binary" "@loader_path/.."
   done < <(macos_plugin_binaries)
+
+  while IFS= read -r binary; do
+    codesign_macos_binary "$binary"
+  done < <(macos_all_binaries)
 }
 
 windows_validate() {

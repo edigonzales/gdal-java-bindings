@@ -10,7 +10,7 @@ CLASS_NAME="GdalGenerated"
 JEXTRACT_BIN="${JEXTRACT_BIN:-jextract}"
 
 if [[ -z "${GDAL_INCLUDE_DIR:-}" ]]; then
-  echo "GDAL_INCLUDE_DIR is required (path containing gdal.h, gdal_utils.h, ogr_api.h, ogr_srs_api.h, cpl_error.h, cpl_conv.h)" >&2
+  echo "GDAL_INCLUDE_DIR is required (path containing gdal.h, gdalalgorithm.h, gdal_utils.h, ogr_api.h, ogr_srs_api.h, cpl_error.h, cpl_conv.h, cpl_string.h)" >&2
   exit 1
 fi
 
@@ -92,14 +92,21 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "GDALVectorTranslateOptionsFree" \
   --include-function "GDALVectorTranslateOptionsSetProgress" \
   --include-function "GDALVectorTranslate" \
-  --include-function "GDALWarpAppOptionsNew" \
-  --include-function "GDALWarpAppOptionsFree" \
-  --include-function "GDALWarpAppOptionsSetProgress" \
-  --include-function "GDALWarp" \
-  --include-function "GDALTranslateOptionsNew" \
-  --include-function "GDALTranslateOptionsFree" \
-  --include-function "GDALTranslateOptionsSetProgress" \
-  --include-function "GDALTranslate" \
+  --include-function "GDALGetGlobalAlgorithmRegistry" \
+  --include-function "GDALAlgorithmRegistryRelease" \
+  --include-function "GDALAlgorithmRegistryInstantiateAlgFromPath" \
+  --include-function "GDALAlgorithmRelease" \
+  --include-function "GDALAlgorithmParseCommandLineArguments" \
+  --include-function "GDALAlgorithmGetActualAlgorithm" \
+  --include-function "GDALAlgorithmRun" \
+  --include-function "GDALAlgorithmFinalize" \
+  --include-function "GDALAlgorithmGetArgNames" \
+  --include-function "GDALAlgorithmGetArg" \
+  --include-function "GDALAlgorithmArgRelease" \
+  --include-function "GDALAlgorithmArgGetType" \
+  --include-function "GDALAlgorithmArgIsOutput" \
+  --include-function "GDALAlgorithmArgGetAsString" \
+  --include-function "CSLDestroy" \
   --include-function "CPLErrorReset" \
   --include-function "CPLGetLastErrorType" \
   --include-function "CPLGetLastErrorNo" \

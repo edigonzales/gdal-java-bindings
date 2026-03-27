@@ -36,21 +36,37 @@ class GdalIntegrationTest {
     }
 
     @Test
-    void translateProducesCog() {
+    void rasterConvertProducesCog() {
         Path input = testData("sample.tif");
         Path output = outputFile("translate-cog.tif");
 
-        Gdal.translate(output, input, "-of", "COG", "-co", "COMPRESS=ZSTD");
+        Gdal.rasterConvert(
+                output,
+                input,
+                "--overwrite",
+                "--output-format",
+                "COG",
+                "--creation-option",
+                "COMPRESS=ZSTD"
+        );
 
         assertTrue(output.toFile().isFile(), "Expected output file to exist: " + output);
     }
 
     @Test
-    void warpReprojectsRaster() {
+    void rasterReprojectChangesCrs() {
         Path input = testData("sample.tif");
         Path output = outputFile("warp-reprojected.tif");
 
-        Gdal.warp(output, input, "-t_srs", "EPSG:2056", "-r", "bilinear");
+        Gdal.rasterReproject(
+                output,
+                input,
+                "--overwrite",
+                "--dst-crs",
+                "EPSG:2056",
+                "--resampling",
+                "bilinear"
+        );
 
         assertTrue(output.toFile().isFile(), "Expected output file to exist: " + output);
     }
@@ -59,21 +75,21 @@ class GdalIntegrationTest {
     void infoReturnsJsonForBundledRaster() throws Exception {
         Path input = bundledRaster();
 
-        String json = Gdal.info(input, "-json");
+        String json = Gdal.rasterInfo(input, "--output-format", "json");
 
         assertTrue(json.contains("\"driverShortName\""), "Expected GDAL info JSON");
         assertTrue(json.contains("\"size\""), "Expected raster size block in info JSON");
     }
 
     @Test
-    void buildVrtCreatesVirtualMosaic() throws Exception {
+    void rasterMosaicCreatesVirtualMosaic() throws Exception {
         Path input = bundledRaster();
         Path output = outputFile("buildvrt.vrt");
 
-        Gdal.buildVrt(output, List.of(input, input));
+        Gdal.rasterMosaic(output, List.of(input, input), "--overwrite", "--output-format", "VRT");
 
         assertTrue(output.toFile().isFile(), "Expected VRT output file to exist: " + output);
-        assertTrue(Gdal.info(output, "-json").contains("\"driverShortName\":\"VRT\""));
+        assertTrue(Gdal.rasterInfo(output, "--output-format", "json").contains("\"driverShortName\":\"VRT\""));
     }
 
     @Test
@@ -96,20 +112,21 @@ class GdalIntegrationTest {
                 }
                 """);
 
-        Gdal.rasterize(
+        Gdal.vectorRasterize(
                 rasterOutput,
                 vectorInput,
-                "-l", "rasterize-input",
-                "-a", "class_id",
-                "-te", "0", "0", "10", "10",
-                "-tr", "1", "1",
-                "-ot", "Byte",
-                "-a_nodata", "0",
-                "-of", "GTiff"
+                "--overwrite",
+                "--input-layer", "rasterize-input",
+                "--attribute-name", "class_id",
+                "--extent", "0,0,10,10",
+                "--resolution", "1,1",
+                "--output-data-type", "Byte",
+                "--nodata", "0",
+                "--output-format", "GTiff"
         );
 
         assertTrue(rasterOutput.toFile().isFile(), "Expected rasterized output file to exist: " + rasterOutput);
-        assertTrue(Gdal.info(rasterOutput, "-json").contains("\"driverShortName\":\"GTiff\""));
+        assertTrue(Gdal.rasterInfo(rasterOutput, "--output-format", "json").contains("\"driverShortName\":\"GTiff\""));
     }
 
     private static Path testData(String fileName) {

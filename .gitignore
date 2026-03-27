@@ -1,5 +1,5 @@
-tmp
-bin
+/tmp/
+/bin/
 .DS_Store
 
 # Compiled class file
@@ -33,6 +33,16 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 
 # Native staging
-tmp/
-gdal-ffm-natives/src/main/resources/META-INF/gdal-native/osx-aarch64/share/
-gdal-ffm-natives/src/main/resources/META-INF/gdal-native/osx-aarch64/lib/
+gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/**
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/README.txt
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/manifest.json
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/lib/
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/lib/.gitkeep
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/lib/gdalplugins/
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/lib/gdalplugins/.gitkeep
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/share/
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/share/gdal/
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/share/gdal/.gitkeep
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/share/proj/
+!gdal-ffm-natives/src/main/resources/META-INF/gdal-native/*/share/proj/.gitkeep

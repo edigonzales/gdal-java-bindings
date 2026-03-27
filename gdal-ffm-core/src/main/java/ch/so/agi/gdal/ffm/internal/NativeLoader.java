@@ -49,17 +49,7 @@ final class NativeLoader {
         URL manifestUrl = findManifest(prefix, classifier);
         NativeManifest manifest = NativeManifest.parse(readUtf8(manifestUrl));
 
-        Path extractionRoot = extractionRoot(manifest.bundleVersion(), classifier);
-        Path marker = extractionRoot.resolve(".extract-complete");
-        if (!Files.exists(marker)) {
-            extractBundle(manifestUrl, extractionRoot);
-            try {
-                Files.createDirectories(extractionRoot);
-                Files.writeString(marker, manifest.bundleVersion(), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new IllegalStateException("Failed to create extraction marker: " + marker, e);
-            }
-        }
+        Path extractionRoot = resolveBundleRoot(manifestUrl, manifest.bundleVersion(), classifier);
 
         for (String preload : manifest.preloadLibraries()) {
             loadLibrary(extractionRoot, preload, "preloadLibraries");
@@ -125,6 +115,40 @@ final class NativeLoader {
         return Path.of(javaTmp, "gdal-ffm", bundleVersion, classifier);
     }
 
+    private static Path resolveBundleRoot(URL manifestUrl, String bundleVersion, String classifier) {
+        if ("file".equals(manifestUrl.getProtocol())) {
+            return fileTreeRoot(manifestUrl);
+        }
+
+        Path extractionRoot = extractionRoot(bundleVersion, classifier);
+        Path marker = extractionRoot.resolve(".extract-complete");
+        if (!Files.exists(marker)) {
+            extractBundle(manifestUrl, extractionRoot);
+            try {
+                Files.createDirectories(extractionRoot);
+                Files.writeString(marker, bundleVersion, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to create extraction marker: " + marker, e);
+            }
+        }
+        return extractionRoot;
+    }
+
+    private static Path fileTreeRoot(URL manifestUrl) {
+        Path manifestPath;
+        try {
+            manifestPath = Path.of(manifestUrl.toURI());
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Invalid manifest URL: " + manifestUrl, e);
+        }
+
+        Path sourceRoot = manifestPath.getParent();
+        if (sourceRoot == null || !Files.exists(sourceRoot)) {
+            throw new IllegalStateException("Native resource source path does not exist: " + manifestPath);
+        }
+        return sourceRoot;
+    }
+
     private static void extractBundle(URL manifestUrl, Path extractionRoot) {
         try {
             Files.createDirectories(extractionRoot);
@@ -178,18 +202,7 @@ final class NativeLoader {
     }
 
     private static void extractFromFileTree(URL manifestUrl, Path extractionRoot) {
-        Path manifestPath;
-        try {
-            URI uri = manifestUrl.toURI();
-            manifestPath = Path.of(uri);
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Invalid manifest URL: " + manifestUrl, e);
-        }
-
-        Path sourceRoot = manifestPath.getParent();
-        if (sourceRoot == null || !Files.exists(sourceRoot)) {
-            throw new IllegalStateException("Native resource source path does not exist: " + manifestPath);
-        }
+        Path sourceRoot = fileTreeRoot(manifestUrl);
 
         try (var stream = Files.walk(sourceRoot)) {
             stream.filter(Files::isRegularFile).forEach(source -> {

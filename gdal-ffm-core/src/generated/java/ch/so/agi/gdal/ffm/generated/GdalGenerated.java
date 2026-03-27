@@ -4070,14 +4070,131 @@ public class GdalGenerated extends GdalGenerated$shared {
         }
     }
 
-    private static class GDALTranslateOptionsNew {
+    private static class GDALGetGlobalAlgorithmRegistry {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER    );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALGetGlobalAlgorithmRegistry");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * GDALAlgorithmRegistryH GDALGetGlobalAlgorithmRegistry()
+     * }
+     */
+    public static FunctionDescriptor GDALGetGlobalAlgorithmRegistry$descriptor() {
+        return GDALGetGlobalAlgorithmRegistry.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * GDALAlgorithmRegistryH GDALGetGlobalAlgorithmRegistry()
+     * }
+     */
+    public static MethodHandle GDALGetGlobalAlgorithmRegistry$handle() {
+        return GDALGetGlobalAlgorithmRegistry.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * GDALAlgorithmRegistryH GDALGetGlobalAlgorithmRegistry()
+     * }
+     */
+    public static MemorySegment GDALGetGlobalAlgorithmRegistry$address() {
+        return GDALGetGlobalAlgorithmRegistry.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * GDALAlgorithmRegistryH GDALGetGlobalAlgorithmRegistry()
+     * }
+     */
+    public static MemorySegment GDALGetGlobalAlgorithmRegistry() {
+        var mh$ = GDALGetGlobalAlgorithmRegistry.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALGetGlobalAlgorithmRegistry");
+            }
+            return (MemorySegment)mh$.invokeExact();
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALAlgorithmRegistryRelease {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmRegistryRelease");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void GDALAlgorithmRegistryRelease(GDALAlgorithmRegistryH)
+     * }
+     */
+    public static FunctionDescriptor GDALAlgorithmRegistryRelease$descriptor() {
+        return GDALAlgorithmRegistryRelease.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void GDALAlgorithmRegistryRelease(GDALAlgorithmRegistryH)
+     * }
+     */
+    public static MethodHandle GDALAlgorithmRegistryRelease$handle() {
+        return GDALAlgorithmRegistryRelease.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void GDALAlgorithmRegistryRelease(GDALAlgorithmRegistryH)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmRegistryRelease$address() {
+        return GDALAlgorithmRegistryRelease.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void GDALAlgorithmRegistryRelease(GDALAlgorithmRegistryH)
+     * }
+     */
+    public static void GDALAlgorithmRegistryRelease(MemorySegment x0) {
+        var mh$ = GDALAlgorithmRegistryRelease.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALAlgorithmRegistryRelease", x0);
+            }
+            mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALAlgorithmRegistryInstantiateAlgFromPath {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             GdalGenerated.C_POINTER,
             GdalGenerated.C_POINTER,
             GdalGenerated.C_POINTER
         );
 
-        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALTranslateOptionsNew");
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmRegistryInstantiateAlgFromPath");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4085,45 +4202,45 @@ public class GdalGenerated extends GdalGenerated$shared {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * GDALTranslateOptions *GDALTranslateOptionsNew(char **papszArgv, GDALTranslateOptionsForBinary *psOptionsForBinary)
+     * GDALAlgorithmH GDALAlgorithmRegistryInstantiateAlgFromPath(GDALAlgorithmRegistryH, const char *const *papszAlgPath)
      * }
      */
-    public static FunctionDescriptor GDALTranslateOptionsNew$descriptor() {
-        return GDALTranslateOptionsNew.DESC;
+    public static FunctionDescriptor GDALAlgorithmRegistryInstantiateAlgFromPath$descriptor() {
+        return GDALAlgorithmRegistryInstantiateAlgFromPath.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * GDALTranslateOptions *GDALTranslateOptionsNew(char **papszArgv, GDALTranslateOptionsForBinary *psOptionsForBinary)
+     * GDALAlgorithmH GDALAlgorithmRegistryInstantiateAlgFromPath(GDALAlgorithmRegistryH, const char *const *papszAlgPath)
      * }
      */
-    public static MethodHandle GDALTranslateOptionsNew$handle() {
-        return GDALTranslateOptionsNew.HANDLE;
+    public static MethodHandle GDALAlgorithmRegistryInstantiateAlgFromPath$handle() {
+        return GDALAlgorithmRegistryInstantiateAlgFromPath.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * GDALTranslateOptions *GDALTranslateOptionsNew(char **papszArgv, GDALTranslateOptionsForBinary *psOptionsForBinary)
+     * GDALAlgorithmH GDALAlgorithmRegistryInstantiateAlgFromPath(GDALAlgorithmRegistryH, const char *const *papszAlgPath)
      * }
      */
-    public static MemorySegment GDALTranslateOptionsNew$address() {
-        return GDALTranslateOptionsNew.ADDR;
+    public static MemorySegment GDALAlgorithmRegistryInstantiateAlgFromPath$address() {
+        return GDALAlgorithmRegistryInstantiateAlgFromPath.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * GDALTranslateOptions *GDALTranslateOptionsNew(char **papszArgv, GDALTranslateOptionsForBinary *psOptionsForBinary)
+     * GDALAlgorithmH GDALAlgorithmRegistryInstantiateAlgFromPath(GDALAlgorithmRegistryH, const char *const *papszAlgPath)
      * }
      */
-    public static MemorySegment GDALTranslateOptionsNew(MemorySegment papszArgv, MemorySegment psOptionsForBinary) {
-        var mh$ = GDALTranslateOptionsNew.HANDLE;
+    public static MemorySegment GDALAlgorithmRegistryInstantiateAlgFromPath(MemorySegment x0, MemorySegment papszAlgPath) {
+        var mh$ = GDALAlgorithmRegistryInstantiateAlgFromPath.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("GDALTranslateOptionsNew", papszArgv, psOptionsForBinary);
+                traceDowncall("GDALAlgorithmRegistryInstantiateAlgFromPath", x0, papszAlgPath);
             }
-            return (MemorySegment)mh$.invokeExact(papszArgv, psOptionsForBinary);
+            return (MemorySegment)mh$.invokeExact(x0, papszAlgPath);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {
@@ -4131,12 +4248,12 @@ public class GdalGenerated extends GdalGenerated$shared {
         }
     }
 
-    private static class GDALTranslateOptionsFree {
+    private static class GDALAlgorithmRelease {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
             GdalGenerated.C_POINTER
         );
 
-        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALTranslateOptionsFree");
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmRelease");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4144,45 +4261,45 @@ public class GdalGenerated extends GdalGenerated$shared {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void GDALTranslateOptionsFree(GDALTranslateOptions *psOptions)
+     * void GDALAlgorithmRelease(GDALAlgorithmH)
      * }
      */
-    public static FunctionDescriptor GDALTranslateOptionsFree$descriptor() {
-        return GDALTranslateOptionsFree.DESC;
+    public static FunctionDescriptor GDALAlgorithmRelease$descriptor() {
+        return GDALAlgorithmRelease.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void GDALTranslateOptionsFree(GDALTranslateOptions *psOptions)
+     * void GDALAlgorithmRelease(GDALAlgorithmH)
      * }
      */
-    public static MethodHandle GDALTranslateOptionsFree$handle() {
-        return GDALTranslateOptionsFree.HANDLE;
+    public static MethodHandle GDALAlgorithmRelease$handle() {
+        return GDALAlgorithmRelease.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void GDALTranslateOptionsFree(GDALTranslateOptions *psOptions)
+     * void GDALAlgorithmRelease(GDALAlgorithmH)
      * }
      */
-    public static MemorySegment GDALTranslateOptionsFree$address() {
-        return GDALTranslateOptionsFree.ADDR;
+    public static MemorySegment GDALAlgorithmRelease$address() {
+        return GDALAlgorithmRelease.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * void GDALTranslateOptionsFree(GDALTranslateOptions *psOptions)
+     * void GDALAlgorithmRelease(GDALAlgorithmH)
      * }
      */
-    public static void GDALTranslateOptionsFree(MemorySegment psOptions) {
-        var mh$ = GDALTranslateOptionsFree.HANDLE;
+    public static void GDALAlgorithmRelease(MemorySegment x0) {
+        var mh$ = GDALAlgorithmRelease.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("GDALTranslateOptionsFree", psOptions);
+                traceDowncall("GDALAlgorithmRelease", x0);
             }
-            mh$.invokeExact(psOptions);
+            mh$.invokeExact(x0);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {
@@ -4190,14 +4307,136 @@ public class GdalGenerated extends GdalGenerated$shared {
         }
     }
 
-    private static class GDALTranslateOptionsSetProgress {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+    private static class GDALAlgorithmParseCommandLineArguments {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_BOOL,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmParseCommandLineArguments");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * bool GDALAlgorithmParseCommandLineArguments(GDALAlgorithmH, CSLConstList papszArgs)
+     * }
+     */
+    public static FunctionDescriptor GDALAlgorithmParseCommandLineArguments$descriptor() {
+        return GDALAlgorithmParseCommandLineArguments.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * bool GDALAlgorithmParseCommandLineArguments(GDALAlgorithmH, CSLConstList papszArgs)
+     * }
+     */
+    public static MethodHandle GDALAlgorithmParseCommandLineArguments$handle() {
+        return GDALAlgorithmParseCommandLineArguments.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * bool GDALAlgorithmParseCommandLineArguments(GDALAlgorithmH, CSLConstList papszArgs)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmParseCommandLineArguments$address() {
+        return GDALAlgorithmParseCommandLineArguments.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * bool GDALAlgorithmParseCommandLineArguments(GDALAlgorithmH, CSLConstList papszArgs)
+     * }
+     */
+    public static boolean GDALAlgorithmParseCommandLineArguments(MemorySegment x0, MemorySegment papszArgs) {
+        var mh$ = GDALAlgorithmParseCommandLineArguments.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALAlgorithmParseCommandLineArguments", x0, papszArgs);
+            }
+            return (boolean)mh$.invokeExact(x0, papszArgs);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALAlgorithmGetActualAlgorithm {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmGetActualAlgorithm");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * GDALAlgorithmH GDALAlgorithmGetActualAlgorithm(GDALAlgorithmH)
+     * }
+     */
+    public static FunctionDescriptor GDALAlgorithmGetActualAlgorithm$descriptor() {
+        return GDALAlgorithmGetActualAlgorithm.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * GDALAlgorithmH GDALAlgorithmGetActualAlgorithm(GDALAlgorithmH)
+     * }
+     */
+    public static MethodHandle GDALAlgorithmGetActualAlgorithm$handle() {
+        return GDALAlgorithmGetActualAlgorithm.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * GDALAlgorithmH GDALAlgorithmGetActualAlgorithm(GDALAlgorithmH)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmGetActualAlgorithm$address() {
+        return GDALAlgorithmGetActualAlgorithm.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * GDALAlgorithmH GDALAlgorithmGetActualAlgorithm(GDALAlgorithmH)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmGetActualAlgorithm(MemorySegment x0) {
+        var mh$ = GDALAlgorithmGetActualAlgorithm.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALAlgorithmGetActualAlgorithm", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALAlgorithmRun {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_BOOL,
             GdalGenerated.C_POINTER,
             GdalGenerated.C_POINTER,
             GdalGenerated.C_POINTER
         );
 
-        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALTranslateOptionsSetProgress");
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmRun");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4205,45 +4444,45 @@ public class GdalGenerated extends GdalGenerated$shared {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void GDALTranslateOptionsSetProgress(GDALTranslateOptions *psOptions, GDALProgressFunc pfnProgress, void *pProgressData)
+     * bool GDALAlgorithmRun(GDALAlgorithmH, GDALProgressFunc pfnProgress, void *pProgressData)
      * }
      */
-    public static FunctionDescriptor GDALTranslateOptionsSetProgress$descriptor() {
-        return GDALTranslateOptionsSetProgress.DESC;
+    public static FunctionDescriptor GDALAlgorithmRun$descriptor() {
+        return GDALAlgorithmRun.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void GDALTranslateOptionsSetProgress(GDALTranslateOptions *psOptions, GDALProgressFunc pfnProgress, void *pProgressData)
+     * bool GDALAlgorithmRun(GDALAlgorithmH, GDALProgressFunc pfnProgress, void *pProgressData)
      * }
      */
-    public static MethodHandle GDALTranslateOptionsSetProgress$handle() {
-        return GDALTranslateOptionsSetProgress.HANDLE;
+    public static MethodHandle GDALAlgorithmRun$handle() {
+        return GDALAlgorithmRun.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void GDALTranslateOptionsSetProgress(GDALTranslateOptions *psOptions, GDALProgressFunc pfnProgress, void *pProgressData)
+     * bool GDALAlgorithmRun(GDALAlgorithmH, GDALProgressFunc pfnProgress, void *pProgressData)
      * }
      */
-    public static MemorySegment GDALTranslateOptionsSetProgress$address() {
-        return GDALTranslateOptionsSetProgress.ADDR;
+    public static MemorySegment GDALAlgorithmRun$address() {
+        return GDALAlgorithmRun.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * void GDALTranslateOptionsSetProgress(GDALTranslateOptions *psOptions, GDALProgressFunc pfnProgress, void *pProgressData)
+     * bool GDALAlgorithmRun(GDALAlgorithmH, GDALProgressFunc pfnProgress, void *pProgressData)
      * }
      */
-    public static void GDALTranslateOptionsSetProgress(MemorySegment psOptions, MemorySegment pfnProgress, MemorySegment pProgressData) {
-        var mh$ = GDALTranslateOptionsSetProgress.HANDLE;
+    public static boolean GDALAlgorithmRun(MemorySegment x0, MemorySegment pfnProgress, MemorySegment pProgressData) {
+        var mh$ = GDALAlgorithmRun.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("GDALTranslateOptionsSetProgress", psOptions, pfnProgress, pProgressData);
+                traceDowncall("GDALAlgorithmRun", x0, pfnProgress, pProgressData);
             }
-            mh$.invokeExact(psOptions, pfnProgress, pProgressData);
+            return (boolean)mh$.invokeExact(x0, pfnProgress, pProgressData);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {
@@ -4251,16 +4490,134 @@ public class GdalGenerated extends GdalGenerated$shared {
         }
     }
 
-    private static class GDALTranslate {
+    private static class GDALAlgorithmFinalize {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_BOOL,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmFinalize");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * bool GDALAlgorithmFinalize(GDALAlgorithmH)
+     * }
+     */
+    public static FunctionDescriptor GDALAlgorithmFinalize$descriptor() {
+        return GDALAlgorithmFinalize.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * bool GDALAlgorithmFinalize(GDALAlgorithmH)
+     * }
+     */
+    public static MethodHandle GDALAlgorithmFinalize$handle() {
+        return GDALAlgorithmFinalize.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * bool GDALAlgorithmFinalize(GDALAlgorithmH)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmFinalize$address() {
+        return GDALAlgorithmFinalize.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * bool GDALAlgorithmFinalize(GDALAlgorithmH)
+     * }
+     */
+    public static boolean GDALAlgorithmFinalize(MemorySegment x0) {
+        var mh$ = GDALAlgorithmFinalize.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALAlgorithmFinalize", x0);
+            }
+            return (boolean)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALAlgorithmGetArgNames {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmGetArgNames");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * char **GDALAlgorithmGetArgNames(GDALAlgorithmH)
+     * }
+     */
+    public static FunctionDescriptor GDALAlgorithmGetArgNames$descriptor() {
+        return GDALAlgorithmGetArgNames.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * char **GDALAlgorithmGetArgNames(GDALAlgorithmH)
+     * }
+     */
+    public static MethodHandle GDALAlgorithmGetArgNames$handle() {
+        return GDALAlgorithmGetArgNames.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * char **GDALAlgorithmGetArgNames(GDALAlgorithmH)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmGetArgNames$address() {
+        return GDALAlgorithmGetArgNames.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * char **GDALAlgorithmGetArgNames(GDALAlgorithmH)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmGetArgNames(MemorySegment x0) {
+        var mh$ = GDALAlgorithmGetArgNames.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALAlgorithmGetArgNames", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALAlgorithmGetArg {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
             GdalGenerated.C_POINTER,
             GdalGenerated.C_POINTER,
-            GdalGenerated.C_POINTER,
-            GdalGenerated.C_POINTER,
             GdalGenerated.C_POINTER
         );
 
-        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALTranslate");
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmGetArg");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4268,45 +4625,45 @@ public class GdalGenerated extends GdalGenerated$shared {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * GDALDatasetH GDALTranslate(const char *pszDestFilename, GDALDatasetH hSrcDataset, const GDALTranslateOptions *psOptions, int *pbUsageError)
+     * GDALAlgorithmArgH GDALAlgorithmGetArg(GDALAlgorithmH, const char *pszArgName)
      * }
      */
-    public static FunctionDescriptor GDALTranslate$descriptor() {
-        return GDALTranslate.DESC;
+    public static FunctionDescriptor GDALAlgorithmGetArg$descriptor() {
+        return GDALAlgorithmGetArg.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * GDALDatasetH GDALTranslate(const char *pszDestFilename, GDALDatasetH hSrcDataset, const GDALTranslateOptions *psOptions, int *pbUsageError)
+     * GDALAlgorithmArgH GDALAlgorithmGetArg(GDALAlgorithmH, const char *pszArgName)
      * }
      */
-    public static MethodHandle GDALTranslate$handle() {
-        return GDALTranslate.HANDLE;
+    public static MethodHandle GDALAlgorithmGetArg$handle() {
+        return GDALAlgorithmGetArg.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * GDALDatasetH GDALTranslate(const char *pszDestFilename, GDALDatasetH hSrcDataset, const GDALTranslateOptions *psOptions, int *pbUsageError)
+     * GDALAlgorithmArgH GDALAlgorithmGetArg(GDALAlgorithmH, const char *pszArgName)
      * }
      */
-    public static MemorySegment GDALTranslate$address() {
-        return GDALTranslate.ADDR;
+    public static MemorySegment GDALAlgorithmGetArg$address() {
+        return GDALAlgorithmGetArg.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * GDALDatasetH GDALTranslate(const char *pszDestFilename, GDALDatasetH hSrcDataset, const GDALTranslateOptions *psOptions, int *pbUsageError)
+     * GDALAlgorithmArgH GDALAlgorithmGetArg(GDALAlgorithmH, const char *pszArgName)
      * }
      */
-    public static MemorySegment GDALTranslate(MemorySegment pszDestFilename, MemorySegment hSrcDataset, MemorySegment psOptions, MemorySegment pbUsageError) {
-        var mh$ = GDALTranslate.HANDLE;
+    public static MemorySegment GDALAlgorithmGetArg(MemorySegment x0, MemorySegment pszArgName) {
+        var mh$ = GDALAlgorithmGetArg.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("GDALTranslate", pszDestFilename, hSrcDataset, psOptions, pbUsageError);
+                traceDowncall("GDALAlgorithmGetArg", x0, pszArgName);
             }
-            return (MemorySegment)mh$.invokeExact(pszDestFilename, hSrcDataset, psOptions, pbUsageError);
+            return (MemorySegment)mh$.invokeExact(x0, pszArgName);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {
@@ -4314,73 +4671,12 @@ public class GdalGenerated extends GdalGenerated$shared {
         }
     }
 
-    private static class GDALWarpAppOptionsNew {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            GdalGenerated.C_POINTER,
-            GdalGenerated.C_POINTER,
-            GdalGenerated.C_POINTER
-        );
-
-        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALWarpAppOptionsNew");
-
-        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-    }
-
-    /**
-     * Function descriptor for:
-     * {@snippet lang=c :
-     * GDALWarpAppOptions *GDALWarpAppOptionsNew(char **papszArgv, GDALWarpAppOptionsForBinary *psOptionsForBinary)
-     * }
-     */
-    public static FunctionDescriptor GDALWarpAppOptionsNew$descriptor() {
-        return GDALWarpAppOptionsNew.DESC;
-    }
-
-    /**
-     * Downcall method handle for:
-     * {@snippet lang=c :
-     * GDALWarpAppOptions *GDALWarpAppOptionsNew(char **papszArgv, GDALWarpAppOptionsForBinary *psOptionsForBinary)
-     * }
-     */
-    public static MethodHandle GDALWarpAppOptionsNew$handle() {
-        return GDALWarpAppOptionsNew.HANDLE;
-    }
-
-    /**
-     * Address for:
-     * {@snippet lang=c :
-     * GDALWarpAppOptions *GDALWarpAppOptionsNew(char **papszArgv, GDALWarpAppOptionsForBinary *psOptionsForBinary)
-     * }
-     */
-    public static MemorySegment GDALWarpAppOptionsNew$address() {
-        return GDALWarpAppOptionsNew.ADDR;
-    }
-
-    /**
-     * {@snippet lang=c :
-     * GDALWarpAppOptions *GDALWarpAppOptionsNew(char **papszArgv, GDALWarpAppOptionsForBinary *psOptionsForBinary)
-     * }
-     */
-    public static MemorySegment GDALWarpAppOptionsNew(MemorySegment papszArgv, MemorySegment psOptionsForBinary) {
-        var mh$ = GDALWarpAppOptionsNew.HANDLE;
-        try {
-            if (TRACE_DOWNCALLS) {
-                traceDowncall("GDALWarpAppOptionsNew", papszArgv, psOptionsForBinary);
-            }
-            return (MemorySegment)mh$.invokeExact(papszArgv, psOptionsForBinary);
-        } catch (Error | RuntimeException ex) {
-           throw ex;
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
-        }
-    }
-
-    private static class GDALWarpAppOptionsFree {
+    private static class GDALAlgorithmArgRelease {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
             GdalGenerated.C_POINTER
         );
 
-        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALWarpAppOptionsFree");
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmArgRelease");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4388,45 +4684,45 @@ public class GdalGenerated extends GdalGenerated$shared {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * void GDALWarpAppOptionsFree(GDALWarpAppOptions *psOptions)
+     * void GDALAlgorithmArgRelease(GDALAlgorithmArgH)
      * }
      */
-    public static FunctionDescriptor GDALWarpAppOptionsFree$descriptor() {
-        return GDALWarpAppOptionsFree.DESC;
+    public static FunctionDescriptor GDALAlgorithmArgRelease$descriptor() {
+        return GDALAlgorithmArgRelease.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * void GDALWarpAppOptionsFree(GDALWarpAppOptions *psOptions)
+     * void GDALAlgorithmArgRelease(GDALAlgorithmArgH)
      * }
      */
-    public static MethodHandle GDALWarpAppOptionsFree$handle() {
-        return GDALWarpAppOptionsFree.HANDLE;
+    public static MethodHandle GDALAlgorithmArgRelease$handle() {
+        return GDALAlgorithmArgRelease.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * void GDALWarpAppOptionsFree(GDALWarpAppOptions *psOptions)
+     * void GDALAlgorithmArgRelease(GDALAlgorithmArgH)
      * }
      */
-    public static MemorySegment GDALWarpAppOptionsFree$address() {
-        return GDALWarpAppOptionsFree.ADDR;
+    public static MemorySegment GDALAlgorithmArgRelease$address() {
+        return GDALAlgorithmArgRelease.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * void GDALWarpAppOptionsFree(GDALWarpAppOptions *psOptions)
+     * void GDALAlgorithmArgRelease(GDALAlgorithmArgH)
      * }
      */
-    public static void GDALWarpAppOptionsFree(MemorySegment psOptions) {
-        var mh$ = GDALWarpAppOptionsFree.HANDLE;
+    public static void GDALAlgorithmArgRelease(MemorySegment x0) {
+        var mh$ = GDALAlgorithmArgRelease.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("GDALWarpAppOptionsFree", psOptions);
+                traceDowncall("GDALAlgorithmArgRelease", x0);
             }
-            mh$.invokeExact(psOptions);
+            mh$.invokeExact(x0);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {
@@ -4434,79 +4730,13 @@ public class GdalGenerated extends GdalGenerated$shared {
         }
     }
 
-    private static class GDALWarpAppOptionsSetProgress {
-        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
-            GdalGenerated.C_POINTER,
-            GdalGenerated.C_POINTER,
-            GdalGenerated.C_POINTER
-        );
-
-        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALWarpAppOptionsSetProgress");
-
-        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
-    }
-
-    /**
-     * Function descriptor for:
-     * {@snippet lang=c :
-     * void GDALWarpAppOptionsSetProgress(GDALWarpAppOptions *psOptions, GDALProgressFunc pfnProgress, void *pProgressData)
-     * }
-     */
-    public static FunctionDescriptor GDALWarpAppOptionsSetProgress$descriptor() {
-        return GDALWarpAppOptionsSetProgress.DESC;
-    }
-
-    /**
-     * Downcall method handle for:
-     * {@snippet lang=c :
-     * void GDALWarpAppOptionsSetProgress(GDALWarpAppOptions *psOptions, GDALProgressFunc pfnProgress, void *pProgressData)
-     * }
-     */
-    public static MethodHandle GDALWarpAppOptionsSetProgress$handle() {
-        return GDALWarpAppOptionsSetProgress.HANDLE;
-    }
-
-    /**
-     * Address for:
-     * {@snippet lang=c :
-     * void GDALWarpAppOptionsSetProgress(GDALWarpAppOptions *psOptions, GDALProgressFunc pfnProgress, void *pProgressData)
-     * }
-     */
-    public static MemorySegment GDALWarpAppOptionsSetProgress$address() {
-        return GDALWarpAppOptionsSetProgress.ADDR;
-    }
-
-    /**
-     * {@snippet lang=c :
-     * void GDALWarpAppOptionsSetProgress(GDALWarpAppOptions *psOptions, GDALProgressFunc pfnProgress, void *pProgressData)
-     * }
-     */
-    public static void GDALWarpAppOptionsSetProgress(MemorySegment psOptions, MemorySegment pfnProgress, MemorySegment pProgressData) {
-        var mh$ = GDALWarpAppOptionsSetProgress.HANDLE;
-        try {
-            if (TRACE_DOWNCALLS) {
-                traceDowncall("GDALWarpAppOptionsSetProgress", psOptions, pfnProgress, pProgressData);
-            }
-            mh$.invokeExact(psOptions, pfnProgress, pProgressData);
-        } catch (Error | RuntimeException ex) {
-           throw ex;
-        } catch (Throwable ex$) {
-           throw new AssertionError("should not reach here", ex$);
-        }
-    }
-
-    private static class GDALWarp {
+    private static class GDALAlgorithmArgGetType {
         public static final FunctionDescriptor DESC = FunctionDescriptor.of(
-            GdalGenerated.C_POINTER,
-            GdalGenerated.C_POINTER,
-            GdalGenerated.C_POINTER,
             GdalGenerated.C_INT,
-            GdalGenerated.C_POINTER,
-            GdalGenerated.C_POINTER,
             GdalGenerated.C_POINTER
         );
 
-        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALWarp");
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmArgGetType");
 
         public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
     }
@@ -4514,45 +4744,165 @@ public class GdalGenerated extends GdalGenerated$shared {
     /**
      * Function descriptor for:
      * {@snippet lang=c :
-     * GDALDatasetH GDALWarp(const char *pszDest, GDALDatasetH hDstDS, int nSrcCount, GDALDatasetH *pahSrcDS, const GDALWarpAppOptions *psOptions, int *pbUsageError)
+     * GDALAlgorithmArgType GDALAlgorithmArgGetType(GDALAlgorithmArgH)
      * }
      */
-    public static FunctionDescriptor GDALWarp$descriptor() {
-        return GDALWarp.DESC;
+    public static FunctionDescriptor GDALAlgorithmArgGetType$descriptor() {
+        return GDALAlgorithmArgGetType.DESC;
     }
 
     /**
      * Downcall method handle for:
      * {@snippet lang=c :
-     * GDALDatasetH GDALWarp(const char *pszDest, GDALDatasetH hDstDS, int nSrcCount, GDALDatasetH *pahSrcDS, const GDALWarpAppOptions *psOptions, int *pbUsageError)
+     * GDALAlgorithmArgType GDALAlgorithmArgGetType(GDALAlgorithmArgH)
      * }
      */
-    public static MethodHandle GDALWarp$handle() {
-        return GDALWarp.HANDLE;
+    public static MethodHandle GDALAlgorithmArgGetType$handle() {
+        return GDALAlgorithmArgGetType.HANDLE;
     }
 
     /**
      * Address for:
      * {@snippet lang=c :
-     * GDALDatasetH GDALWarp(const char *pszDest, GDALDatasetH hDstDS, int nSrcCount, GDALDatasetH *pahSrcDS, const GDALWarpAppOptions *psOptions, int *pbUsageError)
+     * GDALAlgorithmArgType GDALAlgorithmArgGetType(GDALAlgorithmArgH)
      * }
      */
-    public static MemorySegment GDALWarp$address() {
-        return GDALWarp.ADDR;
+    public static MemorySegment GDALAlgorithmArgGetType$address() {
+        return GDALAlgorithmArgGetType.ADDR;
     }
 
     /**
      * {@snippet lang=c :
-     * GDALDatasetH GDALWarp(const char *pszDest, GDALDatasetH hDstDS, int nSrcCount, GDALDatasetH *pahSrcDS, const GDALWarpAppOptions *psOptions, int *pbUsageError)
+     * GDALAlgorithmArgType GDALAlgorithmArgGetType(GDALAlgorithmArgH)
      * }
      */
-    public static MemorySegment GDALWarp(MemorySegment pszDest, MemorySegment hDstDS, int nSrcCount, MemorySegment pahSrcDS, MemorySegment psOptions, MemorySegment pbUsageError) {
-        var mh$ = GDALWarp.HANDLE;
+    public static int GDALAlgorithmArgGetType(MemorySegment x0) {
+        var mh$ = GDALAlgorithmArgGetType.HANDLE;
         try {
             if (TRACE_DOWNCALLS) {
-                traceDowncall("GDALWarp", pszDest, hDstDS, nSrcCount, pahSrcDS, psOptions, pbUsageError);
+                traceDowncall("GDALAlgorithmArgGetType", x0);
             }
-            return (MemorySegment)mh$.invokeExact(pszDest, hDstDS, nSrcCount, pahSrcDS, psOptions, pbUsageError);
+            return (int)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALAlgorithmArgIsOutput {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_BOOL,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmArgIsOutput");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * bool GDALAlgorithmArgIsOutput(GDALAlgorithmArgH)
+     * }
+     */
+    public static FunctionDescriptor GDALAlgorithmArgIsOutput$descriptor() {
+        return GDALAlgorithmArgIsOutput.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * bool GDALAlgorithmArgIsOutput(GDALAlgorithmArgH)
+     * }
+     */
+    public static MethodHandle GDALAlgorithmArgIsOutput$handle() {
+        return GDALAlgorithmArgIsOutput.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * bool GDALAlgorithmArgIsOutput(GDALAlgorithmArgH)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmArgIsOutput$address() {
+        return GDALAlgorithmArgIsOutput.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * bool GDALAlgorithmArgIsOutput(GDALAlgorithmArgH)
+     * }
+     */
+    public static boolean GDALAlgorithmArgIsOutput(MemorySegment x0) {
+        var mh$ = GDALAlgorithmArgIsOutput.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALAlgorithmArgIsOutput", x0);
+            }
+            return (boolean)mh$.invokeExact(x0);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class GDALAlgorithmArgGetAsString {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("GDALAlgorithmArgGetAsString");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * const char *GDALAlgorithmArgGetAsString(GDALAlgorithmArgH)
+     * }
+     */
+    public static FunctionDescriptor GDALAlgorithmArgGetAsString$descriptor() {
+        return GDALAlgorithmArgGetAsString.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * const char *GDALAlgorithmArgGetAsString(GDALAlgorithmArgH)
+     * }
+     */
+    public static MethodHandle GDALAlgorithmArgGetAsString$handle() {
+        return GDALAlgorithmArgGetAsString.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * const char *GDALAlgorithmArgGetAsString(GDALAlgorithmArgH)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmArgGetAsString$address() {
+        return GDALAlgorithmArgGetAsString.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * const char *GDALAlgorithmArgGetAsString(GDALAlgorithmArgH)
+     * }
+     */
+    public static MemorySegment GDALAlgorithmArgGetAsString(MemorySegment x0) {
+        var mh$ = GDALAlgorithmArgGetAsString.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("GDALAlgorithmArgGetAsString", x0);
+            }
+            return (MemorySegment)mh$.invokeExact(x0);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {
@@ -4920,6 +5270,65 @@ public class GdalGenerated extends GdalGenerated$shared {
                 traceDowncall("CPLSetConfigOption", x0, x1);
             }
             mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class CSLDestroy {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("CSLDestroy");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void CSLDestroy(char **papszStrList)
+     * }
+     */
+    public static FunctionDescriptor CSLDestroy$descriptor() {
+        return CSLDestroy.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void CSLDestroy(char **papszStrList)
+     * }
+     */
+    public static MethodHandle CSLDestroy$handle() {
+        return CSLDestroy.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void CSLDestroy(char **papszStrList)
+     * }
+     */
+    public static MemorySegment CSLDestroy$address() {
+        return CSLDestroy.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void CSLDestroy(char **papszStrList)
+     * }
+     */
+    public static void CSLDestroy(MemorySegment papszStrList) {
+        var mh$ = CSLDestroy.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("CSLDestroy", papszStrList);
+            }
+            mh$.invokeExact(papszStrList);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {

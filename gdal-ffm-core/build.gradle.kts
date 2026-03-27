@@ -5,6 +5,36 @@ plugins {
     `maven-publish`
 }
 
+fun currentNativeClassifier(): String {
+    val os = System.getProperty("os.name").lowercase()
+    val arch = System.getProperty("os.arch").lowercase()
+
+    return when {
+        os.contains("mac") || os.contains("darwin") -> when (arch) {
+            "aarch64", "arm64" -> "osx-aarch64"
+            "x86_64", "amd64" -> "osx-x86_64"
+            else -> error("Unsupported macOS architecture for native test resources: $arch")
+        }
+        os.contains("linux") -> when (arch) {
+            "aarch64", "arm64" -> "linux-aarch64"
+            "x86_64", "amd64" -> "linux-x86_64"
+            else -> error("Unsupported Linux architecture for native test resources: $arch")
+        }
+        os.contains("win") -> when (arch) {
+            "x86_64", "amd64" -> "windows-x86_64"
+            else -> error("Unsupported Windows architecture for native test resources: $arch")
+        }
+        else -> error("Unsupported operating system for native test resources: $os")
+    }
+}
+
+val hostNativeClassifier = currentNativeClassifier()
+val hostNativeResources = tasks.register<Sync>("hostNativeResources") {
+    from(project(":gdal-ffm-natives").layout.projectDirectory.dir("src/main/resources")) {
+        include("META-INF/gdal-native/$hostNativeClassifier/**")
+    }
+    into(layout.buildDirectory.dir("host-native-resources"))
+}
 
 val javaToolchainVersion = providers.gradleProperty("gdalFfmJavaToolchainVersion")
     .map(String::toInt)
@@ -60,30 +90,26 @@ tasks.test {
 val integrationTest = tasks.register<Test>("integrationTest") {
     description = "Runs integration tests that require bundled GDAL libraries."
     group = LifecycleBasePlugin.VERIFICATION_GROUP
+    dependsOn(hostNativeResources)
     testClassesDirs = sourceSets["integrationTest"].output.classesDirs
-    val nativesResources = project(":gdal-ffm-natives")
-        .layout.projectDirectory
-        .dir("src/main/resources")
-    classpath = sourceSets["integrationTest"].runtimeClasspath + files(nativesResources)
+    classpath = sourceSets["integrationTest"].runtimeClasspath + files(hostNativeResources)
     shouldRunAfter(tasks.test)
     onlyIf {
         System.getenv("GDAL_FFM_RUN_INTEGRATION") == "true"
     }
+    maxHeapSize = "2g"
     jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
 
 tasks.register<JavaExec>("smokeTest") {
     description = "Runs a GDAL translate smoke test using repository test data."
     group = LifecycleBasePlugin.VERIFICATION_GROUP
-    dependsOn("integrationTestClasses")
+    dependsOn("integrationTestClasses", hostNativeResources)
 
     val inputFile = layout.projectDirectory.file("src/integrationTest/resources/smoke/reclass.tif").asFile
     val outputFile = layout.buildDirectory.file("smoke-test-output/reclass-smoke.tif").get().asFile
-    val nativesResources = project(":gdal-ffm-natives")
-        .layout.projectDirectory
-        .dir("src/main/resources")
 
-    classpath = sourceSets["integrationTest"].runtimeClasspath + files(nativesResources)
+    classpath = sourceSets["integrationTest"].runtimeClasspath + files(hostNativeResources)
     mainClass.set("ch.so.agi.gdal.ffm.GdalSmoke")
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     inputs.file(inputFile)

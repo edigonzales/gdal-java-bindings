@@ -2,12 +2,13 @@
 
 Java 23 FFM bindings for GDAL/OGR utilities and vector streaming with bundled native libraries.
 The public API now covers the raster operations required by the Hop raster suite as well:
-`info`, `translate`, `warp`, `buildVrt`, `rasterize`, structured dataset references and scoped
+`rasterInfo`, `rasterConvert`, `rasterClip`, `rasterReproject`, `rasterResize`, `rasterMosaic`,
+`vectorRasterize`, structured dataset references and scoped
 GDAL/VSI configuration.
 
 ## Modules
 
-- `gdal-ffm-core`: public Java API (`Gdal.info`, `Gdal.translate`, `Gdal.warp`, `Gdal.buildVrt`, `Gdal.rasterize`, `Gdal.vectorTranslate`, `Ogr.*`), native loader, error/progress bridge.
+- `gdal-ffm-core`: public Java API (`Gdal.rasterInfo`, `Gdal.rasterConvert`, `Gdal.rasterClip`, `Gdal.rasterReproject`, `Gdal.rasterResize`, `Gdal.rasterMosaic`, `Gdal.vectorRasterize`, `Gdal.vectorTranslate`, `Ogr.*`), native loader, error/progress bridge.
 - `gdal-ffm-natives`: classifier JARs that package native GDAL libs + `share/gdal` + `share/proj`.
 - `gdal-ffm-natives-swiss`: optional classifier JARs with the same native libs, but a Swiss-focused `share/proj` subset.
 
@@ -71,33 +72,34 @@ Gdal.vectorTranslate(
     "-overwrite"
 );
 
-String infoJson = Gdal.info(Path.of("input.tif"), "-json");
+String infoJson = Gdal.rasterInfo(Path.of("input.tif"), "--output-format", "json");
 
-Gdal.translate(
+Gdal.rasterConvert(
     Path.of("output-cog.tif"),
     Path.of("input.tif"),
-    "-of", "COG",
-    "-co", "COMPRESS=ZSTD"
+    "--output-format", "COG",
+    "--creation-option", "COMPRESS=ZSTD"
 );
 
-Gdal.warp(
+Gdal.rasterReproject(
     Path.of("warped.tif"),
     Path.of("input.tif"),
-    "-t_srs", "EPSG:2056",
-    "-r", "bilinear"
+    "--dst-crs", "EPSG:2056",
+    "--resampling", "bilinear"
 );
 
-Gdal.buildVrt(
+Gdal.rasterMosaic(
     Path.of("mosaic.vrt"),
-    List.of(Path.of("a.tif"), Path.of("b.tif"))
+    List.of(Path.of("a.tif"), Path.of("b.tif")),
+    "--output-format", "VRT"
 );
 
-Gdal.rasterize(
+Gdal.vectorRasterize(
     Path.of("out.tif"),
     Path.of("features.geojson"),
-    "-burn", "1",
-    "-te", "0", "0", "100", "100",
-    "-tr", "1", "1"
+    "--burn", "1",
+    "--extent", "0,0,100,100",
+    "--resolution", "1,1"
 );
 ```
 
@@ -110,7 +112,7 @@ DatasetRef remoteCog = DatasetRef.httpUrl("https://example.org/cog.tif");
 GdalConfig config = GdalConfig.empty()
     .withConfigOption("GDAL_HTTP_BEARER", "token");
 
-String json = Gdal.info(remoteCog, config, "-json");
+String json = Gdal.rasterInfo(remoteCog, config, "--output-format", "json");
 ```
 
 Supported `DatasetRef` types:
@@ -125,14 +127,14 @@ operation through `ScopedGdalConfig`, so auth/config does not remain globally ac
 Progress callback:
 
 ```java
-Gdal.translate(
+Gdal.rasterConvert(
     Path.of("out.tif"),
     Path.of("in.tif"),
     (complete, message) -> {
         System.out.printf("%.1f%% %s%n", complete * 100.0, message);
         return true;
     },
-    "-of", "COG"
+    "--output-format", "COG"
 );
 ```
 
@@ -331,7 +333,7 @@ Swiss variant for the same classifier:
 4. Clear extracted native cache for the exact GDAL/platform tuple:
 
 ```bash
-rm -rf "$TMPDIR/gdal-ffm/3.11.1/osx-aarch64"
+rm -rf "$TMPDIR/gdal-ffm/3.12.2/osx-aarch64"
 ```
 
 Why: `NativeLoader` extracts once into `java.io.tmpdir`. If you do not clear this folder, updated native jars may not be re-extracted.

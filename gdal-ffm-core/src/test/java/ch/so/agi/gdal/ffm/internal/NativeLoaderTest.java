@@ -46,7 +46,7 @@ class NativeLoaderTest {
 
     @Test
     void recognizesLibraryAlreadyLoadedInAnotherClassLoaderMessage() throws Exception {
-        Path libPath = Path.of("/tmp/gdal-ffm/3.11.1/osx-aarch64/lib/libproj.25.dylib");
+        Path libPath = Path.of("/tmp/gdal-ffm/3.12.2/osx-aarch64/lib/libproj.25.dylib");
 
         boolean recognized = invokeAlreadyLoadedByOtherClassLoader(
                 new UnsatisfiedLinkError("Native Library " + libPath + " already loaded in another classloader"),
@@ -59,6 +59,24 @@ class NativeLoaderTest {
                 libPath
         );
         assertFalse(unrelated);
+    }
+
+    @Test
+    void usesFileTreeBundleRootDirectly() throws Exception {
+        Path manifestRoot = createManifestRoot("native-loader-refresh");
+        URL manifestUrl = manifestRoot.resolve("META-INF/gdal-native/" + CLASSIFIER + "/manifest.json").toUri().toURL();
+
+        Path bundleRoot = invokeResolveBundleRoot(manifestUrl);
+        assertEquals(manifestRoot.resolve("META-INF/gdal-native/" + CLASSIFIER), bundleRoot);
+    }
+
+    @Test
+    void resolvesFileTreeRootFromManifestUrl() throws Exception {
+        Path manifestRoot = createManifestRoot("native-loader-file-root");
+        URL manifestUrl = manifestRoot.resolve("META-INF/gdal-native/" + CLASSIFIER + "/manifest.json").toUri().toURL();
+
+        Path bundleRoot = invokeFileTreeRoot(manifestUrl);
+        assertEquals(manifestRoot.resolve("META-INF/gdal-native/" + CLASSIFIER), bundleRoot);
     }
 
     private static URL invokeFindManifest(URLClassLoader classLoader) {
@@ -91,6 +109,43 @@ class NativeLoaderTest {
             );
             method.setAccessible(true);
             return (boolean) method.invoke(null, error, libPath);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new RuntimeException(cause);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Path invokeResolveBundleRoot(URL manifestUrl) {
+        try {
+            Method method = NativeLoader.class.getDeclaredMethod(
+                    "resolveBundleRoot",
+                    URL.class,
+                    String.class,
+                    String.class
+            );
+            method.setAccessible(true);
+            return (Path) method.invoke(null, manifestUrl, "3.12.2", CLASSIFIER);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new RuntimeException(cause);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Path invokeFileTreeRoot(URL manifestUrl) {
+        try {
+            Method method = NativeLoader.class.getDeclaredMethod("fileTreeRoot", URL.class);
+            method.setAccessible(true);
+            return (Path) method.invoke(null, manifestUrl);
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException runtimeException) {

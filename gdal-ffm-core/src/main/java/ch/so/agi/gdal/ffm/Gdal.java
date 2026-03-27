@@ -19,45 +19,61 @@ public final class Gdal {
         GdalRuntime.vectorTranslate(dest, src, progress, args);
     }
 
-    public static void warp(Path dest, Path src, String... args) {
-        warp(dest, src, null, args);
+    public static void rasterConvert(Path dest, Path src, String... args) {
+        rasterConvert(dest, src, null, args);
     }
 
-    public static void warp(Path dest, Path src, ProgressCallback progress, String... args) {
-        warp(DatasetRef.local(dest), DatasetRef.local(src), GdalConfig.empty(), progress, args);
+    public static void rasterConvert(Path dest, Path src, ProgressCallback progress, String... args) {
+        rasterConvert(DatasetRef.local(dest), DatasetRef.local(src), GdalConfig.empty(), progress, args);
     }
 
-    public static void translate(Path dest, Path src, String... args) {
-        translate(dest, src, null, args);
+    public static void rasterClip(Path dest, Path src, String... args) {
+        rasterClip(dest, src, null, args);
     }
 
-    public static void translate(Path dest, Path src, ProgressCallback progress, String... args) {
-        translate(DatasetRef.local(dest), DatasetRef.local(src), GdalConfig.empty(), progress, args);
+    public static void rasterClip(Path dest, Path src, ProgressCallback progress, String... args) {
+        rasterClip(DatasetRef.local(dest), DatasetRef.local(src), GdalConfig.empty(), progress, args);
     }
 
-    public static String info(Path src, String... args) {
-        return info(DatasetRef.local(src), GdalConfig.empty(), args);
+    public static void rasterReproject(Path dest, Path src, String... args) {
+        rasterReproject(dest, src, null, args);
     }
 
-    public static String info(DatasetRef src, String... args) {
-        return info(src, GdalConfig.empty(), args);
+    public static void rasterReproject(Path dest, Path src, ProgressCallback progress, String... args) {
+        rasterReproject(DatasetRef.local(dest), DatasetRef.local(src), GdalConfig.empty(), progress, args);
     }
 
-    public static String info(DatasetRef src, GdalConfig config, String... args) {
+    public static void rasterResize(Path dest, Path src, String... args) {
+        rasterResize(dest, src, null, args);
+    }
+
+    public static void rasterResize(Path dest, Path src, ProgressCallback progress, String... args) {
+        rasterResize(DatasetRef.local(dest), DatasetRef.local(src), GdalConfig.empty(), progress, args);
+    }
+
+    public static String rasterInfo(Path src, String... args) {
+        return rasterInfo(DatasetRef.local(src), GdalConfig.empty(), args);
+    }
+
+    public static String rasterInfo(DatasetRef src, String... args) {
+        return rasterInfo(src, GdalConfig.empty(), args);
+    }
+
+    public static String rasterInfo(DatasetRef src, GdalConfig config, String... args) {
         Objects.requireNonNull(src, "src must not be null");
         Objects.requireNonNull(config, "config must not be null");
-        return GdalRuntime.info(src, config, args);
+        return GdalRuntime.rasterInfo(src, config, args);
     }
 
-    public static void warp(DatasetRef dest, DatasetRef src, String... args) {
-        warp(dest, src, GdalConfig.empty(), null, args);
+    public static void rasterConvert(DatasetRef dest, DatasetRef src, String... args) {
+        rasterConvert(dest, src, GdalConfig.empty(), null, args);
     }
 
-    public static void warp(DatasetRef dest, DatasetRef src, GdalConfig config, String... args) {
-        warp(dest, src, config, null, args);
+    public static void rasterConvert(DatasetRef dest, DatasetRef src, GdalConfig config, String... args) {
+        rasterConvert(dest, src, config, null, args);
     }
 
-    public static void warp(
+    public static void rasterConvert(
             DatasetRef dest,
             DatasetRef src,
             GdalConfig config,
@@ -67,18 +83,18 @@ public final class Gdal {
         Objects.requireNonNull(dest, "dest must not be null");
         Objects.requireNonNull(src, "src must not be null");
         Objects.requireNonNull(config, "config must not be null");
-        GdalRuntime.warp(dest, src, config, progress, args);
+        GdalRuntime.rasterConvert(dest, src, config, progress, args);
     }
 
-    public static void translate(DatasetRef dest, DatasetRef src, String... args) {
-        translate(dest, src, GdalConfig.empty(), null, args);
+    public static void rasterClip(DatasetRef dest, DatasetRef src, String... args) {
+        rasterClip(dest, src, GdalConfig.empty(), null, args);
     }
 
-    public static void translate(DatasetRef dest, DatasetRef src, GdalConfig config, String... args) {
-        translate(dest, src, config, null, args);
+    public static void rasterClip(DatasetRef dest, DatasetRef src, GdalConfig config, String... args) {
+        rasterClip(dest, src, config, null, args);
     }
 
-    public static void translate(
+    public static void rasterClip(
             DatasetRef dest,
             DatasetRef src,
             GdalConfig config,
@@ -88,28 +104,76 @@ public final class Gdal {
         Objects.requireNonNull(dest, "dest must not be null");
         Objects.requireNonNull(src, "src must not be null");
         Objects.requireNonNull(config, "config must not be null");
-        GdalRuntime.translate(dest, src, config, progress, args);
+        GdalRuntime.rasterClip(dest, src, config, progress, args);
     }
 
-    public static void buildVrt(Path dest, List<Path> sources, String... args) {
+    public static void rasterReproject(DatasetRef dest, DatasetRef src, String... args) {
+        rasterReproject(dest, src, GdalConfig.empty(), null, args);
+    }
+
+    public static void rasterReproject(DatasetRef dest, DatasetRef src, GdalConfig config, String... args) {
+        rasterReproject(dest, src, config, null, args);
+    }
+
+    public static void rasterReproject(
+            DatasetRef dest,
+            DatasetRef src,
+            GdalConfig config,
+            ProgressCallback progress,
+            String... args
+    ) {
+        Objects.requireNonNull(dest, "dest must not be null");
+        Objects.requireNonNull(src, "src must not be null");
+        Objects.requireNonNull(config, "config must not be null");
+        GdalRuntime.rasterReproject(dest, src, config, progress, args);
+    }
+
+    public static void rasterResize(DatasetRef dest, DatasetRef src, String... args) {
+        rasterResize(dest, src, GdalConfig.empty(), null, args);
+    }
+
+    public static void rasterResize(DatasetRef dest, DatasetRef src, GdalConfig config, String... args) {
+        rasterResize(dest, src, config, null, args);
+    }
+
+    public static void rasterResize(
+            DatasetRef dest,
+            DatasetRef src,
+            GdalConfig config,
+            ProgressCallback progress,
+            String... args
+    ) {
+        Objects.requireNonNull(dest, "dest must not be null");
+        Objects.requireNonNull(src, "src must not be null");
+        Objects.requireNonNull(config, "config must not be null");
+        GdalRuntime.rasterResize(dest, src, config, progress, args);
+    }
+
+    public static void rasterMosaic(Path dest, List<Path> sources, String... args) {
         Objects.requireNonNull(sources, "sources must not be null");
-        buildVrt(DatasetRef.local(dest), sources.stream().map(DatasetRef::local).toList(), GdalConfig.empty(), null, args);
+        rasterMosaic(
+                DatasetRef.local(dest),
+                sources.stream().map(DatasetRef::local).toList(),
+                GdalConfig.empty(),
+                null,
+                args
+        );
     }
 
-    public static void buildVrt(DatasetRef dest, List<DatasetRef> sources, String... args) {
-        buildVrt(dest, sources, GdalConfig.empty(), null, args);
+    public static void rasterMosaic(DatasetRef dest, List<DatasetRef> sources, String... args) {
+        rasterMosaic(dest, sources, GdalConfig.empty(), null, args);
     }
 
-    public static void buildVrt(
+    public static void rasterMosaic(
             DatasetRef dest,
             List<DatasetRef> sources,
             GdalConfig config,
             String... args
     ) {
-        buildVrt(dest, sources, config, null, args);
+        rasterMosaic(dest, sources, config, null, args);
     }
 
-    public static void buildVrt(
+    public static void rasterMosaic(
             DatasetRef dest,
             List<DatasetRef> sources,
             GdalConfig config,
@@ -119,27 +183,27 @@ public final class Gdal {
         Objects.requireNonNull(dest, "dest must not be null");
         Objects.requireNonNull(sources, "sources must not be null");
         Objects.requireNonNull(config, "config must not be null");
-        GdalRuntime.buildVrt(dest, sources, config, progress, args);
+        GdalRuntime.rasterMosaic(dest, sources, config, progress, args);
     }
 
-    public static void rasterize(Path dest, Path src, String... args) {
-        rasterize(DatasetRef.local(dest), DatasetRef.local(src), GdalConfig.empty(), null, args);
+    public static void vectorRasterize(Path dest, Path src, String... args) {
+        vectorRasterize(DatasetRef.local(dest), DatasetRef.local(src), GdalConfig.empty(), null, args);
     }
 
-    public static void rasterize(DatasetRef dest, DatasetRef src, String... args) {
-        rasterize(dest, src, GdalConfig.empty(), null, args);
+    public static void vectorRasterize(DatasetRef dest, DatasetRef src, String... args) {
+        vectorRasterize(dest, src, GdalConfig.empty(), null, args);
     }
 
-    public static void rasterize(
+    public static void vectorRasterize(
             DatasetRef dest,
             DatasetRef src,
             GdalConfig config,
             String... args
     ) {
-        rasterize(dest, src, config, null, args);
+        vectorRasterize(dest, src, config, null, args);
     }
 
-    public static void rasterize(
+    public static void vectorRasterize(
             DatasetRef dest,
             DatasetRef src,
             GdalConfig config,
@@ -149,7 +213,7 @@ public final class Gdal {
         Objects.requireNonNull(dest, "dest must not be null");
         Objects.requireNonNull(src, "src must not be null");
         Objects.requireNonNull(config, "config must not be null");
-        GdalRuntime.rasterize(dest, src, config, progress, args);
+        GdalRuntime.vectorRasterize(dest, src, config, progress, args);
     }
 
     public static List<RasterDriverInfo> listWritableRasterDrivers() {

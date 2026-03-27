@@ -14,7 +14,7 @@ public final class GdalSmoke {
         Path output = Path.of(args[0]);
         Path input = Path.of(args[1]);
 
-        Gdal.translate(output, input, "-of", "GTiff");
+        Gdal.rasterConvert(output, input, "--overwrite", "--output-format", "GTiff");
         System.out.println("OK");
     }
 }

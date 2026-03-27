@@ -83,38 +83,19 @@ public final class GdalRuntime {
         }
     }
 
-    public static String info(DatasetRef src, GdalConfig config, String... args) {
+    public static String rasterInfo(DatasetRef src, GdalConfig config, String... args) {
         Objects.requireNonNull(src, "src must not be null");
         Objects.requireNonNull(config, "config must not be null");
         initialize();
-
-        MemorySegment options = MemorySegment.NULL;
-        MemorySegment sourceDataset = MemorySegment.NULL;
-        MemorySegment result = MemorySegment.NULL;
-
-        GdalGenerated.CPLErrorReset();
-        try (GdalConfigScope.ScopedConfigHandle ignored = GdalConfigScope.applyScoped(config);
-             Arena arena = Arena.ofConfined()) {
-            MemorySegment argv = CArgv.toCStringArray(args, arena);
-            options = GdalNative.GDALInfoOptionsNew(argv);
-            if (CStrings.isNull(options)) {
-                throw GdalErrors.lastError("Failed to create GDALInfoOptions");
-            }
-
-            sourceDataset = openDataset(src, GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR, arena);
-            result = GdalNative.GDALInfo(sourceDataset, options);
-            if (CStrings.isNull(result)) {
-                throw GdalErrors.lastError("GDALInfo failed");
-            }
-            return CStrings.fromCString(result);
-        } finally {
-            freeQuietly(result, GdalGenerated::VSIFree);
-            freeQuietly(options, GdalNative::GDALInfoOptionsFree);
-            closeDatasetQuietly(sourceDataset);
-        }
+        return GdalAlgorithmRunner.runForStringOutput(
+                List.of("raster", "info"),
+                config,
+                null,
+                withInputArg(src, args)
+        );
     }
 
-    public static void warp(
+    public static void rasterClip(
             DatasetRef dest,
             DatasetRef src,
             GdalConfig config,
@@ -125,55 +106,10 @@ public final class GdalRuntime {
         Objects.requireNonNull(src, "src must not be null");
         Objects.requireNonNull(config, "config must not be null");
         initialize();
-
-        MemorySegment options = MemorySegment.NULL;
-        MemorySegment sourceDataset = MemorySegment.NULL;
-        MemorySegment resultDataset = MemorySegment.NULL;
-
-        GdalGenerated.CPLErrorReset();
-        try (GdalConfigScope.ScopedConfigHandle ignored = GdalConfigScope.applyScoped(config);
-             Arena arena = Arena.ofConfined();
-             ProgressBridge.ProgressHandle progressHandle = ProgressBridge.create(progress, arena)) {
-            MemorySegment argv = CArgv.toCStringArray(args, arena);
-            options = GdalGenerated.GDALWarpAppOptionsNew(argv, MemorySegment.NULL);
-            if (CStrings.isNull(options)) {
-                throw GdalErrors.lastError("Failed to create GDALWarpAppOptions");
-            }
-
-            if (!CStrings.isNull(progressHandle.callbackFn())) {
-                GdalGenerated.GDALWarpAppOptionsSetProgress(options, progressHandle.callbackFn(), progressHandle.userData());
-            }
-
-            sourceDataset = openDataset(src, GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR, arena);
-
-            MemorySegment sources = arena.allocate(ValueLayout.ADDRESS);
-            sources.set(ValueLayout.ADDRESS, 0, sourceDataset);
-
-            MemorySegment usageError = arena.allocate(ValueLayout.JAVA_INT);
-            MemorySegment destination = arena.allocateFrom(dest.toGdalIdentifier());
-
-            resultDataset = GdalGenerated.GDALWarp(
-                    destination,
-                    MemorySegment.NULL,
-                    1,
-                    sources,
-                    options,
-                    usageError
-            );
-
-            throwIfCallbackFailed(progressHandle);
-
-            if (usageError.get(ValueLayout.JAVA_INT, 0) != 0 || CStrings.isNull(resultDataset)) {
-                throw GdalErrors.lastError("GDALWarp failed");
-            }
-        } finally {
-            freeQuietly(options, GdalGenerated::GDALWarpAppOptionsFree);
-            closeDatasetQuietly(resultDataset);
-            closeDatasetQuietly(sourceDataset);
-        }
+        GdalAlgorithmRunner.run(List.of("raster", "clip"), config, progress, withInputOutputArgs(src, dest, args));
     }
 
-    public static void translate(
+    public static void rasterConvert(
             DatasetRef dest,
             DatasetRef src,
             GdalConfig config,
@@ -184,50 +120,43 @@ public final class GdalRuntime {
         Objects.requireNonNull(src, "src must not be null");
         Objects.requireNonNull(config, "config must not be null");
         initialize();
-
-        MemorySegment options = MemorySegment.NULL;
-        MemorySegment sourceDataset = MemorySegment.NULL;
-        MemorySegment resultDataset = MemorySegment.NULL;
-
-        GdalGenerated.CPLErrorReset();
-        try (GdalConfigScope.ScopedConfigHandle ignored = GdalConfigScope.applyScoped(config);
-             Arena arena = Arena.ofConfined();
-             ProgressBridge.ProgressHandle progressHandle = ProgressBridge.create(progress, arena)) {
-            MemorySegment argv = CArgv.toCStringArray(args, arena);
-            options = GdalGenerated.GDALTranslateOptionsNew(argv, MemorySegment.NULL);
-            if (CStrings.isNull(options)) {
-                throw GdalErrors.lastError("Failed to create GDALTranslateOptions");
-            }
-
-            if (!CStrings.isNull(progressHandle.callbackFn())) {
-                GdalGenerated.GDALTranslateOptionsSetProgress(options, progressHandle.callbackFn(), progressHandle.userData());
-            }
-
-            sourceDataset = openDataset(src, GDAL_OF_RASTER | GDAL_OF_VERBOSE_ERROR, arena);
-
-            MemorySegment usageError = arena.allocate(ValueLayout.JAVA_INT);
-            MemorySegment destination = arena.allocateFrom(dest.toGdalIdentifier());
-
-            resultDataset = GdalGenerated.GDALTranslate(
-                    destination,
-                    sourceDataset,
-                    options,
-                    usageError
-            );
-
-            throwIfCallbackFailed(progressHandle);
-
-            if (usageError.get(ValueLayout.JAVA_INT, 0) != 0 || CStrings.isNull(resultDataset)) {
-                throw GdalErrors.lastError("GDALTranslate failed");
-            }
-        } finally {
-            freeQuietly(options, GdalGenerated::GDALTranslateOptionsFree);
-            closeDatasetQuietly(resultDataset);
-            closeDatasetQuietly(sourceDataset);
-        }
+        GdalAlgorithmRunner.run(List.of("raster", "convert"), config, progress, withInputOutputArgs(src, dest, args));
     }
 
-    public static void buildVrt(
+    public static void rasterReproject(
+            DatasetRef dest,
+            DatasetRef src,
+            GdalConfig config,
+            ProgressCallback progress,
+            String... args
+    ) {
+        Objects.requireNonNull(dest, "dest must not be null");
+        Objects.requireNonNull(src, "src must not be null");
+        Objects.requireNonNull(config, "config must not be null");
+        initialize();
+        GdalAlgorithmRunner.run(
+                List.of("raster", "reproject"),
+                config,
+                progress,
+                withInputOutputArgs(src, dest, args)
+        );
+    }
+
+    public static void rasterResize(
+            DatasetRef dest,
+            DatasetRef src,
+            GdalConfig config,
+            ProgressCallback progress,
+            String... args
+    ) {
+        Objects.requireNonNull(dest, "dest must not be null");
+        Objects.requireNonNull(src, "src must not be null");
+        Objects.requireNonNull(config, "config must not be null");
+        initialize();
+        GdalAlgorithmRunner.run(List.of("raster", "resize"), config, progress, withInputOutputArgs(src, dest, args));
+    }
+
+    public static void rasterMosaic(
             DatasetRef dest,
             List<DatasetRef> sources,
             GdalConfig config,
@@ -242,53 +171,15 @@ public final class GdalRuntime {
         }
 
         initialize();
-
-        MemorySegment options = MemorySegment.NULL;
-        MemorySegment resultDataset = MemorySegment.NULL;
-
-        GdalGenerated.CPLErrorReset();
-        try (GdalConfigScope.ScopedConfigHandle ignored = GdalConfigScope.applyScoped(config);
-             Arena arena = Arena.ofConfined();
-             ProgressBridge.ProgressHandle progressHandle = ProgressBridge.create(progress, arena)) {
-            MemorySegment argv = CArgv.toCStringArray(args, arena);
-            options = GdalNative.GDALBuildVRTOptionsNew(argv);
-            if (CStrings.isNull(options)) {
-                throw GdalErrors.lastError("Failed to create GDALBuildVRTOptions");
-            }
-
-            if (!CStrings.isNull(progressHandle.callbackFn())) {
-                GdalNative.GDALBuildVRTOptionsSetProgress(options, progressHandle.callbackFn(), progressHandle.userData());
-            }
-
-            MemorySegment sourceNames = arena.allocate(ValueLayout.ADDRESS, sources.size() + 1L);
-            for (int i = 0; i < sources.size(); i++) {
-                sourceNames.setAtIndex(ValueLayout.ADDRESS, i, arena.allocateFrom(sources.get(i).toGdalIdentifier()));
-            }
-            sourceNames.setAtIndex(ValueLayout.ADDRESS, sources.size(), MemorySegment.NULL);
-
-            MemorySegment usageError = arena.allocate(ValueLayout.JAVA_INT);
-            MemorySegment destination = arena.allocateFrom(dest.toGdalIdentifier());
-
-            resultDataset = GdalNative.GDALBuildVRT(
-                    destination,
-                    sources.size(),
-                    sourceNames,
-                    options,
-                    usageError
-            );
-
-            throwIfCallbackFailed(progressHandle);
-
-            if (usageError.get(ValueLayout.JAVA_INT, 0) != 0 || CStrings.isNull(resultDataset)) {
-                throw GdalErrors.lastError("GDALBuildVRT failed");
-            }
-        } finally {
-            freeQuietly(options, GdalNative::GDALBuildVRTOptionsFree);
-            closeDatasetQuietly(resultDataset);
-        }
+        GdalAlgorithmRunner.run(
+                List.of("raster", "mosaic"),
+                config,
+                progress,
+                withInputOutputArgs(sources, dest, args)
+        );
     }
 
-    public static void rasterize(
+    public static void vectorRasterize(
             DatasetRef dest,
             DatasetRef src,
             GdalConfig config,
@@ -299,42 +190,7 @@ public final class GdalRuntime {
         Objects.requireNonNull(src, "src must not be null");
         Objects.requireNonNull(config, "config must not be null");
         initialize();
-
-        MemorySegment options = MemorySegment.NULL;
-        MemorySegment sourceDataset = MemorySegment.NULL;
-        MemorySegment resultDataset = MemorySegment.NULL;
-
-        GdalGenerated.CPLErrorReset();
-        try (GdalConfigScope.ScopedConfigHandle ignored = GdalConfigScope.applyScoped(config);
-             Arena arena = Arena.ofConfined();
-             ProgressBridge.ProgressHandle progressHandle = ProgressBridge.create(progress, arena)) {
-            MemorySegment argv = CArgv.toCStringArray(args, arena);
-            options = GdalNative.GDALRasterizeOptionsNew(argv);
-            if (CStrings.isNull(options)) {
-                throw GdalErrors.lastError("Failed to create GDALRasterizeOptions");
-            }
-
-            if (!CStrings.isNull(progressHandle.callbackFn())) {
-                GdalNative.GDALRasterizeOptionsSetProgress(options, progressHandle.callbackFn(), progressHandle.userData());
-            }
-
-            sourceDataset = openDataset(src, GDAL_OF_VECTOR | GDAL_OF_VERBOSE_ERROR, arena);
-
-            MemorySegment usageError = arena.allocate(ValueLayout.JAVA_INT);
-            MemorySegment destination = arena.allocateFrom(dest.toGdalIdentifier());
-
-            resultDataset = GdalNative.GDALRasterize(destination, sourceDataset, options, usageError);
-
-            throwIfCallbackFailed(progressHandle);
-
-            if (usageError.get(ValueLayout.JAVA_INT, 0) != 0 || CStrings.isNull(resultDataset)) {
-                throw GdalErrors.lastError("GDALRasterize failed");
-            }
-        } finally {
-            freeQuietly(options, GdalNative::GDALRasterizeOptionsFree);
-            closeDatasetQuietly(resultDataset);
-            closeDatasetQuietly(sourceDataset);
-        }
+        GdalAlgorithmRunner.run(List.of("vector", "rasterize"), config, progress, withInputOutputArgs(src, dest, args));
     }
 
     public static List<RasterDriverInfo> listWritableRasterDrivers() {
@@ -500,6 +356,57 @@ public final class GdalRuntime {
         System.setProperty(key, value.toAbsolutePath().toString());
     }
 
+    @FunctionalInterface
+    private interface NativeFree {
+        void free(MemorySegment segment);
+    }
+
+    private static void freeQuietly(MemorySegment segment, NativeFree free) {
+        if (CStrings.isNull(segment)) {
+            return;
+        }
+        try {
+            free.free(segment);
+        } catch (RuntimeException ignored) {
+            // Keep cleanup best-effort and preserve root cause from the utility call.
+        }
+    }
+
+    private static List<String> withInputArg(DatasetRef input, String... args) {
+        Objects.requireNonNull(input, "input must not be null");
+        ArrayList<String> commandLineArgs = new ArrayList<>();
+        if (args != null) {
+            commandLineArgs.addAll(List.of(args));
+        }
+        commandLineArgs.add("-i");
+        commandLineArgs.add(input.toGdalIdentifier());
+        return commandLineArgs;
+    }
+
+    private static List<String> withInputOutputArgs(DatasetRef input, DatasetRef output, String... args) {
+        Objects.requireNonNull(output, "output must not be null");
+        ArrayList<String> commandLineArgs = new ArrayList<>(withInputArg(input, args));
+        commandLineArgs.add("-o");
+        commandLineArgs.add(output.toGdalIdentifier());
+        return commandLineArgs;
+    }
+
+    private static List<String> withInputOutputArgs(List<DatasetRef> inputs, DatasetRef output, String... args) {
+        Objects.requireNonNull(inputs, "inputs must not be null");
+        Objects.requireNonNull(output, "output must not be null");
+        ArrayList<String> commandLineArgs = new ArrayList<>();
+        if (args != null) {
+            commandLineArgs.addAll(List.of(args));
+        }
+        for (DatasetRef input : inputs) {
+            commandLineArgs.add("-i");
+            commandLineArgs.add(input.toGdalIdentifier());
+        }
+        commandLineArgs.add("-o");
+        commandLineArgs.add(output.toGdalIdentifier());
+        return commandLineArgs;
+    }
+
     private static void closeDatasetQuietly(MemorySegment dataset) {
         if (CStrings.isNull(dataset)) {
             return;
@@ -515,22 +422,6 @@ public final class GdalRuntime {
         RuntimeException callbackFailure = progressHandle.callbackFailure();
         if (callbackFailure != null) {
             throw callbackFailure;
-        }
-    }
-
-    @FunctionalInterface
-    private interface NativeFree {
-        void free(MemorySegment segment);
-    }
-
-    private static void freeQuietly(MemorySegment segment, NativeFree free) {
-        if (CStrings.isNull(segment)) {
-            return;
-        }
-        try {
-            free.free(segment);
-        } catch (RuntimeException ignored) {
-            // Keep cleanup best-effort and preserve root cause from the utility call.
         }
     }
 }

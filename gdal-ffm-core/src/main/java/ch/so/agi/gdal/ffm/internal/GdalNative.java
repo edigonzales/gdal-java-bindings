@@ -12,65 +12,6 @@ final class GdalNative {
     private static final Linker LINKER = Linker.nativeLinker();
     private static final SymbolLookup SYMBOL_LOOKUP = SymbolLookup.loaderLookup().or(LINKER.defaultLookup());
 
-    private static final MethodHandle GDAL_INFO_OPTIONS_NEW = downcall(
-            "GDALInfoOptionsNew",
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_INFO_OPTIONS_FREE = downcall(
-            "GDALInfoOptionsFree",
-            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_INFO = downcall(
-            "GDALInfo",
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_BUILD_VRT_OPTIONS_NEW = downcall(
-            "GDALBuildVRTOptionsNew",
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_BUILD_VRT_OPTIONS_FREE = downcall(
-            "GDALBuildVRTOptionsFree",
-            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_BUILD_VRT_OPTIONS_SET_PROGRESS = downcall(
-            "GDALBuildVRTOptionsSetProgress",
-            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_BUILD_VRT = downcall(
-            "GDALBuildVRT",
-            FunctionDescriptor.of(
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.JAVA_INT,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-            )
-    );
-    private static final MethodHandle GDAL_RASTERIZE_OPTIONS_NEW = downcall(
-            "GDALRasterizeOptionsNew",
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_RASTERIZE_OPTIONS_FREE = downcall(
-            "GDALRasterizeOptionsFree",
-            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_RASTERIZE_OPTIONS_SET_PROGRESS = downcall(
-            "GDALRasterizeOptionsSetProgress",
-            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_RASTERIZE = downcall(
-            "GDALRasterize",
-            FunctionDescriptor.of(
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS,
-                    ValueLayout.ADDRESS
-            )
-    );
     private static final MethodHandle CPL_SET_THREAD_LOCAL_CONFIG_OPTION = downcall(
             "CPLSetThreadLocalConfigOption",
             FunctionDescriptor.ofVoid(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
@@ -79,86 +20,68 @@ final class GdalNative {
             "CPLGetThreadLocalConfigOption",
             FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
+    private static final MethodHandle CSL_DESTROY = downcall(
+            "CSLDestroy",
+            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_GET_GLOBAL_ALGORITHM_REGISTRY = downcall(
+            "GDALGetGlobalAlgorithmRegistry",
+            FunctionDescriptor.of(ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_REGISTRY_RELEASE = downcall(
+            "GDALAlgorithmRegistryRelease",
+            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_REGISTRY_INSTANTIATE_ALG_FROM_PATH = downcall(
+            "GDALAlgorithmRegistryInstantiateAlgFromPath",
+            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_RELEASE = downcall(
+            "GDALAlgorithmRelease",
+            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_PARSE_COMMAND_LINE_ARGUMENTS = downcall(
+            "GDALAlgorithmParseCommandLineArguments",
+            FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_GET_ACTUAL_ALGORITHM = downcall(
+            "GDALAlgorithmGetActualAlgorithm",
+            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_RUN = downcall(
+            "GDALAlgorithmRun",
+            FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_FINALIZE = downcall(
+            "GDALAlgorithmFinalize",
+            FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_GET_ARG_NAMES = downcall(
+            "GDALAlgorithmGetArgNames",
+            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_GET_ARG = downcall(
+            "GDALAlgorithmGetArg",
+            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_ARG_RELEASE = downcall(
+            "GDALAlgorithmArgRelease",
+            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_ARG_GET_TYPE = downcall(
+            "GDALAlgorithmArgGetType",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_ARG_IS_OUTPUT = downcall(
+            "GDALAlgorithmArgIsOutput",
+            FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS)
+    );
+    private static final MethodHandle GDAL_ALGORITHM_ARG_GET_AS_STRING = downcall(
+            "GDALAlgorithmArgGetAsString",
+            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+    );
 
     private GdalNative() {
-    }
-
-    static MemorySegment GDALInfoOptionsNew(MemorySegment argv) {
-        return invokeAddress(GDAL_INFO_OPTIONS_NEW, argv, MemorySegment.NULL);
-    }
-
-    static void GDALInfoOptionsFree(MemorySegment options) {
-        invokeVoid(GDAL_INFO_OPTIONS_FREE, options);
-    }
-
-    static MemorySegment GDALInfo(MemorySegment dataset, MemorySegment options) {
-        return invokeAddress(GDAL_INFO, dataset, options);
-    }
-
-    static MemorySegment GDALBuildVRTOptionsNew(MemorySegment argv) {
-        return invokeAddress(GDAL_BUILD_VRT_OPTIONS_NEW, argv, MemorySegment.NULL);
-    }
-
-    static void GDALBuildVRTOptionsFree(MemorySegment options) {
-        invokeVoid(GDAL_BUILD_VRT_OPTIONS_FREE, options);
-    }
-
-    static void GDALBuildVRTOptionsSetProgress(
-            MemorySegment options,
-            MemorySegment callback,
-            MemorySegment userData
-    ) {
-        invokeVoid(GDAL_BUILD_VRT_OPTIONS_SET_PROGRESS, options, callback, userData);
-    }
-
-    static MemorySegment GDALBuildVRT(
-            MemorySegment destination,
-            int sourceCount,
-            MemorySegment sourceNames,
-            MemorySegment options,
-            MemorySegment usageError
-    ) {
-        return invokeAddress(
-                GDAL_BUILD_VRT,
-                destination,
-                sourceCount,
-                MemorySegment.NULL,
-                sourceNames,
-                options,
-                usageError
-        );
-    }
-
-    static MemorySegment GDALRasterizeOptionsNew(MemorySegment argv) {
-        return invokeAddress(GDAL_RASTERIZE_OPTIONS_NEW, argv, MemorySegment.NULL);
-    }
-
-    static void GDALRasterizeOptionsFree(MemorySegment options) {
-        invokeVoid(GDAL_RASTERIZE_OPTIONS_FREE, options);
-    }
-
-    static void GDALRasterizeOptionsSetProgress(
-            MemorySegment options,
-            MemorySegment callback,
-            MemorySegment userData
-    ) {
-        invokeVoid(GDAL_RASTERIZE_OPTIONS_SET_PROGRESS, options, callback, userData);
-    }
-
-    static MemorySegment GDALRasterize(
-            MemorySegment destination,
-            MemorySegment sourceDataset,
-            MemorySegment options,
-            MemorySegment usageError
-    ) {
-        return invokeAddress(
-                GDAL_RASTERIZE,
-                destination,
-                MemorySegment.NULL,
-                sourceDataset,
-                options,
-                usageError
-        );
     }
 
     static void setThreadLocalConfigOption(String key, String value) {
@@ -177,6 +100,66 @@ final class GdalNative {
         }
     }
 
+    static void CSLDestroy(MemorySegment strings) {
+        invokeVoid(CSL_DESTROY, strings);
+    }
+
+    static MemorySegment GDALGetGlobalAlgorithmRegistry() {
+        return invokeAddress(GDAL_GET_GLOBAL_ALGORITHM_REGISTRY);
+    }
+
+    static void GDALAlgorithmRegistryRelease(MemorySegment registry) {
+        invokeVoid(GDAL_ALGORITHM_REGISTRY_RELEASE, registry);
+    }
+
+    static MemorySegment GDALAlgorithmRegistryInstantiateAlgFromPath(MemorySegment registry, MemorySegment algPath) {
+        return invokeAddress(GDAL_ALGORITHM_REGISTRY_INSTANTIATE_ALG_FROM_PATH, registry, algPath);
+    }
+
+    static void GDALAlgorithmRelease(MemorySegment algorithm) {
+        invokeVoid(GDAL_ALGORITHM_RELEASE, algorithm);
+    }
+
+    static boolean GDALAlgorithmParseCommandLineArguments(MemorySegment algorithm, MemorySegment argv) {
+        return invokeBoolean(GDAL_ALGORITHM_PARSE_COMMAND_LINE_ARGUMENTS, algorithm, argv);
+    }
+
+    static MemorySegment GDALAlgorithmGetActualAlgorithm(MemorySegment algorithm) {
+        return invokeAddress(GDAL_ALGORITHM_GET_ACTUAL_ALGORITHM, algorithm);
+    }
+
+    static boolean GDALAlgorithmRun(MemorySegment algorithm, MemorySegment callback, MemorySegment userData) {
+        return invokeBoolean(GDAL_ALGORITHM_RUN, algorithm, callback, userData);
+    }
+
+    static boolean GDALAlgorithmFinalize(MemorySegment algorithm) {
+        return invokeBoolean(GDAL_ALGORITHM_FINALIZE, algorithm);
+    }
+
+    static MemorySegment GDALAlgorithmGetArgNames(MemorySegment algorithm) {
+        return invokeAddress(GDAL_ALGORITHM_GET_ARG_NAMES, algorithm);
+    }
+
+    static MemorySegment GDALAlgorithmGetArg(MemorySegment algorithm, MemorySegment argName) {
+        return invokeAddress(GDAL_ALGORITHM_GET_ARG, algorithm, argName);
+    }
+
+    static void GDALAlgorithmArgRelease(MemorySegment arg) {
+        invokeVoid(GDAL_ALGORITHM_ARG_RELEASE, arg);
+    }
+
+    static int GDALAlgorithmArgGetType(MemorySegment arg) {
+        return invokeInt(GDAL_ALGORITHM_ARG_GET_TYPE, arg);
+    }
+
+    static boolean GDALAlgorithmArgIsOutput(MemorySegment arg) {
+        return invokeBoolean(GDAL_ALGORITHM_ARG_IS_OUTPUT, arg);
+    }
+
+    static MemorySegment GDALAlgorithmArgGetAsString(MemorySegment arg) {
+        return invokeAddress(GDAL_ALGORITHM_ARG_GET_AS_STRING, arg);
+    }
+
     private static MethodHandle downcall(String symbolName, FunctionDescriptor descriptor) {
         MemorySegment symbol = SYMBOL_LOOKUP.find(symbolName)
                 .orElseThrow(() -> new IllegalStateException("Required GDAL symbol not found: " + symbolName));
@@ -186,6 +169,26 @@ final class GdalNative {
     private static MemorySegment invokeAddress(MethodHandle handle, Object... args) {
         try {
             return (MemorySegment) handle.invokeWithArguments(args);
+        } catch (RuntimeException | Error e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new IllegalStateException("Native GDAL invocation failed", e);
+        }
+    }
+
+    private static boolean invokeBoolean(MethodHandle handle, Object... args) {
+        try {
+            return (boolean) handle.invokeWithArguments(args);
+        } catch (RuntimeException | Error e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new IllegalStateException("Native GDAL invocation failed", e);
+        }
+    }
+
+    private static int invokeInt(MethodHandle handle, Object... args) {
+        try {
+            return (int) handle.invokeWithArguments(args);
         } catch (RuntimeException | Error e) {
             throw e;
         } catch (Throwable e) {
