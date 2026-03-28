@@ -35,8 +35,13 @@ After native extraction/loading, the runtime sets:
 - `GDAL_DATA`
 - `PROJ_LIB`
 - `GDAL_DRIVER_PATH` (if present)
+- on Linux/macOS, bundled `CURL_CA_BUNDLE` and `SSL_CERT_FILE` when the classifier manifest declares `caBundlePath`
 
 Values point to extracted bundle directories in `java.io.tmpdir`.
+
+Bundled Unix CA defaults are only applied when neither the process environment nor Java system
+properties already define `CURL_CA_BUNDLE` or `SSL_CERT_FILE`. If either value is user-defined,
+the runtime sets neither default and leaves caller intent unchanged.
 
 ## Scoped GDAL/VSI config
 
@@ -103,6 +108,7 @@ GitHub `Build Natives` / `Release` run `verify-lock.sh` by default. The resolver
 The staged classifier payload intentionally excludes CLI binaries.
 
 - Linux/macOS: only shared libraries in `lib/` (`*.so*`, `*.dylib*`), optional `lib/gdalplugins`, plus `share/gdal` and `share/proj`
+- Linux/macOS additionally keep `ssl/cacert.pem` when libcurl is bundled
 - Windows: only DLL runtime in `bin/` (`*.dll`), optional `bin/gdalplugins`, plus `share/gdal` and `share/proj`
 
 Build/dev artifacts (`cmake`, `pkgconfig`, docs, man pages, completions, headers) are stripped during staging.
@@ -135,6 +141,7 @@ GitHub Actions runs packaged runtime smokes in both `Build Natives` and `Release
 - only for `linux-*` and `osx-*` classifiers
 - for both bundle variants (`gdal-ffm-natives` and `gdal-ffm-natives-swiss`)
 - with per-run isolation via `-Djava.io.tmpdir=.../build/tmp/smoke/<label>` to avoid cache carry-over
+- packaged Unix smoke also asserts extracted `ssl/cacert.pem` exists and that runtime sets both `CURL_CA_BUNDLE` and `SSL_CERT_FILE`
 
 Local equivalent:
 

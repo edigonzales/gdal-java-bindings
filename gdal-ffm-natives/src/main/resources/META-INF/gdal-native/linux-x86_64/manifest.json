@@ -6,5 +6,6 @@
   ],
   "gdalDataPath": "share/gdal",
   "projDataPath": "share/proj",
-  "driverPath": "lib/gdalplugins"
+  "driverPath": "lib/gdalplugins",
+  "caBundlePath": "ssl/cacert.pem"
 }

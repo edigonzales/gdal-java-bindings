@@ -184,7 +184,8 @@ tasks.register<JavaExec>("smokeTestPackagedNative") {
         classpath = sourceSets["integrationTest"].runtimeClasspath + files(nativeJar)
         jvmArgs(
             "--enable-native-access=ALL-UNNAMED",
-            "-Djava.io.tmpdir=${smokeTmpDir.absolutePath}"
+            "-Djava.io.tmpdir=${smokeTmpDir.absolutePath}",
+            "-Dgdal.ffm.smoke.expectBundledCaBundle=true"
         )
         setArgs(listOf(smokeOutputFile.absolutePath, inputFile.absolutePath))
     }

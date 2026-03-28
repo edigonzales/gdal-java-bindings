@@ -14,7 +14,8 @@ class NativeManifestTest {
                   "preloadLibraries": ["lib/libproj.so.25", "lib/libgeos_c.so.1"],
                   "gdalDataPath": "share/gdal",
                   "projDataPath": "share/proj",
-                  "driverPath": "lib/gdalplugins"
+                  "driverPath": "lib/gdalplugins",
+                  "caBundlePath": "ssl/cacert.pem"
                 }
                 """;
 
@@ -26,5 +27,6 @@ class NativeManifestTest {
         assertEquals("share/gdal", manifest.gdalDataPath());
         assertEquals("share/proj", manifest.projDataPath());
         assertEquals("lib/gdalplugins", manifest.driverPath());
+        assertEquals("ssl/cacert.pem", manifest.caBundlePath());
     }
 }

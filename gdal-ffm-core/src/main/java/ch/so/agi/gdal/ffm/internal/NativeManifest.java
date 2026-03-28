@@ -12,7 +12,8 @@ record NativeManifest(
         List<String> preloadLibraries,
         String gdalDataPath,
         String projDataPath,
-        String driverPath
+        String driverPath,
+        String caBundlePath
 ) {
     static NativeManifest parse(String json) {
         String bundleVersion = stringField(json, "bundleVersion").orElse("unknown");
@@ -22,7 +23,8 @@ record NativeManifest(
         String gdalDataPath = stringField(json, "gdalDataPath").orElse(null);
         String projDataPath = stringField(json, "projDataPath").orElse(null);
         String driverPath = stringField(json, "driverPath").orElse(null);
-        return new NativeManifest(bundleVersion, entryLibrary, preload, gdalDataPath, projDataPath, driverPath);
+        String caBundlePath = stringField(json, "caBundlePath").orElse(null);
+        return new NativeManifest(bundleVersion, entryLibrary, preload, gdalDataPath, projDataPath, driverPath, caBundlePath);
     }
 
     private static Optional<String> stringField(String json, String field) {

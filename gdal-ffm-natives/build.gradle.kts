@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.jvm.tasks.Jar
 
@@ -127,14 +128,39 @@ tasks.assemble {
 
 tasks.register("verifyNativeBundleLayout") {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
-    description = "Checks that each classifier bundle has a manifest.json file"
+    description = "Checks that each classifier bundle has a manifest.json file and required Unix CA metadata"
     doLast {
         nativeClassifiers.forEach { classifier ->
+            val classifierRoot = layout.projectDirectory
+                .dir("src/main/resources/META-INF/gdal-native/$classifier")
+                .asFile
             val manifest = layout.projectDirectory
                 .file("src/main/resources/META-INF/gdal-native/$classifier/manifest.json")
                 .asFile
             if (!manifest.isFile) {
                 throw GradleException("Missing manifest.json for classifier: $classifier")
+            }
+
+            @Suppress("UNCHECKED_CAST")
+            val manifestData = JsonSlurper().parseText(manifest.readText()) as Map<String, Any?>
+            val caBundlePath = (manifestData["caBundlePath"] as String?)?.takeIf { it.isNotBlank() }
+            if (caBundlePath != null) {
+                val caBundle = classifierRoot.resolve(caBundlePath)
+                if (!caBundle.isFile) {
+                    throw GradleException(
+                        "Manifest caBundlePath for classifier '$classifier' points to a missing file: $caBundlePath"
+                    )
+                }
+            }
+
+            val isUnixClassifier = classifier.startsWith("linux-") || classifier.startsWith("osx-")
+            val hasLibcurl = classifierRoot.resolve("lib")
+                .walkTopDown()
+                .any { it.isFile && it.name.startsWith("libcurl.") }
+            if (isUnixClassifier && hasLibcurl && caBundlePath == null) {
+                throw GradleException(
+                    "Unix classifier '$classifier' bundles libcurl but manifest.json does not declare caBundlePath"
+                )
             }
         }
     }

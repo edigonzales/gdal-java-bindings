@@ -8,6 +8,7 @@ record NativeBundleInfo(
         Path extractionRoot,
         Path gdalData,
         Path projData,
-        Path driverPath
+        Path driverPath,
+        Path caBundle
 ) {
 }

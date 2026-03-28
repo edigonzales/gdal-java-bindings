@@ -48,21 +48,25 @@ final class NativeLoader {
 
         URL manifestUrl = findManifest(prefix, classifier);
         NativeManifest manifest = NativeManifest.parse(readUtf8(manifestUrl));
-
-        Path extractionRoot = resolveBundleRoot(manifestUrl, manifest.bundleVersion(), classifier);
+        NativeBundleInfo bundleInfo = resolveBundleInfo(manifestUrl, manifest, classifier);
 
         for (String preload : manifest.preloadLibraries()) {
-            loadLibrary(extractionRoot, preload, "preloadLibraries");
+            loadLibrary(bundleInfo.extractionRoot(), preload, "preloadLibraries");
         }
-        loadLibrary(extractionRoot, manifest.entryLibrary(), "entryLibrary");
+        loadLibrary(bundleInfo.extractionRoot(), manifest.entryLibrary(), "entryLibrary");
+        return bundleInfo;
+    }
 
+    static NativeBundleInfo resolveBundleInfo(URL manifestUrl, NativeManifest manifest, String classifier) {
+        Path extractionRoot = resolveBundleRoot(manifestUrl, manifest.bundleVersion(), classifier);
         return new NativeBundleInfo(
                 classifier,
                 manifest.bundleVersion(),
                 extractionRoot,
                 resolveOptional(extractionRoot, manifest.gdalDataPath()),
                 resolveOptional(extractionRoot, manifest.projDataPath()),
-                resolveOptional(extractionRoot, manifest.driverPath())
+                resolveOptional(extractionRoot, manifest.driverPath()),
+                resolveOptional(extractionRoot, manifest.caBundlePath())
         );
     }
 

@@ -181,6 +181,12 @@ copy_sections() {
         copied_any=true
       fi
     done
+
+    if [[ "$OS_FAMILY" != "windows" && -f "$root/ssl/cacert.pem" ]]; then
+      mkdir -p "$TARGET_DIR/ssl"
+      cp "$root/ssl/cacert.pem" "$TARGET_DIR/ssl/cacert.pem"
+      copied_any=true
+    fi
   done
 
   if [[ "$copied_any" != "true" ]]; then
@@ -334,6 +340,19 @@ validate_staged_payload() {
     exit 1
   fi
 
+  if [[ "$os_family" != "windows" ]]; then
+    local has_libcurl=false
+    if [[ -d "$TARGET_DIR/lib" ]] && find "$TARGET_DIR/lib" -maxdepth 1 -type f \
+      \( -name 'libcurl.so*' -o -name 'libcurl*.dylib*' \) -print -quit | grep -q .; then
+      has_libcurl=true
+    fi
+
+    if [[ "$has_libcurl" == "true" && ! -f "$TARGET_DIR/ssl/cacert.pem" ]]; then
+      echo "Missing ssl/cacert.pem in staged Unix bundle for $CLASSIFIER with libcurl runtime" >&2
+      exit 1
+    fi
+  fi
+
   if [[ "$os_family" != "windows" && -d "$TARGET_DIR/bin" ]]; then
     if find "$TARGET_DIR/bin" -mindepth 1 -print -quit | grep -q .; then
       echo "Non-empty bin directory is not allowed for $CLASSIFIER runtime bundle" >&2
@@ -484,6 +503,11 @@ if [[ -n "$PRELOAD_LIBRARIES" ]]; then
   done
 fi
 
+CA_BUNDLE_JSON=""
+if [[ "$OS_FAMILY" != "windows" && -f "$TARGET_DIR/ssl/cacert.pem" ]]; then
+  CA_BUNDLE_JSON=$',\n  "caBundlePath": "ssl/cacert.pem"'
+fi
+
 cat > "$TARGET_DIR/manifest.json" <<MANIFEST
 {
   "bundleVersion": "$GDAL_VERSION",
@@ -493,7 +517,7 @@ cat > "$TARGET_DIR/manifest.json" <<MANIFEST
   ],
   "gdalDataPath": "share/gdal",
   "projDataPath": "share/proj",
-  "driverPath": "$DRIVER_PATH"
+  "driverPath": "$DRIVER_PATH"$CA_BUNDLE_JSON
 }
 MANIFEST
 

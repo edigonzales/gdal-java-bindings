@@ -9,7 +9,7 @@ GDAL/VSI configuration.
 ## Modules
 
 - `gdal-ffm-core`: public Java API (`Gdal.rasterInfo`, `Gdal.rasterConvert`, `Gdal.rasterClip`, `Gdal.rasterReproject`, `Gdal.rasterResize`, `Gdal.rasterMosaic`, `Gdal.rasterZonalStats`, `Gdal.vectorRasterize`, `Gdal.vectorTranslate`, `Ogr.*`), native loader, error/progress bridge.
-- `gdal-ffm-natives`: classifier JARs that package native GDAL libs + `share/gdal` + `share/proj`.
+- `gdal-ffm-natives`: classifier JARs that package native GDAL libs + `share/gdal` + `share/proj` (+ bundled Unix CA bundle for libcurl-based HTTPS).
 - `gdal-ffm-natives-swiss`: optional classifier JARs with the same native libs, but a Swiss-focused `share/proj` subset.
 
 ## Requirements
@@ -132,6 +132,8 @@ Supported `DatasetRef` types:
 
 `HTTP_URL` inputs are translated into GDAL `/vsicurl/` identifiers. Config values are applied per
 operation through `ScopedGdalConfig`, so auth/config does not remain globally active after the call.
+On Linux/macOS the runtime also sets bundled `CURL_CA_BUNDLE` and `SSL_CERT_FILE` defaults from the
+native classifier when neither environment variables nor system properties already define either key.
 
 Progress callback:
 

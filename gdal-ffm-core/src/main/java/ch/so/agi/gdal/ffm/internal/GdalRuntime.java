@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -360,9 +361,9 @@ public final class GdalRuntime {
 
     private static void applyConfig(NativeBundleInfo bundleInfo) {
         try (Arena arena = Arena.ofConfined()) {
-            setConfigOption(arena, "GDAL_DATA", bundleInfo.gdalData());
-            setConfigOption(arena, "PROJ_LIB", bundleInfo.projData());
-            setConfigOption(arena, "GDAL_DRIVER_PATH", bundleInfo.driverPath());
+            for (Map.Entry<String, Path> entry : NativeBundleRuntimeConfig.configOptions(bundleInfo).entrySet()) {
+                setConfigOption(arena, entry.getKey(), entry.getValue());
+            }
         }
     }
 

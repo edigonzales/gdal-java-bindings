@@ -1306,9 +1306,9 @@ public final class OgrRuntime {
 
     private static void applyConfig(NativeBundleInfo bundleInfo) {
         try (Arena arena = Arena.ofConfined()) {
-            setConfigOption(arena, "GDAL_DATA", bundleInfo.gdalData());
-            setConfigOption(arena, "PROJ_LIB", bundleInfo.projData());
-            setConfigOption(arena, "GDAL_DRIVER_PATH", bundleInfo.driverPath());
+            for (Map.Entry<String, Path> entry : NativeBundleRuntimeConfig.configOptions(bundleInfo).entrySet()) {
+                setConfigOption(arena, entry.getKey(), entry.getValue());
+            }
         }
     }
 
