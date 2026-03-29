@@ -1,6 +1,13 @@
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.gradle.api.Task
+import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.jvm.tasks.Jar
+import java.io.File
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 
 plugins {
     `java-base`
@@ -50,33 +57,194 @@ fun String.toTaskSuffix(): String {
     }
 }
 
+fun relativeClassifierPath(classifierRoot: File, file: File): String {
+    return classifierRoot.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '/')
+}
+
+fun collectVariantFiles(
+    classifierRoot: File,
+    includeSwissProjSubset: Boolean,
+    swissProjAllowlistCandidates: Set<String>
+): List<Pair<String, File>> {
+    return classifierRoot.walkTopDown()
+        .filter(File::isFile)
+        .mapNotNull { file ->
+            val relativePath = relativeClassifierPath(classifierRoot, file)
+            if (relativePath == "manifest.json") {
+                return@mapNotNull null
+            }
+            if (includeSwissProjSubset && relativePath.startsWith("share/proj/")) {
+                val projFile = relativePath.removePrefix("share/proj/")
+                if (projFile !in swissProjAllowlistCandidates) {
+                    return@mapNotNull null
+                }
+            }
+            relativePath to file
+        }
+        .sortedBy { it.first }
+        .toList()
+}
+
+fun updateDigestWithFile(digest: MessageDigest, file: File) {
+    file.inputStream().use { input ->
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) {
+                break
+            }
+            digest.update(buffer, 0, read)
+        }
+    }
+}
+
+fun computeCacheKey(
+    classifier: String,
+    artifactId: String,
+    classifierRoot: File,
+    manifestData: Map<String, Any?>,
+    includeSwissProjSubset: Boolean,
+    swissProjAllowlistCandidates: Set<String>
+): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    digest.update("artifactId=$artifactId\n".toByteArray(StandardCharsets.UTF_8))
+    digest.update("classifier=$classifier\n".toByteArray(StandardCharsets.UTF_8))
+    digest.update(JsonOutput.toJson(manifestData).toByteArray(StandardCharsets.UTF_8))
+    for ((relativePath, file) in collectVariantFiles(classifierRoot, includeSwissProjSubset, swissProjAllowlistCandidates)) {
+        digest.update("\nfile=$relativePath\n".toByteArray(StandardCharsets.UTF_8))
+        updateDigestWithFile(digest, file)
+    }
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
+
+fun validateSwissProjSubset(
+    classifier: String,
+    projDir: File,
+    swissProjRequirements: List<SwissProjRequirement>
+) {
+    val stagedFiles = projDir.listFiles { file -> file.isFile }
+        ?.map { it.name }
+        ?.filterNot { it.startsWith(".") }
+        ?.toSet()
+        .orEmpty()
+
+    if (stagedFiles.isEmpty()) {
+        return
+    }
+
+    val missingGroups = swissProjRequirements.filter { requirement ->
+        requirement.candidates.none(stagedFiles::contains)
+    }
+
+    if (missingGroups.isNotEmpty()) {
+        val missingLabels = missingGroups.joinToString(", ") { requirement ->
+            "${requirement.label} [${requirement.candidates.joinToString(" | ")}]"
+        }
+
+        throw GradleException(
+            "Swiss PROJ subset for classifier '$classifier' is incomplete. " +
+                "Missing groups: $missingLabels. Available files in share/proj: " +
+                stagedFiles.sorted().joinToString(", ")
+        )
+    }
+}
+
+fun registerPackagedManifestTask(
+    classifier: String,
+    artifactId: String,
+    includeSwissProjSubset: Boolean,
+    swissProjAllowlistCandidates: Set<String>,
+    swissProjRequirements: List<SwissProjRequirement>
+): Pair<TaskProvider<Task>, Provider<RegularFile>> {
+    val classifierRoot = layout.projectDirectory.dir("src/main/resources/META-INF/gdal-native/$classifier")
+    val projRoot = classifierRoot.dir("share/proj")
+    val taskName = buildString {
+        append("generate")
+        append(if (artifactId.endsWith("-swiss")) "NativesSwiss" else "Natives")
+        append("Manifest")
+        append(classifier.toTaskSuffix())
+    }
+    val outputFile = layout.buildDirectory.file("generated/packaged-manifests/$artifactId/$classifier/manifest.json")
+    val task = tasks.register(taskName) {
+        inputs.dir(classifierRoot)
+        inputs.property("artifactId", artifactId)
+        inputs.property("includeSwissProjSubset", includeSwissProjSubset)
+        inputs.property("swissProjAllowlistCandidates", swissProjAllowlistCandidates.toList())
+        outputs.file(outputFile)
+
+        doLast {
+            if (includeSwissProjSubset) {
+                validateSwissProjSubset(classifier, projRoot.asFile, swissProjRequirements)
+            }
+
+            val sourceManifestFile = classifierRoot.file("manifest.json").asFile
+            @Suppress("UNCHECKED_CAST")
+            val sourceManifest = JsonSlurper().parseText(sourceManifestFile.readText()) as Map<String, Any?>
+            val manifestData = LinkedHashMap(sourceManifest)
+            manifestData.remove("cacheKey")
+            manifestData["cacheKey"] = computeCacheKey(
+                classifier,
+                artifactId,
+                classifierRoot.asFile,
+                manifestData,
+                includeSwissProjSubset,
+                swissProjAllowlistCandidates
+            )
+
+            val targetFile = outputFile.get().asFile
+            targetFile.parentFile.mkdirs()
+            targetFile.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(manifestData)) + "\n", StandardCharsets.UTF_8)
+        }
+    }
+    return task to outputFile
+}
+
 val classifierJarTasks = nativeClassifiers.associateWith { classifier ->
+    val classifierRoot = layout.projectDirectory.dir("src/main/resources/META-INF/gdal-native/$classifier")
+    val (packagedManifestTask, packagedManifestFile) = registerPackagedManifestTask(
+        classifier,
+        "gdal-ffm-natives",
+        false,
+        swissProjAllowlistCandidates.toSet(),
+        swissProjRequirements
+    )
     tasks.register<Jar>("nativesJar${classifier.toTaskSuffix()}") {
         group = LifecycleBasePlugin.BUILD_GROUP
         description = "Builds native bundle JAR for $classifier"
         archiveBaseName.set("gdal-ffm-natives")
         archiveClassifier.set("natives-$classifier")
 
-        val classifierRoot = layout.projectDirectory.dir("src/main/resources/META-INF/gdal-native/$classifier")
         from(classifierRoot) {
             into("META-INF/gdal-native/$classifier")
+            exclude("manifest.json")
         }
+        from(packagedManifestFile) {
+            into("META-INF/gdal-native/$classifier")
+        }
+        dependsOn(packagedManifestTask)
     }
 }
 
 val swissClassifierJarTasks: Map<String, TaskProvider<Jar>> = if (gdalSwissNativesEnabled) {
     nativeClassifiers.associateWith { classifier ->
+        val classifierRoot = layout.projectDirectory.dir("src/main/resources/META-INF/gdal-native/$classifier")
+        val projRoot = classifierRoot.dir("share/proj")
+        val (packagedManifestTask, packagedManifestFile) = registerPackagedManifestTask(
+            classifier,
+            "gdal-ffm-natives-swiss",
+            true,
+            swissProjAllowlistCandidates.toSet(),
+            swissProjRequirements
+        )
         tasks.register<Jar>("nativesSwissJar${classifier.toTaskSuffix()}") {
             group = LifecycleBasePlugin.BUILD_GROUP
             description = "Builds Swiss native bundle JAR for $classifier"
             archiveBaseName.set("gdal-ffm-natives-swiss")
             archiveClassifier.set("natives-$classifier")
 
-            val classifierRoot = layout.projectDirectory.dir("src/main/resources/META-INF/gdal-native/$classifier")
-            val projRoot = classifierRoot.dir("share/proj")
-
             from(classifierRoot) {
                 into("META-INF/gdal-native/$classifier")
+                exclude("manifest.json")
                 exclude("share/proj/**")
             }
 
@@ -85,34 +253,15 @@ val swissClassifierJarTasks: Map<String, TaskProvider<Jar>> = if (gdalSwissNativ
                 include(*swissProjAllowlistCandidates.toTypedArray())
             }
 
-            doFirst {
-                val projDir = projRoot.asFile
-                val stagedFiles = projDir.listFiles { file -> file.isFile }
-                    ?.map { it.name }
-                    ?.filterNot { it.startsWith(".") }
-                    ?.toSet()
-                    .orEmpty()
-
-                if (stagedFiles.isEmpty()) {
-                    return@doFirst
-                }
-
-                val missingGroups = swissProjRequirements.filter { requirement ->
-                    requirement.candidates.none(stagedFiles::contains)
-                }
-
-                if (missingGroups.isNotEmpty()) {
-                    val missingLabels = missingGroups.joinToString(", ") { requirement ->
-                        "${requirement.label} [${requirement.candidates.joinToString(" | ")}]"
-                    }
-
-                    throw GradleException(
-                        "Swiss PROJ subset for classifier '$classifier' is incomplete. " +
-                            "Missing groups: $missingLabels. Available files in share/proj: " +
-                            stagedFiles.sorted().joinToString(", ")
-                    )
-                }
+            from(packagedManifestFile) {
+                into("META-INF/gdal-native/$classifier")
             }
+
+            doFirst {
+                validateSwissProjSubset(classifier, projRoot.asFile, swissProjRequirements)
+            }
+
+            dependsOn(packagedManifestTask)
         }
     }
 } else {

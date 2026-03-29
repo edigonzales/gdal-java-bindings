@@ -15,7 +15,8 @@ class NativeManifestTest {
                   "gdalDataPath": "share/gdal",
                   "projDataPath": "share/proj",
                   "driverPath": "lib/gdalplugins",
-                  "caBundlePath": "ssl/cacert.pem"
+                  "caBundlePath": "ssl/cacert.pem",
+                  "cacheKey": "standard-abc123"
                 }
                 """;
 
@@ -28,5 +29,6 @@ class NativeManifestTest {
         assertEquals("share/proj", manifest.projDataPath());
         assertEquals("lib/gdalplugins", manifest.driverPath());
         assertEquals("ssl/cacert.pem", manifest.caBundlePath());
+        assertEquals("standard-abc123", manifest.cacheKey());
     }
 }

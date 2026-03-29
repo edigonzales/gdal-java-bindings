@@ -3,6 +3,7 @@ package ch.so.agi.gdal.ffm.internal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -91,7 +92,7 @@ class NativeLoaderTest {
         Files.createDirectories(bundleRoot.resolve("ssl"));
         Files.writeString(bundleRoot.resolve("ssl/cacert.pem"), "bundle-ca", StandardCharsets.UTF_8);
 
-        String json = manifestJson("ca-file-tree-1", "ssl/cacert.pem");
+        String json = manifestJson("ca-file-tree-1", "ssl/cacert.pem", null);
         Files.writeString(bundleRoot.resolve("manifest.json"), json, StandardCharsets.UTF_8);
 
         NativeBundleInfo bundleInfo = NativeLoader.resolveBundleInfo(
@@ -107,22 +108,77 @@ class NativeLoaderTest {
 
     @Test
     void resolvesCaBundleFromJarBundle() throws Exception {
-        String bundleVersion = "jar-ca-" + System.nanoTime();
-        Path jarFile = createJarBundle(bundleVersion, "ssl/cacert.pem");
-        URL manifestUrl = new URL(
-                "jar:" + jarFile.toUri().toURL() + "!/META-INF/gdal-native/" + CLASSIFIER + "/manifest.json"
-        );
-
-        NativeBundleInfo bundleInfo = NativeLoader.resolveBundleInfo(
-                manifestUrl,
-                NativeManifest.parse(manifestJson(bundleVersion, "ssl/cacert.pem")),
-                CLASSIFIER
+        Path tmpDir = Files.createTempDirectory("native-loader-jar-ca");
+        NativeBundleInfo bundleInfo = withJavaTmpDir(
+                tmpDir,
+                () -> resolveBundleInfoFromJar("jar-ca-1", "ssl/cacert.pem", "cache-key-jar-ca-1")
         );
 
         assertTrue(Files.isRegularFile(bundleInfo.caBundle()));
         assertEquals("bundle-ca", Files.readString(bundleInfo.caBundle(), StandardCharsets.UTF_8));
         assertTrue(bundleInfo.caBundle().endsWith("ssl/cacert.pem"));
-        assertTrue(bundleInfo.caBundle().startsWith(Path.of(System.getProperty("java.io.tmpdir")).toAbsolutePath()));
+        assertEquals(tmpDir.resolve("gdal-ffm").resolve("cache-key-jar-ca-1").resolve(CLASSIFIER), bundleInfo.extractionRoot());
+        assertTrue(bundleInfo.caBundle().startsWith(tmpDir.toAbsolutePath()));
+    }
+
+    @Test
+    void fallsBackToBundleVersionExtractionRootWhenCacheKeyMissing() throws Exception {
+        Path tmpDir = Files.createTempDirectory("native-loader-legacy-root");
+
+        NativeBundleInfo bundleInfo = withJavaTmpDir(
+                tmpDir,
+                () -> resolveBundleInfoFromJar("legacy-bundle-version-1", "ssl/cacert.pem", null)
+        );
+
+        assertEquals(
+                tmpDir.resolve("gdal-ffm").resolve("legacy-bundle-version-1").resolve(CLASSIFIER),
+                bundleInfo.extractionRoot()
+        );
+        assertTrue(Files.isRegularFile(bundleInfo.caBundle()));
+    }
+
+    @Test
+    void usesCacheKeyToAvoidLegacyBundleVersionRootReuse() throws Exception {
+        Path tmpDir = Files.createTempDirectory("native-loader-cache-key-root");
+
+        NativeBundleInfo bundleInfo = withJavaTmpDir(tmpDir, () -> {
+            Path legacyRoot = tmpDir.resolve("gdal-ffm").resolve("3.12.2").resolve(CLASSIFIER);
+            Files.createDirectories(legacyRoot);
+            Files.writeString(legacyRoot.resolve(".extract-complete"), "3.12.2", StandardCharsets.UTF_8);
+            Files.writeString(legacyRoot.resolve("manifest.json"), "stale-manifest", StandardCharsets.UTF_8);
+
+            return resolveBundleInfoFromJar("3.12.2", "ssl/cacert.pem", "cache-key-current");
+        });
+
+        assertEquals(
+                tmpDir.resolve("gdal-ffm").resolve("cache-key-current").resolve(CLASSIFIER),
+                bundleInfo.extractionRoot()
+        );
+        assertNotEquals(tmpDir.resolve("gdal-ffm").resolve("3.12.2").resolve(CLASSIFIER), bundleInfo.extractionRoot());
+        assertTrue(Files.isRegularFile(bundleInfo.caBundle()));
+    }
+
+    @Test
+    void differentCacheKeysDoNotCollideForSameBundleVersion() throws Exception {
+        Path tmpDir = Files.createTempDirectory("native-loader-cache-collision");
+
+        withJavaTmpDir(tmpDir, () -> {
+            NativeBundleInfo first = resolveBundleInfoFromJar("3.12.2", "ssl/cacert.pem", "cache-key-first");
+            NativeBundleInfo second = resolveBundleInfoFromJar("3.12.2", "ssl/cacert.pem", "cache-key-second");
+
+            assertEquals(
+                    tmpDir.resolve("gdal-ffm").resolve("cache-key-first").resolve(CLASSIFIER),
+                    first.extractionRoot()
+            );
+            assertEquals(
+                    tmpDir.resolve("gdal-ffm").resolve("cache-key-second").resolve(CLASSIFIER),
+                    second.extractionRoot()
+            );
+            assertNotEquals(first.extractionRoot(), second.extractionRoot());
+            assertTrue(Files.isRegularFile(first.caBundle()));
+            assertTrue(Files.isRegularFile(second.caBundle()));
+            return null;
+        });
     }
 
     private static URL invokeFindManifest(URLClassLoader classLoader) {
@@ -211,11 +267,24 @@ class NativeLoaderTest {
         return root;
     }
 
-    private static Path createJarBundle(String bundleVersion, String caBundlePath) throws Exception {
+    private static NativeBundleInfo resolveBundleInfoFromJar(String bundleVersion, String caBundlePath, String cacheKey)
+            throws Exception {
+        Path jarFile = createJarBundle(bundleVersion, caBundlePath, cacheKey);
+        URL manifestUrl = new URL(
+                "jar:" + jarFile.toUri().toURL() + "!/META-INF/gdal-native/" + CLASSIFIER + "/manifest.json"
+        );
+        return NativeLoader.resolveBundleInfo(
+                manifestUrl,
+                NativeManifest.parse(manifestJson(bundleVersion, caBundlePath, cacheKey)),
+                CLASSIFIER
+        );
+    }
+
+    private static Path createJarBundle(String bundleVersion, String caBundlePath, String cacheKey) throws Exception {
         Path jarFile = Files.createTempFile("native-loader-bundle", ".jar");
         String prefix = "META-INF/gdal-native/" + CLASSIFIER + "/";
         try (JarOutputStream output = new JarOutputStream(Files.newOutputStream(jarFile))) {
-            writeJarEntry(output, prefix + "manifest.json", manifestJson(bundleVersion, caBundlePath));
+            writeJarEntry(output, prefix + "manifest.json", manifestJson(bundleVersion, caBundlePath, cacheKey));
             writeJarEntry(output, prefix + "share/gdal/README.txt", "gdal-data");
             writeJarEntry(output, prefix + "share/proj/proj.db", "proj-data");
             writeJarEntry(output, prefix + "ssl/cacert.pem", "bundle-ca");
@@ -230,7 +299,8 @@ class NativeLoaderTest {
         output.closeEntry();
     }
 
-    private static String manifestJson(String bundleVersion, String caBundlePath) {
+    private static String manifestJson(String bundleVersion, String caBundlePath, String cacheKey) {
+        String cacheKeyJson = cacheKey == null ? "" : ",\n  \"cacheKey\": \"%s\"".formatted(cacheKey);
         return """
                 {
                   "bundleVersion": "%s",
@@ -239,8 +309,27 @@ class NativeLoaderTest {
                   "gdalDataPath": "share/gdal",
                   "projDataPath": "share/proj",
                   "driverPath": "lib/gdalplugins",
-                  "caBundlePath": "%s"
+                  "caBundlePath": "%s"%s
                 }
-                """.formatted(bundleVersion, caBundlePath);
+                """.formatted(bundleVersion, caBundlePath, cacheKeyJson);
+    }
+
+    private static <T> T withJavaTmpDir(Path tmpDir, ThrowingSupplier<T> supplier) throws Exception {
+        String previous = System.getProperty("java.io.tmpdir");
+        System.setProperty("java.io.tmpdir", tmpDir.toAbsolutePath().toString());
+        try {
+            return supplier.get();
+        } finally {
+            if (previous == null) {
+                System.clearProperty("java.io.tmpdir");
+            } else {
+                System.setProperty("java.io.tmpdir", previous);
+            }
+        }
+    }
+
+    @FunctionalInterface
+    private interface ThrowingSupplier<T> {
+        T get() throws Exception;
     }
 }

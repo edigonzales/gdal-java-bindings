@@ -28,6 +28,11 @@ Mapped classifiers:
 
 If no matching bundle exists on classpath, initialization fails with a dependency hint.
 
+Packaged native manifests may also carry an internal `cacheKey`. When present, `NativeLoader`
+extracts the bundle under `java.io.tmpdir/gdal-ffm/<cacheKey>/<classifier>` instead of using
+`bundleVersion`, which prevents stale bundle reuse across bindings releases and across standard vs
+swiss native variants. Older manifests without `cacheKey` continue to fall back to `bundleVersion`.
+
 ## Runtime config options
 
 After native extraction/loading, the runtime sets:

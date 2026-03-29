@@ -99,9 +99,11 @@ jobs:
             exit 1
           fi
           jar_path="$(pwd)/${matches[0]}"
+          shared_tmpdir="$(pwd)/gdal-ffm-core/build/tmp/smoke/${{ matrix.classifier }}-shared"
           ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
             -PgdalFfmSmokeNativeJar="$jar_path" \
-            -PgdalFfmSmokeLabel="${{ matrix.classifier }}-standard"
+            -PgdalFfmSmokeLabel="${{ matrix.classifier }}-standard" \
+            -PgdalFfmSmokeTmpDir="$shared_tmpdir"
 
       - name: Run packaged smoke (swiss)
         if: startsWith(matrix.classifier, 'linux-') || startsWith(matrix.classifier, 'osx-')
@@ -122,9 +124,11 @@ jobs:
             exit 1
           fi
           jar_path="$(pwd)/${matches[0]}"
+          shared_tmpdir="$(pwd)/gdal-ffm-core/build/tmp/smoke/${{ matrix.classifier }}-shared"
           ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
             -PgdalFfmSmokeNativeJar="$jar_path" \
-            -PgdalFfmSmokeLabel="${{ matrix.classifier }}-swiss"
+            -PgdalFfmSmokeLabel="${{ matrix.classifier }}-swiss" \
+            -PgdalFfmSmokeTmpDir="$shared_tmpdir"
 
       - name: Upload classifier artifact (standard)
         uses: actions/upload-artifact@v4

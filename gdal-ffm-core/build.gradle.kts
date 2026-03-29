@@ -138,6 +138,7 @@ tasks.register<JavaExec>("smokeTestPackagedNative") {
     val smokeLabel = providers.gradleProperty("gdalFfmSmokeLabel")
         .map { label -> label.trim().ifEmpty { "packaged" } }
         .orElse("packaged")
+    val smokeTmpDirOverride = providers.gradleProperty("gdalFfmSmokeTmpDir")
     val outputFile = smokeLabel.flatMap { label ->
         layout.buildDirectory.file("smoke-test-output/${label}-reclass-smoke.tif")
     }
@@ -150,6 +151,7 @@ tasks.register<JavaExec>("smokeTestPackagedNative") {
     inputs.file(inputFile)
     inputs.property("gdalFfmSmokeNativeJar", smokeNativeJar.orNull ?: "")
     inputs.property("gdalFfmSmokeLabel", smokeLabel)
+    inputs.property("gdalFfmSmokeTmpDir", smokeTmpDirOverride.orNull ?: "")
     outputs.file(outputFile)
     outputs.upToDateWhen { false }
 
@@ -177,7 +179,14 @@ tasks.register<JavaExec>("smokeTestPackagedNative") {
         }
 
         val smokeOutputFile = outputFile.get().asFile
-        val smokeTmpDir = tmpDir.get().asFile
+        val smokeTmpDir = smokeTmpDirOverride.orNull?.trim()?.takeIf { it.isNotEmpty() }?.let { path ->
+            val pathFile = File(path)
+            if (pathFile.isAbsolute) {
+                pathFile
+            } else {
+                rootProject.file(path)
+            }
+        } ?: tmpDir.get().asFile
         smokeOutputFile.parentFile.mkdirs()
         smokeTmpDir.mkdirs()
 

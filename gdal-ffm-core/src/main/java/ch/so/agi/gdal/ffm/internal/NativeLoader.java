@@ -58,7 +58,7 @@ final class NativeLoader {
     }
 
     static NativeBundleInfo resolveBundleInfo(URL manifestUrl, NativeManifest manifest, String classifier) {
-        Path extractionRoot = resolveBundleRoot(manifestUrl, manifest.bundleVersion(), classifier);
+        Path extractionRoot = resolveBundleRoot(manifestUrl, extractionIdentity(manifest), classifier);
         return new NativeBundleInfo(
                 classifier,
                 manifest.bundleVersion(),
@@ -68,6 +68,14 @@ final class NativeLoader {
                 resolveOptional(extractionRoot, manifest.driverPath()),
                 resolveOptional(extractionRoot, manifest.caBundlePath())
         );
+    }
+
+    private static String extractionIdentity(NativeManifest manifest) {
+        String cacheKey = manifest.cacheKey();
+        if (cacheKey != null && !cacheKey.isBlank()) {
+            return cacheKey;
+        }
+        return manifest.bundleVersion();
     }
 
     private static URL findManifest(String prefix, String classifier) {
@@ -114,23 +122,23 @@ final class NativeLoader {
         }
     }
 
-    private static Path extractionRoot(String bundleVersion, String classifier) {
+    private static Path extractionRoot(String extractionIdentity, String classifier) {
         String javaTmp = System.getProperty("java.io.tmpdir");
-        return Path.of(javaTmp, "gdal-ffm", bundleVersion, classifier);
+        return Path.of(javaTmp, "gdal-ffm", extractionIdentity, classifier);
     }
 
-    private static Path resolveBundleRoot(URL manifestUrl, String bundleVersion, String classifier) {
+    private static Path resolveBundleRoot(URL manifestUrl, String extractionIdentity, String classifier) {
         if ("file".equals(manifestUrl.getProtocol())) {
             return fileTreeRoot(manifestUrl);
         }
 
-        Path extractionRoot = extractionRoot(bundleVersion, classifier);
+        Path extractionRoot = extractionRoot(extractionIdentity, classifier);
         Path marker = extractionRoot.resolve(".extract-complete");
         if (!Files.exists(marker)) {
             extractBundle(manifestUrl, extractionRoot);
             try {
                 Files.createDirectories(extractionRoot);
-                Files.writeString(marker, bundleVersion, StandardCharsets.UTF_8);
+                Files.writeString(marker, extractionIdentity, StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new IllegalStateException("Failed to create extraction marker: " + marker, e);
             }
