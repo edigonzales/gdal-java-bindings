@@ -146,7 +146,7 @@ tasks.register<JavaExec>("smokeTestPackagedNative") {
     }
 
     classpath = sourceSets["integrationTest"].runtimeClasspath
-    mainClass.set("ch.so.agi.gdal.ffm.GdalSmoke")
+    mainClass.set("ch.so.agi.gdal.ffm.internal.GdalScopedConfigSmoke")
     inputs.file(inputFile)
     inputs.property("gdalFfmSmokeNativeJar", smokeNativeJar.orNull ?: "")
     inputs.property("gdalFfmSmokeLabel", smokeLabel)

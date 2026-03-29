@@ -361,7 +361,7 @@ public final class GdalRuntime {
 
     private static void applyConfig(NativeBundleInfo bundleInfo) {
         try (Arena arena = Arena.ofConfined()) {
-            for (Map.Entry<String, Path> entry : NativeBundleRuntimeConfig.configOptions(bundleInfo).entrySet()) {
+            for (Map.Entry<String, Path> entry : NativeBundleRuntimeConfig.globalConfigOptions(bundleInfo).entrySet()) {
                 setConfigOption(arena, entry.getKey(), entry.getValue());
             }
         }

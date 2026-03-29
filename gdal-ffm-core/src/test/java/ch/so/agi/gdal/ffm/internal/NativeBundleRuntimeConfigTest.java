@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 
 class NativeBundleRuntimeConfigTest {
     @Test
-    void includesBundledCaDefaultsForUnixBundleWhenNoOverrideExists() throws Exception {
+    void globalConfigOptionsContainOnlyStableBundlePaths() throws Exception {
         NativeBundleInfo bundleInfo = createBundleInfo("osx-aarch64");
 
-        Map<String, Path> options = NativeBundleRuntimeConfig.configOptions(bundleInfo, Map.of(), new Properties());
+        Map<String, Path> options = NativeBundleRuntimeConfig.globalConfigOptions(bundleInfo);
 
         assertEquals(bundleInfo.gdalData().toAbsolutePath(), options.get(NativeBundleRuntimeConfig.GDAL_DATA));
         assertEquals(bundleInfo.projData().toAbsolutePath(), options.get(NativeBundleRuntimeConfig.PROJ_LIB));
@@ -24,52 +24,58 @@ class NativeBundleRuntimeConfigTest {
                 bundleInfo.driverPath().toAbsolutePath(),
                 options.get(NativeBundleRuntimeConfig.GDAL_DRIVER_PATH)
         );
+        assertFalse(options.containsKey(NativeBundleRuntimeConfig.CURL_CA_BUNDLE));
+        assertFalse(options.containsKey(NativeBundleRuntimeConfig.SSL_CERT_FILE));
+    }
+
+    @Test
+    void scopedConfigOptionsIncludeBundledCaDefaultsForUnixBundleWhenNoOverrideExists() throws Exception {
+        NativeBundleInfo bundleInfo = createBundleInfo("osx-aarch64");
+
+        Map<String, String> options = NativeBundleRuntimeConfig.scopedConfigOptions(bundleInfo, Map.of(), new Properties());
+
         assertEquals(
-                bundleInfo.caBundle().toAbsolutePath(),
+                bundleInfo.caBundle().toAbsolutePath().toString(),
                 options.get(NativeBundleRuntimeConfig.CURL_CA_BUNDLE)
         );
         assertEquals(
-                bundleInfo.caBundle().toAbsolutePath(),
+                bundleInfo.caBundle().toAbsolutePath().toString(),
                 options.get(NativeBundleRuntimeConfig.SSL_CERT_FILE)
         );
     }
 
     @Test
-    void doesNotIncludeBundledCaDefaultsForNonUnixBundle() throws Exception {
+    void scopedConfigOptionsDoNotIncludeBundledCaDefaultsForNonUnixBundle() throws Exception {
         NativeBundleInfo bundleInfo = createBundleInfo("windows-x86_64");
 
-        Map<String, Path> options = NativeBundleRuntimeConfig.configOptions(bundleInfo, Map.of(), new Properties());
+        Map<String, String> options = NativeBundleRuntimeConfig.scopedConfigOptions(bundleInfo, Map.of(), new Properties());
 
         assertFalse(options.containsKey(NativeBundleRuntimeConfig.CURL_CA_BUNDLE));
         assertFalse(options.containsKey(NativeBundleRuntimeConfig.SSL_CERT_FILE));
     }
 
     @Test
-    void skipsBundledCaDefaultsWhenEnvironmentDefinesCurlCaBundle() throws Exception {
+    void scopedConfigOptionsSkipBundledCaDefaultsWhenEnvironmentDefinesCurlCaBundle() throws Exception {
         NativeBundleInfo bundleInfo = createBundleInfo("linux-x86_64");
 
-        Map<String, Path> options = NativeBundleRuntimeConfig.configOptions(
+        Map<String, String> options = NativeBundleRuntimeConfig.scopedConfigOptions(
                 bundleInfo,
                 Map.of(NativeBundleRuntimeConfig.CURL_CA_BUNDLE, "/custom/ca.pem"),
                 new Properties()
         );
 
-        assertFalse(options.containsKey(NativeBundleRuntimeConfig.CURL_CA_BUNDLE));
-        assertFalse(options.containsKey(NativeBundleRuntimeConfig.SSL_CERT_FILE));
-        assertTrue(options.containsKey(NativeBundleRuntimeConfig.GDAL_DATA));
+        assertTrue(options.isEmpty());
     }
 
     @Test
-    void skipsBundledCaDefaultsWhenSystemPropertyDefinesSslCertFile() throws Exception {
+    void scopedConfigOptionsSkipBundledCaDefaultsWhenSystemPropertyDefinesSslCertFile() throws Exception {
         NativeBundleInfo bundleInfo = createBundleInfo("linux-aarch64");
         Properties properties = new Properties();
         properties.setProperty(NativeBundleRuntimeConfig.SSL_CERT_FILE, "/custom/ssl-cert.pem");
 
-        Map<String, Path> options = NativeBundleRuntimeConfig.configOptions(bundleInfo, Map.of(), properties);
+        Map<String, String> options = NativeBundleRuntimeConfig.scopedConfigOptions(bundleInfo, Map.of(), properties);
 
-        assertFalse(options.containsKey(NativeBundleRuntimeConfig.CURL_CA_BUNDLE));
-        assertFalse(options.containsKey(NativeBundleRuntimeConfig.SSL_CERT_FILE));
-        assertTrue(options.containsKey(NativeBundleRuntimeConfig.PROJ_LIB));
+        assertTrue(options.isEmpty());
     }
 
     private static NativeBundleInfo createBundleInfo(String classifier) throws Exception {

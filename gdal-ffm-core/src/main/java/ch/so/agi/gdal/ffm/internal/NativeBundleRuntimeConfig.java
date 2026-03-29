@@ -18,11 +18,21 @@ final class NativeBundleRuntimeConfig {
     private NativeBundleRuntimeConfig() {
     }
 
-    static Map<String, Path> configOptions(NativeBundleInfo bundleInfo) {
-        return configOptions(bundleInfo, System.getenv(), System.getProperties());
+    static Map<String, Path> globalConfigOptions(NativeBundleInfo bundleInfo) {
+        Objects.requireNonNull(bundleInfo, "bundleInfo must not be null");
+
+        LinkedHashMap<String, Path> options = new LinkedHashMap<>();
+        putIfPresent(options, GDAL_DATA, bundleInfo.gdalData());
+        putIfPresent(options, PROJ_LIB, bundleInfo.projData());
+        putIfPresent(options, GDAL_DRIVER_PATH, bundleInfo.driverPath());
+        return Collections.unmodifiableMap(new LinkedHashMap<>(options));
     }
 
-    static Map<String, Path> configOptions(
+    static Map<String, String> scopedConfigOptions(NativeBundleInfo bundleInfo) {
+        return scopedConfigOptions(bundleInfo, System.getenv(), System.getProperties());
+    }
+
+    static Map<String, String> scopedConfigOptions(
             NativeBundleInfo bundleInfo,
             Map<String, String> environment,
             Properties systemProperties
@@ -31,17 +41,13 @@ final class NativeBundleRuntimeConfig {
         Objects.requireNonNull(environment, "environment must not be null");
         Objects.requireNonNull(systemProperties, "systemProperties must not be null");
 
-        LinkedHashMap<String, Path> options = new LinkedHashMap<>();
-        putIfPresent(options, GDAL_DATA, bundleInfo.gdalData());
-        putIfPresent(options, PROJ_LIB, bundleInfo.projData());
-        putIfPresent(options, GDAL_DRIVER_PATH, bundleInfo.driverPath());
-
+        LinkedHashMap<String, String> options = new LinkedHashMap<>();
         Path bundledCa = bundledCaBundle(bundleInfo, environment, systemProperties);
         if (bundledCa != null) {
-            options.put(CURL_CA_BUNDLE, bundledCa);
-            options.put(SSL_CERT_FILE, bundledCa);
+            String bundledCaPath = bundledCa.toAbsolutePath().toString();
+            options.put(CURL_CA_BUNDLE, bundledCaPath);
+            options.put(SSL_CERT_FILE, bundledCaPath);
         }
-
         return Collections.unmodifiableMap(new LinkedHashMap<>(options));
     }
 

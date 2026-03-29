@@ -132,8 +132,10 @@ Supported `DatasetRef` types:
 
 `HTTP_URL` inputs are translated into GDAL `/vsicurl/` identifiers. Config values are applied per
 operation through `ScopedGdalConfig`, so auth/config does not remain globally active after the call.
-On Linux/macOS the runtime also sets bundled `CURL_CA_BUNDLE` and `SSL_CERT_FILE` defaults from the
-native classifier when neither environment variables nor system properties already define either key.
+On Linux/macOS `GdalConfigScope` also injects bundled `CURL_CA_BUNDLE` and `SSL_CERT_FILE` defaults
+from the native classifier when neither environment variables nor system properties already define
+either key. Those CA defaults are operation-scoped and explicit `GdalConfig` values still override
+them key-by-key.
 
 Progress callback:
 

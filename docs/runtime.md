@@ -35,13 +35,8 @@ After native extraction/loading, the runtime sets:
 - `GDAL_DATA`
 - `PROJ_LIB`
 - `GDAL_DRIVER_PATH` (if present)
-- on Linux/macOS, bundled `CURL_CA_BUNDLE` and `SSL_CERT_FILE` when the classifier manifest declares `caBundlePath`
 
 Values point to extracted bundle directories in `java.io.tmpdir`.
-
-Bundled Unix CA defaults are only applied when neither the process environment nor Java system
-properties already define `CURL_CA_BUNDLE` or `SSL_CERT_FILE`. If either value is user-defined,
-the runtime sets neither default and leaves caller intent unchanged.
 
 ## Scoped GDAL/VSI config
 
@@ -51,6 +46,12 @@ The high-level API now distinguishes explicit runtime config from the global pro
 - `ScopedGdalConfig` applies config for one operation and restores previous thread-local values
 
 This is the basis for row/job-scoped remote access in downstream integrations such as Apache Hop.
+On Linux/macOS, `GdalConfigScope` also injects bundled `CURL_CA_BUNDLE` and `SSL_CERT_FILE`
+defaults from the extracted classifier when the manifest declares `caBundlePath`.
+These implicit Unix CA defaults are scoped to the operation, not left behind as global config.
+If either `CURL_CA_BUNDLE` or `SSL_CERT_FILE` is already defined via environment or Java system
+property, neither implicit default is applied. Explicit `GdalConfig` values still override the
+implicit scoped defaults key-by-key.
 
 Typical remote/auth mappings:
 
@@ -141,7 +142,8 @@ GitHub Actions runs packaged runtime smokes in both `Build Natives` and `Release
 - only for `linux-*` and `osx-*` classifiers
 - for both bundle variants (`gdal-ffm-natives` and `gdal-ffm-natives-swiss`)
 - with per-run isolation via `-Djava.io.tmpdir=.../build/tmp/smoke/<label>` to avoid cache carry-over
-- packaged Unix smoke also asserts extracted `ssl/cacert.pem` exists and that runtime sets both `CURL_CA_BUNDLE` and `SSL_CERT_FILE`
+- packaged Unix smoke also asserts extracted `ssl/cacert.pem` exists and that `GdalConfigScope`
+  sets both `CURL_CA_BUNDLE` and `SSL_CERT_FILE` thread-locally during an operation
 
 Local equivalent:
 
