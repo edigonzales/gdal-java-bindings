@@ -23,6 +23,10 @@ final class WindowsNativeLibraryPathSupport {
     }
 
     static void configureIfNeeded(NativePlatform platform, Path extractionRoot) {
+        Objects.requireNonNull(platform, "platform must not be null");
+        if (!"windows".equals(platform.os())) {
+            return;
+        }
         configureIfNeeded(platform, extractionRoot, GLOBAL_STATE, Kernel32Holder.INSTANCE);
     }
 

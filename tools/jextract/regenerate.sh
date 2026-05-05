@@ -117,6 +117,11 @@ mkdir -p "$OUTPUT_DIR"
   -I "$GDAL_INCLUDE_DIR" \
   "$HEADER_FILE"
 
+SHARED_FILE="$OUTPUT_DIR/${PACKAGE_NAME//.//}/${CLASS_NAME}\$shared.java"
+if [[ -f "$SHARED_FILE" ]]; then
+  perl -0pi -e 's/public static final ValueLayout\.OfLong C_LONG = \(ValueLayout\.OfLong\) Linker\.nativeLinker\(\)\.canonicalLayouts\(\)\.get\("long"\);/public static final ValueLayout C_LONG = (ValueLayout) Linker.nativeLinker().canonicalLayouts().get("long");/' "$SHARED_FILE"
+fi
+
 cat <<MSG
 Regenerated FFM bindings in:
   $OUTPUT_DIR
