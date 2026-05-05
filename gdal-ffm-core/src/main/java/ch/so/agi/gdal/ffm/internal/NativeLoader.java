@@ -49,6 +49,7 @@ final class NativeLoader {
         URL manifestUrl = findManifest(prefix, classifier);
         NativeManifest manifest = NativeManifest.parse(readUtf8(manifestUrl));
         NativeBundleInfo bundleInfo = resolveBundleInfo(manifestUrl, manifest, classifier);
+        WindowsNativeLibraryPathSupport.configureIfNeeded(platform, bundleInfo.extractionRoot());
 
         for (String preload : manifest.preloadLibraries()) {
             loadLibrary(bundleInfo.extractionRoot(), preload, "preloadLibraries");
