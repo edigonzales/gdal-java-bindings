@@ -80,7 +80,6 @@ jobs:
         run: ./gradlew :gdal-ffm-natives:assemble
 
       - name: Run packaged smoke (standard)
-        if: startsWith(matrix.classifier, 'linux-') || startsWith(matrix.classifier, 'osx-')
         shell: bash
         run: |
           set -euo pipefail
@@ -99,14 +98,15 @@ jobs:
             exit 1
           fi
           jar_path="$(pwd)/${matches[0]}"
-          shared_tmpdir="$(pwd)/gdal-ffm-core/build/tmp/smoke/${{ matrix.classifier }}-shared"
-          ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
-            -PgdalFfmSmokeNativeJar="$jar_path" \
-            -PgdalFfmSmokeLabel="${{ matrix.classifier }}-standard" \
-            -PgdalFfmSmokeTmpDir="$shared_tmpdir"
+          shared_tmpdir="$(pwd)/gdal-ffm-core/build/tmp/smoke/${{ matrix.classifier }}-standard-shared"
+          for run_label in first second; do
+            ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
+              -PgdalFfmSmokeNativeJar="$jar_path" \
+              -PgdalFfmSmokeLabel="${{ matrix.classifier }}-standard-${run_label}" \
+              -PgdalFfmSmokeTmpDir="$shared_tmpdir"
+          done
 
       - name: Run packaged smoke (swiss)
-        if: startsWith(matrix.classifier, 'linux-') || startsWith(matrix.classifier, 'osx-')
         shell: bash
         run: |
           set -euo pipefail
@@ -124,11 +124,62 @@ jobs:
             exit 1
           fi
           jar_path="$(pwd)/${matches[0]}"
-          shared_tmpdir="$(pwd)/gdal-ffm-core/build/tmp/smoke/${{ matrix.classifier }}-shared"
-          ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
-            -PgdalFfmSmokeNativeJar="$jar_path" \
-            -PgdalFfmSmokeLabel="${{ matrix.classifier }}-swiss" \
-            -PgdalFfmSmokeTmpDir="$shared_tmpdir"
+          shared_tmpdir="$(pwd)/gdal-ffm-core/build/tmp/smoke/${{ matrix.classifier }}-swiss-shared"
+          for run_label in first second; do
+            ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
+              -PgdalFfmSmokeNativeJar="$jar_path" \
+              -PgdalFfmSmokeLabel="${{ matrix.classifier }}-swiss-${run_label}" \
+              -PgdalFfmSmokeTmpDir="$shared_tmpdir"
+          done
+
+      - name: Dump Windows smoke diagnostics on failure
+        if: failure() && matrix.classifier == 'windows-x86_64'
+        shell: bash
+        run: |
+          set +e
+          echo "=== Windows packaged smoke diagnostics ==="
+          dump_tool=""
+          if command -v dumpbin >/dev/null 2>&1; then
+            dump_tool="dumpbin"
+          elif command -v llvm-objdump >/dev/null 2>&1; then
+            dump_tool="llvm-objdump"
+          fi
+
+          inspect_native_jar() {
+            local prefix="$1"
+            local tmpdir="$2"
+            local jar_path
+            jar_path="$(find gdal-ffm-natives/build/libs -maxdepth 1 -type f -name "${prefix}-*-natives-${{ matrix.classifier }}.jar" | sort | head -n1)"
+            if [[ -z "$jar_path" ]]; then
+              echo "No ${prefix} jar found for diagnostics"
+              return
+            fi
+
+            echo "--- jar tf ${jar_path}"
+            jar tf "$jar_path" || true
+
+            echo "--- extracted tree under ${tmpdir}"
+            find "$tmpdir" -maxdepth 6 -print 2>/dev/null || true
+
+            while IFS= read -r dll_path; do
+              [[ -n "$dll_path" ]] || continue
+              echo "--- dependency dump for ${dll_path}"
+              if [[ "$dump_tool" == "dumpbin" ]]; then
+                dumpbin /DEPENDENTS "$dll_path" || true
+              elif [[ "$dump_tool" == "llvm-objdump" ]]; then
+                llvm-objdump -p "$dll_path" || true
+              else
+                echo "No dump tool available"
+              fi
+            done < <(
+              find "$tmpdir" \
+                \( -path '*/windows-x86_64/bin/proj_9.dll' -o -path '*/windows-x86_64/bin/gdal.dll' \) \
+                -type f 2>/dev/null | sort -u
+            )
+          }
+
+          inspect_native_jar "gdal-ffm-natives" "$(pwd)/gdal-ffm-core/build/tmp/smoke/${{ matrix.classifier }}-standard-shared"
+          inspect_native_jar "gdal-ffm-natives-swiss" "$(pwd)/gdal-ffm-core/build/tmp/smoke/${{ matrix.classifier }}-swiss-shared"
 
       - name: Upload classifier artifact (standard)
         uses: actions/upload-artifact@v4

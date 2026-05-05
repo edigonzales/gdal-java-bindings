@@ -305,14 +305,14 @@ Disable Swiss jar creation/publication when needed:
 
 ## CI runtime smoke coverage
 
-- `Build Natives` and `Release` run packaged runtime smoke tests for `linux-*` and `osx-*` classifiers.
+- `Build Natives` and `Release` run packaged runtime smoke tests for every supported classifier, including `windows-x86_64`.
 - Both variants are validated per classifier:
   - standard (`gdal-ffm-natives`)
   - swiss (`gdal-ffm-natives-swiss`)
-- Each smoke run uses a dedicated label and isolated temp dir (`build/tmp/smoke/<label>`) to avoid cache carry-over between variants.
+- Each smoke run uses a dedicated label and isolated temp dir (`build/tmp/smoke/<label>`), and packaged smokes repeat once against the same temp dir to catch cache carry-over and stale extraction problems.
+- Packaged smokes cover both raster conversion and OGR open/read/vector translate against bundled smoke data.
 - Resolver drift check (`tools/natives/refresh-lock-closure.sh --check`) is available as optional workflow input `verify-lock-closure` and is disabled by default.
 - Linux runners install `patchelf` before staging natives.
-- Windows currently keeps lock/audit validation, but no packaged smoke task.
 
 ## Developing / Smoke tests
 

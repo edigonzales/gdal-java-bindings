@@ -144,9 +144,11 @@ absolute non-relocatable linkage as an error (`absolute DT_NEEDED dependency` / 
 
 GitHub Actions runs packaged runtime smokes in both `Build Natives` and `Release`:
 
-- only for `linux-*` and `osx-*` classifiers
+- for every supported classifier, including `windows-x86_64`
 - for both bundle variants (`gdal-ffm-natives` and `gdal-ffm-natives-swiss`)
 - with per-run isolation via `-Djava.io.tmpdir=.../build/tmp/smoke/<label>` to avoid cache carry-over
+- with a second run against the same shared temp directory to catch stale extraction/cache reuse issues
+- packaged smoke exercises both raster conversion and OGR open/read/vector-translate against bundled test data
 - packaged Unix smoke also asserts extracted `ssl/cacert.pem` exists and that `GdalConfigScope`
   sets both `CURL_CA_BUNDLE` and `SSL_CERT_FILE` thread-locally during an operation
 

@@ -129,7 +129,7 @@ tasks.register<JavaExec>("smokeTest") {
 }
 
 tasks.register<JavaExec>("smokeTestPackagedNative") {
-    description = "Runs a GDAL translate smoke test against a packaged native classifier JAR."
+    description = "Runs raster and OGR smoke tests against a packaged native classifier JAR."
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     dependsOn("integrationTestClasses")
 
@@ -147,7 +147,7 @@ tasks.register<JavaExec>("smokeTestPackagedNative") {
     }
 
     classpath = sourceSets["integrationTest"].runtimeClasspath
-    mainClass.set("ch.so.agi.gdal.ffm.internal.GdalScopedConfigSmoke")
+    mainClass.set("ch.so.agi.gdal.ffm.internal.GdalPackagedNativeSmoke")
     inputs.file(inputFile)
     inputs.property("gdalFfmSmokeNativeJar", smokeNativeJar.orNull ?: "")
     inputs.property("gdalFfmSmokeLabel", smokeLabel)
@@ -191,11 +191,14 @@ tasks.register<JavaExec>("smokeTestPackagedNative") {
         smokeTmpDir.mkdirs()
 
         classpath = sourceSets["integrationTest"].runtimeClasspath + files(nativeJar)
-        jvmArgs(
+        val smokeJvmArgs = mutableListOf(
             "--enable-native-access=ALL-UNNAMED",
-            "-Djava.io.tmpdir=${smokeTmpDir.absolutePath}",
-            "-Dgdal.ffm.smoke.expectBundledCaBundle=true"
+            "-Djava.io.tmpdir=${smokeTmpDir.absolutePath}"
         )
+        if (!hostNativeClassifier.startsWith("windows-")) {
+            smokeJvmArgs += "-Dgdal.ffm.smoke.expectBundledCaBundle=true"
+        }
+        jvmArgs(smokeJvmArgs)
         setArgs(listOf(smokeOutputFile.absolutePath, inputFile.absolutePath))
     }
 }
