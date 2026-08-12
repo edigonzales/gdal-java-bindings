@@ -125,7 +125,7 @@ public final class GdalPackagedNativeSmoke {
                 writer.write(new OgrFeature(
                         1L,
                         Map.of(),
-                        OgrGeometry.fromWkb(CURVE_POLYGON_WKB, 2056)
+                        OgrGeometry.fromWkb(CURVE_POLYGON_WKB)
                 ));
             }
 
@@ -146,11 +146,6 @@ public final class GdalPackagedNativeSmoke {
                     OgrGeometry geometry = iterator.next().geometry();
                     if (geometry == null) {
                         throw new IllegalStateException("Native true-curve smoke returned null geometry");
-                    }
-                    if (geometry.srid().orElse(-1) != 2056) {
-                        throw new IllegalStateException(
-                                "Native true-curve smoke lost SRID 2056: " + geometry.srid()
-                        );
                     }
 
                     byte[] ewkb = geometry.ewkb();
