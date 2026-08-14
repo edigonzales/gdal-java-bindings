@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsSLo /tmp/jextract.tar.gz \
-            'https://download.java.net/java/early_access/jextract/22/6/openjdk-22-jextract+6-47_linux-x64_bin.tar.gz'
+            'https://download.java.net/java/early_access/jextract/25/2/openjdk-25-jextract+2-4_linux-x64_bin.tar.gz'
           mkdir -p /tmp/jextract
           tar -xzf /tmp/jextract.tar.gz -C /tmp/jextract
           JEXTRACT_BIN="$(find /tmp/jextract -type f -path '*/bin/jextract' -print -quit)"
@@ -43,6 +43,7 @@ jobs:
           set -euo pipefail
           GDAL_INCLUDE_DIR="$CONDA_PREFIX/include" \
             JEXTRACT_BIN="$JEXTRACT_BIN" \
+            JEXTRACT_EXPECTED_VERSION='jextract 25' \
             tools/jextract/regenerate.sh
 
       - name: Verify checked-in generated sources
