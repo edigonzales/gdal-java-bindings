@@ -107,11 +107,10 @@ final class GdalAlgorithmRunner {
         }
 
         try {
-            int argCount = GdalNative.CSLCount(argNames);
+            int argCount = GdalGenerated.CSLCount(argNames);
             MemorySegment namesArray = argNames.reinterpret((long) argCount * ValueLayout.ADDRESS.byteSize());
             for (int i = 0; i < argCount; i++) {
                 MemorySegment argNamePtr = namesArray.getAtIndex(ValueLayout.ADDRESS, i);
-                String argName = CStrings.fromCString(argNamePtr);
                 MemorySegment arg = GdalGenerated.GDALAlgorithmGetArg(actualAlgorithm, argNamePtr);
                 if (CStrings.isNull(arg)) {
                     continue;
