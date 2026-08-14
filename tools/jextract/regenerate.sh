@@ -8,14 +8,37 @@ OUTPUT_DIR="$CORE_DIR/src/generated/java"
 PACKAGE_NAME="ch.so.agi.gdal.ffm.generated"
 CLASS_NAME="GdalGenerated"
 JEXTRACT_BIN="${JEXTRACT_BIN:-jextract}"
+EXPECTED_JEXTRACT_VERSION="${JEXTRACT_EXPECTED_VERSION:-22-jextract+6-47}"
+EXPECTED_GDAL_VERSION="$(sed -n 's/^gdalVersion=//p' "$ROOT_DIR/gradle.properties")"
 
 if [[ -z "${GDAL_INCLUDE_DIR:-}" ]]; then
-  echo "GDAL_INCLUDE_DIR is required (path containing gdal.h, gdalalgorithm.h, gdal_utils.h, ogr_api.h, ogr_srs_api.h, cpl_error.h, cpl_conv.h, cpl_string.h)" >&2
+  echo "GDAL_INCLUDE_DIR is required (path containing GDAL headers)" >&2
   exit 1
 fi
 
 if ! command -v "$JEXTRACT_BIN" >/dev/null 2>&1; then
   echo "jextract executable not found: $JEXTRACT_BIN" >&2
+  exit 1
+fi
+
+actual_jextract_version="$($JEXTRACT_BIN --version 2>&1 | head -n 1)"
+if [[ "$actual_jextract_version" != *"$EXPECTED_JEXTRACT_VERSION"* ]]; then
+  echo "Unexpected jextract version: $actual_jextract_version" >&2
+  echo "Expected version containing: $EXPECTED_JEXTRACT_VERSION" >&2
+  exit 1
+fi
+
+version_header="$GDAL_INCLUDE_DIR/gdal_version.h"
+if [[ ! -f "$version_header" ]]; then
+  echo "Missing GDAL version header: $version_header" >&2
+  exit 1
+fi
+major="$(awk '$2 == "GDAL_VERSION_MAJOR" { print $3 }' "$version_header")"
+minor="$(awk '$2 == "GDAL_VERSION_MINOR" { print $3 }' "$version_header")"
+revision="$(awk '$2 == "GDAL_VERSION_REV" { print $3 }' "$version_header")"
+actual_gdal_version="$major.$minor.$revision"
+if [[ "$actual_gdal_version" != "$EXPECTED_GDAL_VERSION" ]]; then
+  echo "GDAL header version mismatch: found $actual_gdal_version, expected $EXPECTED_GDAL_VERSION" >&2
   exit 1
 fi
 
@@ -106,6 +129,7 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "GDALAlgorithmArgGetType" \
   --include-function "GDALAlgorithmArgIsOutput" \
   --include-function "GDALAlgorithmArgGetAsString" \
+  --include-function "CSLCount" \
   --include-function "CSLDestroy" \
   --include-function "CPLErrorReset" \
   --include-function "CPLGetLastErrorType" \
@@ -114,17 +138,25 @@ mkdir -p "$OUTPUT_DIR"
   --include-function "CPLFree" \
   --include-function "VSIFree" \
   --include-function "CPLSetConfigOption" \
+  --include-function "CPLSetThreadLocalConfigOption" \
+  --include-function "CPLGetThreadLocalConfigOption" \
   -I "$GDAL_INCLUDE_DIR" \
   "$HEADER_FILE"
 
 SHARED_FILE="$OUTPUT_DIR/${PACKAGE_NAME//.//}/${CLASS_NAME}\$shared.java"
 if [[ -f "$SHARED_FILE" ]]; then
+  # jextract 22 emits C_LONG as OfLong even on platforms where the canonical C long
+  # layout is not represented by that concrete subtype. Keep this compatibility
+  # rewrite deterministic until the generator is upgraded and the patch is no longer needed.
   perl -0pi -e 's/public static final ValueLayout\.OfLong C_LONG = \(ValueLayout\.OfLong\) Linker\.nativeLinker\(\)\.canonicalLayouts\(\)\.get\("long"\);/public static final ValueLayout C_LONG = (ValueLayout) Linker.nativeLinker().canonicalLayouts().get("long");/' "$SHARED_FILE"
 fi
 
 cat <<MSG
 Regenerated FFM bindings in:
   $OUTPUT_DIR
+using:
+  jextract: $actual_jextract_version
+  GDAL headers: $actual_gdal_version
 
 Review generated files and commit them together with any wrapper adjustments.
 MSG
