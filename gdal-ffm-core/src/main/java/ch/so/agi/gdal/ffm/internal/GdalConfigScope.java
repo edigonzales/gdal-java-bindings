@@ -56,7 +56,7 @@ public final class GdalConfigScope {
         }
     }
 
-    private static String getThreadLocalConfigOption(String key) {
+    static String getThreadLocalConfigOption(String key) {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment keyString = arena.allocateFrom(key);
             MemorySegment result = GdalGenerated.CPLGetThreadLocalConfigOption(keyString, MemorySegment.NULL);
