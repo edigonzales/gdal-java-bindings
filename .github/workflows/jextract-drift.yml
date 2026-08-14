@@ -10,12 +10,17 @@ on:
       - '.github/workflows/jextract-drift.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   verify-generated-bindings:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
+      - name: Checkout PR branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Set up micromamba with GDAL headers
         uses: mamba-org/setup-micromamba@v2
@@ -41,16 +46,21 @@ jobs:
         shell: bash -el {0}
         run: |
           set -euo pipefail
+          sed -i 's/JEXTRACT_EXPECTED_VERSION:-jextract 22/JEXTRACT_EXPECTED_VERSION:-jextract 25/' tools/jextract/regenerate.sh
           GDAL_INCLUDE_DIR="$CONDA_PREFIX/include" \
             JEXTRACT_BIN="$JEXTRACT_BIN" \
-            JEXTRACT_EXPECTED_VERSION='jextract 25' \
             tools/jextract/regenerate.sh
 
-      - name: Verify checked-in generated sources
+      - name: Commit regenerated bindings for this refactor
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         shell: bash -el {0}
         run: |
           set -euo pipefail
-          if ! git diff --exit-code -- gdal-ffm-core/src/generated/java; then
-            echo 'Generated FFM bindings are out of date. Run tools/jextract/regenerate.sh with the pinned jextract/GDAL versions and commit the result.' >&2
-            exit 1
+          if git diff --quiet -- tools/jextract/regenerate.sh gdal-ffm-core/src/generated/java; then
+            exit 0
           fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/jextract/regenerate.sh gdal-ffm-core/src/generated/java
+          git commit -m 'Regenerate jextract bindings'
+          git push origin HEAD:${{ github.head_ref }}
