@@ -1,0 +1,55 @@
+name: jextract drift
+
+on:
+  pull_request:
+    paths:
+      - 'gdal-ffm-core/src/generated/java/**'
+      - 'gdal-ffm-core/src/main/native/**'
+      - 'tools/jextract/**'
+      - 'gradle.properties'
+      - '.github/workflows/jextract-drift.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-generated-bindings:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up micromamba with GDAL headers
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: jextract
+          create-args: >-
+            gdal=3.12.2
+            -c conda-forge
+
+      - name: Install pinned jextract
+        shell: bash -el {0}
+        run: |
+          set -euo pipefail
+          curl -fsSLo /tmp/jextract.tar.gz \
+            'https://download.java.net/java/early_access/jextract/25/2/openjdk-25-jextract+2-4_linux-x64_bin.tar.gz'
+          mkdir -p /tmp/jextract
+          tar -xzf /tmp/jextract.tar.gz -C /tmp/jextract
+          JEXTRACT_BIN="$(find /tmp/jextract -type f -path '*/bin/jextract' -print -quit)"
+          test -n "$JEXTRACT_BIN"
+          echo "JEXTRACT_BIN=$JEXTRACT_BIN" >> "$GITHUB_ENV"
+
+      - name: Regenerate bindings
+        shell: bash -el {0}
+        run: |
+          set -euo pipefail
+          GDAL_INCLUDE_DIR="$CONDA_PREFIX/include" \
+            JEXTRACT_BIN="$JEXTRACT_BIN" \
+            tools/jextract/regenerate.sh
+
+      - name: Verify checked-in generated sources
+        shell: bash -el {0}
+        run: |
+          set -euo pipefail
+          if ! git diff --exit-code -- gdal-ffm-core/src/generated/java; then
+            echo 'Generated FFM bindings are out of date. Run tools/jextract/regenerate.sh with the pinned jextract/GDAL versions and commit the result.' >&2
+            exit 1
+          fi

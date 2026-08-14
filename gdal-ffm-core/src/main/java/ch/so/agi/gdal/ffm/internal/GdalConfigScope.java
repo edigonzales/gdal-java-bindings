@@ -1,6 +1,9 @@
 package ch.so.agi.gdal.ffm.internal;
 
 import ch.so.agi.gdal.ffm.GdalConfig;
+import ch.so.agi.gdal.ffm.generated.GdalGenerated;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,8 +25,8 @@ public final class GdalConfigScope {
 
         LinkedHashMap<String, String> previousValues = new LinkedHashMap<>();
         for (Map.Entry<String, String> entry : effectiveOptions.entrySet()) {
-            previousValues.put(entry.getKey(), GdalNative.getThreadLocalConfigOption(entry.getKey()));
-            GdalNative.setThreadLocalConfigOption(entry.getKey(), entry.getValue());
+            previousValues.put(entry.getKey(), getThreadLocalConfigOption(entry.getKey()));
+            setThreadLocalConfigOption(entry.getKey(), entry.getValue());
         }
         return new ScopedConfigHandle(previousValues);
     }
@@ -45,6 +48,22 @@ public final class GdalConfigScope {
         return Collections.unmodifiableMap(new LinkedHashMap<>(effectiveOptions));
     }
 
+    private static void setThreadLocalConfigOption(String key, String value) {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment keyString = arena.allocateFrom(key);
+            MemorySegment valueString = value == null ? MemorySegment.NULL : arena.allocateFrom(value);
+            GdalGenerated.CPLSetThreadLocalConfigOption(keyString, valueString);
+        }
+    }
+
+    static String getThreadLocalConfigOption(String key) {
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment keyString = arena.allocateFrom(key);
+            MemorySegment result = GdalGenerated.CPLGetThreadLocalConfigOption(keyString, MemorySegment.NULL);
+            return CStrings.isNull(result) ? null : CStrings.fromCString(result);
+        }
+    }
+
     public static final class ScopedConfigHandle implements AutoCloseable {
         private static final ScopedConfigHandle NOOP = new ScopedConfigHandle(Map.of());
 
@@ -62,7 +81,7 @@ public final class GdalConfigScope {
             }
             closed = true;
             for (Map.Entry<String, String> entry : previousValues.entrySet()) {
-                GdalNative.setThreadLocalConfigOption(entry.getKey(), entry.getValue());
+                setThreadLocalConfigOption(entry.getKey(), entry.getValue());
             }
         }
     }

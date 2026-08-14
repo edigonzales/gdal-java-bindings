@@ -5217,6 +5217,67 @@ public class GdalGenerated extends GdalGenerated$shared {
         }
     }
 
+    private static class CPLGetThreadLocalConfigOption {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("CPLGetThreadLocalConfigOption");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * const char *CPLGetThreadLocalConfigOption(const char *, const char *)
+     * }
+     */
+    public static FunctionDescriptor CPLGetThreadLocalConfigOption$descriptor() {
+        return CPLGetThreadLocalConfigOption.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * const char *CPLGetThreadLocalConfigOption(const char *, const char *)
+     * }
+     */
+    public static MethodHandle CPLGetThreadLocalConfigOption$handle() {
+        return CPLGetThreadLocalConfigOption.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * const char *CPLGetThreadLocalConfigOption(const char *, const char *)
+     * }
+     */
+    public static MemorySegment CPLGetThreadLocalConfigOption$address() {
+        return CPLGetThreadLocalConfigOption.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * const char *CPLGetThreadLocalConfigOption(const char *, const char *)
+     * }
+     */
+    public static MemorySegment CPLGetThreadLocalConfigOption(MemorySegment x0, MemorySegment x1) {
+        var mh$ = CPLGetThreadLocalConfigOption.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("CPLGetThreadLocalConfigOption", x0, x1);
+            }
+            return (MemorySegment)mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
     private static class CPLSetConfigOption {
         public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
             GdalGenerated.C_POINTER,
@@ -5270,6 +5331,126 @@ public class GdalGenerated extends GdalGenerated$shared {
                 traceDowncall("CPLSetConfigOption", x0, x1);
             }
             mh$.invokeExact(x0, x1);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class CPLSetThreadLocalConfigOption {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.ofVoid(
+            GdalGenerated.C_POINTER,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("CPLSetThreadLocalConfigOption");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * void CPLSetThreadLocalConfigOption(const char *pszKey, const char *pszValue)
+     * }
+     */
+    public static FunctionDescriptor CPLSetThreadLocalConfigOption$descriptor() {
+        return CPLSetThreadLocalConfigOption.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * void CPLSetThreadLocalConfigOption(const char *pszKey, const char *pszValue)
+     * }
+     */
+    public static MethodHandle CPLSetThreadLocalConfigOption$handle() {
+        return CPLSetThreadLocalConfigOption.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * void CPLSetThreadLocalConfigOption(const char *pszKey, const char *pszValue)
+     * }
+     */
+    public static MemorySegment CPLSetThreadLocalConfigOption$address() {
+        return CPLSetThreadLocalConfigOption.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * void CPLSetThreadLocalConfigOption(const char *pszKey, const char *pszValue)
+     * }
+     */
+    public static void CPLSetThreadLocalConfigOption(MemorySegment pszKey, MemorySegment pszValue) {
+        var mh$ = CPLSetThreadLocalConfigOption.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("CPLSetThreadLocalConfigOption", pszKey, pszValue);
+            }
+            mh$.invokeExact(pszKey, pszValue);
+        } catch (Error | RuntimeException ex) {
+           throw ex;
+        } catch (Throwable ex$) {
+           throw new AssertionError("should not reach here", ex$);
+        }
+    }
+
+    private static class CSLCount {
+        public static final FunctionDescriptor DESC = FunctionDescriptor.of(
+            GdalGenerated.C_INT,
+            GdalGenerated.C_POINTER
+        );
+
+        public static final MemorySegment ADDR = SYMBOL_LOOKUP.findOrThrow("CSLCount");
+
+        public static final MethodHandle HANDLE = Linker.nativeLinker().downcallHandle(ADDR, DESC);
+    }
+
+    /**
+     * Function descriptor for:
+     * {@snippet lang=c :
+     * int CSLCount(CSLConstList papszStrList)
+     * }
+     */
+    public static FunctionDescriptor CSLCount$descriptor() {
+        return CSLCount.DESC;
+    }
+
+    /**
+     * Downcall method handle for:
+     * {@snippet lang=c :
+     * int CSLCount(CSLConstList papszStrList)
+     * }
+     */
+    public static MethodHandle CSLCount$handle() {
+        return CSLCount.HANDLE;
+    }
+
+    /**
+     * Address for:
+     * {@snippet lang=c :
+     * int CSLCount(CSLConstList papszStrList)
+     * }
+     */
+    public static MemorySegment CSLCount$address() {
+        return CSLCount.ADDR;
+    }
+
+    /**
+     * {@snippet lang=c :
+     * int CSLCount(CSLConstList papszStrList)
+     * }
+     */
+    public static int CSLCount(MemorySegment papszStrList) {
+        var mh$ = CSLCount.HANDLE;
+        try {
+            if (TRACE_DOWNCALLS) {
+                traceDowncall("CSLCount", papszStrList);
+            }
+            return (int)mh$.invokeExact(papszStrList);
         } catch (Error | RuntimeException ex) {
            throw ex;
         } catch (Throwable ex$) {
