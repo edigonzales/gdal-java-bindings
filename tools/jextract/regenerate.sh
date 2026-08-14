@@ -33,9 +33,13 @@ if [[ ! -f "$version_header" ]]; then
   echo "Missing GDAL version header: $version_header" >&2
   exit 1
 fi
-major="$(awk '$2 == "GDAL_VERSION_MAJOR" { print $3 }' "$version_header")"
-minor="$(awk '$2 == "GDAL_VERSION_MINOR" { print $3 }' "$version_header")"
-revision="$(awk '$2 == "GDAL_VERSION_REV" { print $3 }' "$version_header")"
+read_define() {
+  local name="$1"
+  sed -nE "s/^[[:space:]]*#[[:space:]]*define[[:space:]]+$name[[:space:]]+([0-9]+).*/\\1/p" "$version_header" | head -n 1
+}
+major="$(read_define GDAL_VERSION_MAJOR)"
+minor="$(read_define GDAL_VERSION_MINOR)"
+revision="$(read_define GDAL_VERSION_REV)"
 actual_gdal_version="$major.$minor.$revision"
 if [[ "$actual_gdal_version" != "$EXPECTED_GDAL_VERSION" ]]; then
   echo "GDAL header version mismatch: found $actual_gdal_version, expected $EXPECTED_GDAL_VERSION" >&2
