@@ -8,7 +8,7 @@ OUTPUT_DIR="$CORE_DIR/src/generated/java"
 PACKAGE_NAME="ch.so.agi.gdal.ffm.generated"
 CLASS_NAME="GdalGenerated"
 JEXTRACT_BIN="${JEXTRACT_BIN:-jextract}"
-EXPECTED_JEXTRACT_VERSION="${JEXTRACT_EXPECTED_VERSION:-22-jextract+6-47}"
+EXPECTED_JEXTRACT_VERSION="${JEXTRACT_EXPECTED_VERSION:-jextract 22}"
 EXPECTED_GDAL_VERSION="$(sed -n 's/^gdalVersion=//p' "$ROOT_DIR/gradle.properties")"
 
 if [[ -z "${GDAL_INCLUDE_DIR:-}" ]]; then
@@ -22,9 +22,9 @@ if ! command -v "$JEXTRACT_BIN" >/dev/null 2>&1; then
 fi
 
 actual_jextract_version="$($JEXTRACT_BIN --version 2>&1 | head -n 1)"
-if [[ "$actual_jextract_version" != *"$EXPECTED_JEXTRACT_VERSION"* ]]; then
+if [[ "$actual_jextract_version" != "$EXPECTED_JEXTRACT_VERSION" ]]; then
   echo "Unexpected jextract version: $actual_jextract_version" >&2
-  echo "Expected version containing: $EXPECTED_JEXTRACT_VERSION" >&2
+  echo "Expected: $EXPECTED_JEXTRACT_VERSION" >&2
   exit 1
 fi
 
