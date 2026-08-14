@@ -8,6 +8,10 @@ import java.lang.foreign.SymbolLookup;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 
+/**
+ * Temporary compatibility bridge for GDAL C functions that are not yet present in the checked-in
+ * jextract output. Keep this class deliberately small; normal GDAL calls belong in GdalGenerated.
+ */
 final class GdalNative {
     private static final Linker LINKER = Linker.nativeLinker();
     private static final SymbolLookup SYMBOL_LOOKUP = SymbolLookup.loaderLookup().or(LINKER.defaultLookup());
@@ -20,65 +24,9 @@ final class GdalNative {
             "CPLGetThreadLocalConfigOption",
             FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
-    private static final MethodHandle CSL_DESTROY = downcall(
-            "CSLDestroy",
-            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_GET_GLOBAL_ALGORITHM_REGISTRY = downcall(
-            "GDALGetGlobalAlgorithmRegistry",
-            FunctionDescriptor.of(ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_REGISTRY_RELEASE = downcall(
-            "GDALAlgorithmRegistryRelease",
-            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_REGISTRY_INSTANTIATE_ALG_FROM_PATH = downcall(
-            "GDALAlgorithmRegistryInstantiateAlgFromPath",
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_RELEASE = downcall(
-            "GDALAlgorithmRelease",
-            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_PARSE_COMMAND_LINE_ARGUMENTS = downcall(
-            "GDALAlgorithmParseCommandLineArguments",
-            FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_GET_ACTUAL_ALGORITHM = downcall(
-            "GDALAlgorithmGetActualAlgorithm",
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_RUN = downcall(
-            "GDALAlgorithmRun",
-            FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_FINALIZE = downcall(
-            "GDALAlgorithmFinalize",
-            FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_GET_ARG_NAMES = downcall(
-            "GDALAlgorithmGetArgNames",
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_GET_ARG = downcall(
-            "GDALAlgorithmGetArg",
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_ARG_RELEASE = downcall(
-            "GDALAlgorithmArgRelease",
-            FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_ARG_GET_TYPE = downcall(
-            "GDALAlgorithmArgGetType",
+    private static final MethodHandle CSL_COUNT = downcall(
+            "CSLCount",
             FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_ARG_IS_OUTPUT = downcall(
-            "GDALAlgorithmArgIsOutput",
-            FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS)
-    );
-    private static final MethodHandle GDAL_ALGORITHM_ARG_GET_AS_STRING = downcall(
-            "GDALAlgorithmArgGetAsString",
-            FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
 
     private GdalNative() {
@@ -100,64 +48,8 @@ final class GdalNative {
         }
     }
 
-    static void CSLDestroy(MemorySegment strings) {
-        invokeVoid(CSL_DESTROY, strings);
-    }
-
-    static MemorySegment GDALGetGlobalAlgorithmRegistry() {
-        return invokeAddress(GDAL_GET_GLOBAL_ALGORITHM_REGISTRY);
-    }
-
-    static void GDALAlgorithmRegistryRelease(MemorySegment registry) {
-        invokeVoid(GDAL_ALGORITHM_REGISTRY_RELEASE, registry);
-    }
-
-    static MemorySegment GDALAlgorithmRegistryInstantiateAlgFromPath(MemorySegment registry, MemorySegment algPath) {
-        return invokeAddress(GDAL_ALGORITHM_REGISTRY_INSTANTIATE_ALG_FROM_PATH, registry, algPath);
-    }
-
-    static void GDALAlgorithmRelease(MemorySegment algorithm) {
-        invokeVoid(GDAL_ALGORITHM_RELEASE, algorithm);
-    }
-
-    static boolean GDALAlgorithmParseCommandLineArguments(MemorySegment algorithm, MemorySegment argv) {
-        return invokeBoolean(GDAL_ALGORITHM_PARSE_COMMAND_LINE_ARGUMENTS, algorithm, argv);
-    }
-
-    static MemorySegment GDALAlgorithmGetActualAlgorithm(MemorySegment algorithm) {
-        return invokeAddress(GDAL_ALGORITHM_GET_ACTUAL_ALGORITHM, algorithm);
-    }
-
-    static boolean GDALAlgorithmRun(MemorySegment algorithm, MemorySegment callback, MemorySegment userData) {
-        return invokeBoolean(GDAL_ALGORITHM_RUN, algorithm, callback, userData);
-    }
-
-    static boolean GDALAlgorithmFinalize(MemorySegment algorithm) {
-        return invokeBoolean(GDAL_ALGORITHM_FINALIZE, algorithm);
-    }
-
-    static MemorySegment GDALAlgorithmGetArgNames(MemorySegment algorithm) {
-        return invokeAddress(GDAL_ALGORITHM_GET_ARG_NAMES, algorithm);
-    }
-
-    static MemorySegment GDALAlgorithmGetArg(MemorySegment algorithm, MemorySegment argName) {
-        return invokeAddress(GDAL_ALGORITHM_GET_ARG, algorithm, argName);
-    }
-
-    static void GDALAlgorithmArgRelease(MemorySegment arg) {
-        invokeVoid(GDAL_ALGORITHM_ARG_RELEASE, arg);
-    }
-
-    static int GDALAlgorithmArgGetType(MemorySegment arg) {
-        return invokeInt(GDAL_ALGORITHM_ARG_GET_TYPE, arg);
-    }
-
-    static boolean GDALAlgorithmArgIsOutput(MemorySegment arg) {
-        return invokeBoolean(GDAL_ALGORITHM_ARG_IS_OUTPUT, arg);
-    }
-
-    static MemorySegment GDALAlgorithmArgGetAsString(MemorySegment arg) {
-        return invokeAddress(GDAL_ALGORITHM_ARG_GET_AS_STRING, arg);
+    static int CSLCount(MemorySegment strings) {
+        return invokeInt(CSL_COUNT, strings);
     }
 
     private static MethodHandle downcall(String symbolName, FunctionDescriptor descriptor) {
@@ -169,16 +61,6 @@ final class GdalNative {
     private static MemorySegment invokeAddress(MethodHandle handle, Object... args) {
         try {
             return (MemorySegment) handle.invokeWithArguments(args);
-        } catch (RuntimeException | Error e) {
-            throw e;
-        } catch (Throwable e) {
-            throw new IllegalStateException("Native GDAL invocation failed", e);
-        }
-    }
-
-    private static boolean invokeBoolean(MethodHandle handle, Object... args) {
-        try {
-            return (boolean) handle.invokeWithArguments(args);
         } catch (RuntimeException | Error e) {
             throw e;
         } catch (Throwable e) {
