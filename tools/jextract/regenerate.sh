@@ -8,7 +8,7 @@ OUTPUT_DIR="$CORE_DIR/src/generated/java"
 PACKAGE_NAME="ch.so.agi.gdal.ffm.generated"
 CLASS_NAME="GdalGenerated"
 JEXTRACT_BIN="${JEXTRACT_BIN:-jextract}"
-EXPECTED_JEXTRACT_VERSION="${JEXTRACT_EXPECTED_VERSION:-jextract 22}"
+EXPECTED_JEXTRACT_VERSION="${JEXTRACT_EXPECTED_VERSION:-jextract 25}"
 EXPECTED_GDAL_VERSION="$(sed -n 's/^gdalVersion=//p' "$ROOT_DIR/gradle.properties")"
 
 if [[ -z "${GDAL_INCLUDE_DIR:-}" ]]; then
