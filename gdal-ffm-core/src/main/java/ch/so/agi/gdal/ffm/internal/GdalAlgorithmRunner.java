@@ -6,13 +6,12 @@ import ch.so.agi.gdal.ffm.generated.GdalGenerated;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 final class GdalAlgorithmRunner {
+    // GDALAlgorithmArgType::GAAT_STRING from gdalalgorithm.h.
     private static final int GAAT_STRING = 1;
-    private static final int MAX_ARG_NAMES = 512;
 
     private GdalAlgorithmRunner() {
     }
@@ -52,25 +51,25 @@ final class GdalAlgorithmRunner {
         try (GdalConfigScope.ScopedConfigHandle ignored = GdalConfigScope.applyScoped(config);
              Arena arena = Arena.ofConfined();
              ProgressBridge.ProgressHandle progressHandle = ProgressBridge.create(progress, arena)) {
-            registry = GdalNative.GDALGetGlobalAlgorithmRegistry();
+            registry = GdalGenerated.GDALGetGlobalAlgorithmRegistry();
             if (CStrings.isNull(registry)) {
                 throw GdalErrors.lastError("Failed to obtain GDAL algorithm registry");
             }
 
             MemorySegment algorithmPathArray = CArgv.toCStringArray(algorithmPath.toArray(String[]::new), arena);
-            algorithm = GdalNative.GDALAlgorithmRegistryInstantiateAlgFromPath(registry, algorithmPathArray);
+            algorithm = GdalGenerated.GDALAlgorithmRegistryInstantiateAlgFromPath(registry, algorithmPathArray);
             if (CStrings.isNull(algorithm)) {
                 throw GdalErrors.lastError("Failed to instantiate GDAL algorithm: " + String.join(" ", algorithmPath));
             }
 
             MemorySegment argv = CArgv.toCStringArray(args.toArray(String[]::new), arena);
-            if (!GdalNative.GDALAlgorithmParseCommandLineArguments(algorithm, argv)) {
+            if (!GdalGenerated.GDALAlgorithmParseCommandLineArguments(algorithm, argv)) {
                 throw GdalErrors.lastError(
                         "Failed to parse arguments for GDAL algorithm: " + String.join(" ", algorithmPath)
                 );
             }
 
-            if (!GdalNative.GDALAlgorithmRun(algorithm, progressHandle.callbackFn(), progressHandle.userData())) {
+            if (!GdalGenerated.GDALAlgorithmRun(algorithm, progressHandle.callbackFn(), progressHandle.userData())) {
                 throwIfCallbackFailed(progressHandle);
                 throw GdalErrors.lastError("GDAL algorithm failed: " + String.join(" ", algorithmPath));
             }
@@ -81,63 +80,60 @@ final class GdalAlgorithmRunner {
                 stringOutput = readFirstStringOutput(algorithm);
             }
 
-            if (!GdalNative.GDALAlgorithmFinalize(algorithm)) {
+            if (!GdalGenerated.GDALAlgorithmFinalize(algorithm)) {
                 throw GdalErrors.lastError("Failed to finalize GDAL algorithm: " + String.join(" ", algorithmPath));
             }
 
             return stringOutput;
         } finally {
             if (!CStrings.isNull(algorithm)) {
-                GdalNative.GDALAlgorithmRelease(algorithm);
+                GdalGenerated.GDALAlgorithmRelease(algorithm);
             }
             if (!CStrings.isNull(registry)) {
-                GdalNative.GDALAlgorithmRegistryRelease(registry);
+                GdalGenerated.GDALAlgorithmRegistryRelease(registry);
             }
         }
     }
 
     private static String readFirstStringOutput(MemorySegment algorithm) {
-        MemorySegment actualAlgorithm = GdalNative.GDALAlgorithmGetActualAlgorithm(algorithm);
+        MemorySegment actualAlgorithm = GdalGenerated.GDALAlgorithmGetActualAlgorithm(algorithm);
         if (CStrings.isNull(actualAlgorithm)) {
             actualAlgorithm = algorithm;
         }
 
-        MemorySegment argNames = GdalNative.GDALAlgorithmGetArgNames(actualAlgorithm);
+        MemorySegment argNames = GdalGenerated.GDALAlgorithmGetArgNames(actualAlgorithm);
         if (CStrings.isNull(argNames)) {
             return "";
         }
 
         try {
-            MemorySegment namesArray = argNames.reinterpret((long) MAX_ARG_NAMES * ValueLayout.ADDRESS.byteSize());
-            for (int i = 0; i < MAX_ARG_NAMES; i++) {
+            int argCount = GdalNative.CSLCount(argNames);
+            MemorySegment namesArray = argNames.reinterpret((long) argCount * ValueLayout.ADDRESS.byteSize());
+            for (int i = 0; i < argCount; i++) {
                 MemorySegment argNamePtr = namesArray.getAtIndex(ValueLayout.ADDRESS, i);
-                if (CStrings.isNull(argNamePtr)) {
-                    break;
-                }
-
                 String argName = CStrings.fromCString(argNamePtr);
-                MemorySegment arg = GdalNative.GDALAlgorithmGetArg(actualAlgorithm, argNamePtr);
+                MemorySegment arg = GdalGenerated.GDALAlgorithmGetArg(actualAlgorithm, argNamePtr);
                 if (CStrings.isNull(arg)) {
                     continue;
                 }
                 try {
-                    if (!GdalNative.GDALAlgorithmArgIsOutput(arg)) {
+                    if (!GdalGenerated.GDALAlgorithmArgIsOutput(arg)) {
                         continue;
                     }
-                    if (GdalNative.GDALAlgorithmArgGetType(arg) != GAAT_STRING) {
+                    if (GdalGenerated.GDALAlgorithmArgGetType(arg) != GAAT_STRING) {
                         continue;
                     }
-                    String value = CStrings.fromCString(GdalNative.GDALAlgorithmArgGetAsString(arg));
+                    String value = CStrings.fromCString(GdalGenerated.GDALAlgorithmArgGetAsString(arg));
                     if (!value.isBlank()) {
                         return value;
                     }
                 } finally {
-                    GdalNative.GDALAlgorithmArgRelease(arg);
+                    GdalGenerated.GDALAlgorithmArgRelease(arg);
                 }
             }
             return "";
         } finally {
-            GdalNative.CSLDestroy(argNames);
+            GdalGenerated.CSLDestroy(argNames);
         }
     }
 
