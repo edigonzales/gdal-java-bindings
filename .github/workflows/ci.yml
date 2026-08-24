@@ -56,15 +56,16 @@ jobs:
     name: windows-native-smoke (${{ matrix.label }})
     runs-on: windows-2025
     timeout-minutes: 30
+    continue-on-error: ${{ matrix.allow_failure }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { label: temurin-23, distribution: temurin, java-version: '23' }
-          - { label: temurin-24, distribution: temurin, java-version: '24' }
-          - { label: oracle-24.0.2, distribution: oracle, java-version: '24.0.2' }
-          - { label: temurin-25, distribution: temurin, java-version: '25' }
-          - { label: oracle-25, distribution: oracle, java-version: '25' }
+          - { label: temurin-23, distribution: temurin, java-version: '23', allow_failure: false }
+          - { label: temurin-24, distribution: temurin, java-version: '24', allow_failure: false }
+          - { label: oracle-24.0.2-known-incompatibility, distribution: oracle, java-version: '24.0.2', allow_failure: true }
+          - { label: temurin-25, distribution: temurin, java-version: '25', allow_failure: false }
+          - { label: oracle-25, distribution: oracle, java-version: '25', allow_failure: false }
     steps:
       - uses: actions/checkout@v5
       - name: Set up ${{ matrix.distribution }} JDK ${{ matrix.java-version }}
@@ -200,6 +201,20 @@ jobs:
           } else {
             Write-Line "No extracted smoke tree found at $smokeRoot"
           }
+      - name: Document known Oracle 24.0.2 incompatibility
+        if: ${{ always() && matrix.allow_failure }}
+        shell: pwsh
+        run: |
+          @"
+          ### Known incompatibility: Oracle JDK 24.0.2 on Windows
+
+          This matrix entry is intentionally allowed to fail.
+
+          The packaged native GDAL smoke currently reproduces an
+          `EXCEPTION_ACCESS_VIOLATION` in `msvcp140.dll` during `GDALAllRegister()`.
+          The entry remains in CI so the incompatibility stays visible and is
+          automatically retested on future changes.
+          "@ >> $env:GITHUB_STEP_SUMMARY
       - name: Collect Windows crash diagnostics
         if: failure()
         shell: bash
