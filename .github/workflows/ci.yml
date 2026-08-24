@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["main", "codex/**"]
+    branches: ["main", "codex/**", "ci/**"]
   pull_request:
 
 jobs:
@@ -11,172 +11,244 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - label: linux-x86_64
-            os: ubuntu-24.04
-          - label: linux-aarch64
-            os: ubuntu-24.04-arm
-          - label: osx-x86_64
-            os: macos-15-intel
-          - label: osx-aarch64
-            os: macos-15
-          - label: windows-x86_64
-            os: windows-2025
+          - { label: linux-x86_64, os: ubuntu-24.04 }
+          - { label: linux-aarch64, os: ubuntu-24.04-arm }
+          - { label: osx-x86_64, os: macos-15-intel }
+          - { label: osx-aarch64, os: macos-15 }
+          - { label: windows-x86_64, os: windows-2025 }
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v5
       - name: Set up JDK 23
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '23'
-
       - name: Make gradlew executable
         shell: bash
         run: chmod +x ./gradlew
-
       - name: Build and test
         shell: bash
         run: ./gradlew clean check :gdal-ffm-natives:check
-
-      - name: Verify Runtime-Only Native Resources
+      - name: Verify runtime-only native resources
         shell: bash
         run: |
           set -euo pipefail
-          classifiers=(
-            "linux-x86_64"
-            "linux-aarch64"
-            "osx-x86_64"
-            "osx-aarch64"
-            "windows-x86_64"
-          )
-
+          classifiers=(linux-x86_64 linux-aarch64 osx-x86_64 osx-aarch64 windows-x86_64)
           for classifier in "${classifiers[@]}"; do
             root="gdal-ffm-natives/src/main/resources/META-INF/gdal-native/$classifier"
-            if [[ ! -d "$root" ]]; then
-              continue
-            fi
-
+            [[ -d "$root" ]] || continue
             if [[ "$classifier" == windows-* ]]; then
               if [[ -d "$root/bin" ]] && find "$root/bin" -type f ! -iname '*.dll' ! -name '.gitkeep' | grep -q .; then
-                echo "Non-DLL files found in windows runtime bin for $classifier" >&2
+                echo "Non-DLL files found in Windows runtime bin for $classifier" >&2
                 find "$root/bin" -type f ! -iname '*.dll' ! -name '.gitkeep' >&2
                 exit 1
               fi
-            else
-              if [[ -d "$root/bin" ]] && find "$root/bin" -mindepth 1 -print -quit | grep -q .; then
-                echo "Unexpected non-empty bin directory in runtime bundle for $classifier" >&2
-                find "$root/bin" -mindepth 1 >&2
-                exit 1
-              fi
+            elif [[ -d "$root/bin" ]] && find "$root/bin" -mindepth 1 -print -quit | grep -q .; then
+              echo "Unexpected non-empty bin directory in runtime bundle for $classifier" >&2
+              find "$root/bin" -mindepth 1 >&2
+              exit 1
             fi
           done
 
   windows-native-smoke:
-    name: windows-native-smoke
+    name: windows-native-smoke (${{ matrix.label }})
     runs-on: windows-2025
+    timeout-minutes: 30
+    continue-on-error: ${{ matrix.allow_failure }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { label: temurin-23, distribution: temurin, java-version: '23', allow_failure: false }
+          - { label: temurin-24, distribution: temurin, java-version: '24', allow_failure: false }
+          - { label: oracle-24.0.2-known-incompatibility, distribution: oracle, java-version: '24.0.2', allow_failure: true }
+          - { label: temurin-25, distribution: temurin, java-version: '25', allow_failure: false }
+          - { label: oracle-25, distribution: oracle, java-version: '25', allow_failure: false }
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 23
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - name: Set up ${{ matrix.distribution }} JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v5
         with:
-          distribution: temurin
-          java-version: '23'
-
+          distribution: ${{ matrix.distribution }}
+          java-version: ${{ matrix.java-version }}
+      - name: Verify selected Java runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "JAVA_HOME=$JAVA_HOME"
+          command -v java
+          java --version
+          "$JAVA_HOME/bin/java" --version
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-
       - name: Install conda-package-handling
         shell: bash
         run: |
           python -m pip install --user conda-package-handling
           USER_BASE="$(python -m site --user-base)"
           echo "$USER_BASE/Scripts" >> "$GITHUB_PATH"
-
       - name: Make scripts executable
         shell: bash
         run: chmod +x ./gradlew tools/natives/*.sh
-
       - name: Validate native lock file
         shell: bash
         run: tools/natives/verify-lock.sh
-
       - name: Stage Windows native payload
         shell: bash
         run: tools/natives/fetch-and-stage.sh windows-x86_64
-
       - name: Audit Windows runtime dependencies
         shell: bash
         run: tools/natives/audit-runtime-deps.sh windows-x86_64
-
       - name: Assemble Windows native jars
         shell: bash
-        run: ./gradlew :gdal-ffm-natives:assemble
-
-      - name: Run packaged Windows smoke
+        run: >-
+          ./gradlew --no-daemon
+          -Porg.gradle.java.installations.auto-detect=false
+          -Porg.gradle.java.installations.auto-download=false
+          -Porg.gradle.java.installations.paths="$JAVA_HOME"
+          :gdal-ffm-natives:assemble
+      - name: Run packaged Windows smoke against standard and Swiss bundles
         shell: bash
+        env:
+          JAVA_FEATURE: ${{ matrix.java-version }}
+          RUNTIME_LABEL: ${{ matrix.label }}
         run: |
           set -euo pipefail
-          matches=()
-          while IFS= read -r path; do
-            [[ -n "$path" ]] && matches+=("$path")
-          done < <(
-            find gdal-ffm-natives/build/libs -maxdepth 1 -type f \
-              -name 'gdal-ffm-natives-*-natives-windows-x86_64.jar' \
-              ! -name 'gdal-ffm-natives-swiss-*' \
-              | sort
-          )
-
-          if [[ ${#matches[@]} -ne 1 ]]; then
-            echo "Expected exactly one standard Windows native jar, found ${#matches[@]}" >&2
-            printf '%s\n' "${matches[@]}" >&2 || true
+          mapfile -t standard_matches < <(find gdal-ffm-natives/build/libs -maxdepth 1 -type f -name 'gdal-ffm-natives-*-natives-windows-x86_64.jar' ! -name 'gdal-ffm-natives-swiss-*' | sort)
+          mapfile -t swiss_matches < <(find gdal-ffm-natives/build/libs -maxdepth 1 -type f -name 'gdal-ffm-natives-swiss-*-natives-windows-x86_64.jar' | sort)
+          if [[ ${#standard_matches[@]} -ne 1 ]]; then
+            echo "Expected exactly one standard Windows native jar, found ${#standard_matches[@]}" >&2
+            printf '%s\n' "${standard_matches[@]}" >&2 || true
+            exit 1
+          fi
+          if [[ ${#swiss_matches[@]} -ne 1 ]]; then
+            echo "Expected exactly one Swiss Windows native jar, found ${#swiss_matches[@]}" >&2
+            printf '%s\n' "${swiss_matches[@]}" >&2 || true
             exit 1
           fi
 
-          jar_path="$(pwd)/${matches[0]}"
-          shared_tmpdir="$(pwd)/gdal-ffm-core/build/tmp/smoke/windows-x86_64-ci-shared"
-          for run_label in first second; do
-            ./gradlew :gdal-ffm-core:smokeTestPackagedNative \
-              -PgdalFfmSmokeNativeJar="$jar_path" \
-              -PgdalFfmSmokeLabel="windows-x86_64-ci-${run_label}" \
-              -PgdalFfmSmokeTmpDir="$shared_tmpdir"
+          java_feature="${JAVA_FEATURE%%.*}"
+          for variant in standard swiss; do
+            if [[ "$variant" == standard ]]; then
+              jar_path="$(pwd)/${standard_matches[0]}"
+            else
+              jar_path="$(pwd)/${swiss_matches[0]}"
+            fi
+            shared_tmpdir="$(pwd)/gdal-ffm-core/build/tmp/smoke/windows-x86_64-${RUNTIME_LABEL}-${variant}-shared"
+            mkdir -p "$shared_tmpdir"
+            for run_label in first second; do
+              label="windows-x86_64-${RUNTIME_LABEL}-${variant}-${run_label}"
+              ./gradlew --no-daemon \
+                -Porg.gradle.java.installations.auto-detect=false \
+                -Porg.gradle.java.installations.auto-download=false \
+                -Porg.gradle.java.installations.paths="$JAVA_HOME" \
+                -PgdalFfmJavaToolchainVersion="$java_feature" \
+                -PgdalFfmSmokeNativeJar="$jar_path" \
+                -PgdalFfmSmokeLabel="$label" \
+                -PgdalFfmSmokeTmpDir="$shared_tmpdir" \
+                :gdal-ffm-core:smokeTestPackagedNative
+            done
           done
+      - name: Record Java and CRT identities
+        if: always()
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $diagnostics = Join-Path $PWD 'gdal-ffm-core/build/diagnostics'
+          New-Item -ItemType Directory -Force -Path $diagnostics | Out-Null
+          $report = Join-Path $diagnostics 'runtime-and-crt.txt'
 
-      - name: Dump Windows dependency diagnostics on failure
+          function Write-Line([string]$Text = '') {
+            $Text | Tee-Object -FilePath $report -Append
+          }
+
+          function Write-DllIdentity([string]$Scope, [System.IO.FileInfo]$File) {
+            if ($null -eq $File -or -not $File.Exists) { return }
+            $info = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($File.FullName)
+            $sha = (Get-FileHash -Algorithm SHA256 -LiteralPath $File.FullName).Hash
+            Write-Line "scope=$Scope"
+            Write-Line "path=$($File.FullName)"
+            Write-Line "fileVersion=$($info.FileVersion)"
+            Write-Line "productVersion=$($info.ProductVersion)"
+            Write-Line "length=$($File.Length)"
+            Write-Line "sha256=$sha"
+            Write-Line
+          }
+
+          Write-Line '=== Java runtime ==='
+          Write-Line "JAVA_HOME=$env:JAVA_HOME"
+          Write-Line "matrix=${{ matrix.label }}"
+          (& "$env:JAVA_HOME/bin/java.exe" --version 2>&1) | ForEach-Object { Write-Line $_ }
+          Write-Line
+
+          Write-Line '=== JDK CRT ==='
+          Get-ChildItem -LiteralPath (Join-Path $env:JAVA_HOME 'bin') -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like 'msvcp140*.dll' -or $_.Name -like 'vcruntime140*.dll' } |
+            Sort-Object Name |
+            ForEach-Object { Write-DllIdentity 'jdk' $_ }
+
+          Write-Line '=== Extracted GDAL CRT ==='
+          $smokeRoot = Join-Path $PWD 'gdal-ffm-core/build/tmp/smoke'
+          if (Test-Path $smokeRoot) {
+            Get-ChildItem -LiteralPath $smokeRoot -Recurse -File -ErrorAction SilentlyContinue |
+              Where-Object { $_.Name -like 'msvcp140*.dll' -or $_.Name -like 'vcruntime140*.dll' } |
+              Sort-Object FullName -Unique |
+              ForEach-Object { Write-DllIdentity 'gdal-bundle' $_ }
+          } else {
+            Write-Line "No extracted smoke tree found at $smokeRoot"
+          }
+      - name: Document known Oracle 24.0.2 incompatibility
+        if: ${{ always() && matrix.allow_failure }}
+        shell: pwsh
+        run: |
+          @"
+          ### Known incompatibility: Oracle JDK 24.0.2 on Windows
+
+          This matrix entry is intentionally allowed to fail.
+
+          The packaged native GDAL smoke currently reproduces an
+          `EXCEPTION_ACCESS_VIOLATION` in `msvcp140.dll` during `GDALAllRegister()`.
+          The entry remains in CI so the incompatibility stays visible and is
+          automatically retested on future changes.
+          "@ >> $env:GITHUB_STEP_SUMMARY
+      - name: Collect Windows crash diagnostics
         if: failure()
         shell: bash
         run: |
           set +e
           echo "=== Windows native smoke diagnostics ==="
+          echo "JAVA_HOME=$JAVA_HOME"
+          java --version || true
+          echo "--- hs_err files"
+          find . -type f -name 'hs_err_pid*.log' -print -exec cat {} \; 2>/dev/null || true
+          echo "--- extracted native roots"
+          find gdal-ffm-core/build/tmp/smoke -type f \( -name 'manifest.json' -o -name '.extract-complete' -o -iname 'gdal.dll' -o -iname 'proj_9.dll' -o -iname 'msvcp140*.dll' -o -iname 'vcruntime140*.dll' \) -print 2>/dev/null || true
           dump_tool=""
-          if command -v dumpbin >/dev/null 2>&1; then
-            dump_tool="dumpbin"
-          elif command -v llvm-objdump >/dev/null 2>&1; then
-            dump_tool="llvm-objdump"
-          fi
-
-          tmpdir="$(pwd)/gdal-ffm-core/build/tmp/smoke/windows-x86_64-ci-shared"
-          echo "--- extracted tree under ${tmpdir}"
-          find "$tmpdir" -maxdepth 6 -print 2>/dev/null || true
-
+          command -v dumpbin >/dev/null 2>&1 && dump_tool="dumpbin"
+          [[ -z "$dump_tool" ]] && command -v llvm-objdump >/dev/null 2>&1 && dump_tool="llvm-objdump"
           while IFS= read -r dll_path; do
             [[ -n "$dll_path" ]] || continue
             echo "--- dependency dump for ${dll_path}"
-            if [[ "$dump_tool" == "dumpbin" ]]; then
+            if [[ "$dump_tool" == dumpbin ]]; then
               dumpbin /DEPENDENTS "$dll_path" || true
-            elif [[ "$dump_tool" == "llvm-objdump" ]]; then
+            elif [[ "$dump_tool" == llvm-objdump ]]; then
               llvm-objdump -p "$dll_path" || true
             else
               echo "No dump tool available"
             fi
-          done < <(
-            find "$tmpdir" \
-              \( -path '*/windows-x86_64/bin/proj_9.dll' -o -path '*/windows-x86_64/bin/gdal.dll' \) \
-              -type f 2>/dev/null | sort -u
-          )
+          done < <(find gdal-ffm-core/build/tmp/smoke \( -iname 'proj_9.dll' -o -iname 'gdal.dll' \) -type f 2>/dev/null | sort -u)
+      - name: Upload Windows crash diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-native-smoke-diagnostics-${{ matrix.label }}
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            **/hs_err_pid*.log
+            gdal-ffm-core/build/diagnostics/**
+            gdal-ffm-core/build/smoke-test-output/**
